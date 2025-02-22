@@ -16,6 +16,10 @@ An API-driven Library Management System built with Python (FastAPI), MongoDB, an
 - **Frontend:** Vue.js
 - **Authentication:** JWT
 
+## Contributing / Developer Guide
+
+See the [dev-guide](dev-guide.md) file before contributing the project.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
