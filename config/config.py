@@ -23,7 +23,3 @@ def get_config(name):
 
 def set_config(name, value):
     conf[name] = value
-
-
-def append_conf(name, value):
-    conf[name].append(value)
