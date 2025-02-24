@@ -1,5 +1,8 @@
 from pydantic import BaseModel, EmailStr
 
+SUCCESS = "Success"
+FAIL = "Fail"
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
