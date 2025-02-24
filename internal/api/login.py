@@ -32,9 +32,6 @@ def register_user(request: RegisterRequest):
 
 @router.post("/login", response_model=SuccessResponse)
 def login_user(request: LoginRequest):
-    for u in USER_DB:
-        print(u.get_email())
-
     user = next((u for u in USER_DB if u.get_email() == request.email), None)
 
     if not user:
