@@ -1,17 +1,23 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from internal.api.login import router as login_router
+from internal.api.service_status import router as service_status_router
 from internal.api.exception_handlers import generic_exception_handler, validation_exception_handler
+from config.config import get_config, set_config
 
 app = FastAPI()
 
 # Routers
-app.include_router(login_router, prefix="/api/v1", tags=["Authenticate and Session Management"])
+app.include_router(login_router, prefix=get_config("api_prefix"), tags=["Authenticate and Session Management"])
+app.include_router(service_status_router, prefix=get_config("api_prefix"), tags=["Service Status"])
 
 # Exception handlers
 app.add_exception_handler(Exception, generic_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 if __name__ == "__main__":
+    set_config("health", True)
+    set_config("ready", True)
+
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=get_config("api_port"))
