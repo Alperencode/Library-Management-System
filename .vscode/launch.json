@@ -11,7 +11,12 @@
                 "--reload"
             ],
             "env": {
-                "PYTHONDONTWRITEBYTECODE": "1"
+                "PYTHONDONTWRITEBYTECODE": "1",
+                "API_PORT": "8000",
+                "API_PREFIX": "/api/v1",
+                "ALGORITHM": "HS256",
+                "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
+                "REFRESH_TOKEN_EXPIRE_DAYS": "7"
             }
         }
     ]
