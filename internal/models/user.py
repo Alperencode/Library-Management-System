@@ -4,14 +4,15 @@ from internal.utils.utils import (
 
 
 class User():
-    def __init__(self, username, email, password):
-        self.__user_id = generate_user_id()
+    def __init__(self, username, email, password, role):
+        self.__id = generate_user_id()
         self.__username = username
         self.__email = email
         self.__password = hash_password(password)
+        self.__role = role
 
-    def get_user_id(self):
-        return self.__user_id
+    def get_id(self):
+        return self.__id
 
     def get_username(self):
         return self.__username
@@ -33,3 +34,9 @@ class User():
 
     def check_password(self, plain_password):
         return verify_password(plain_password, self.__password)
+
+    def get_role(self):
+        return self.__role
+
+    def set_role(self, role):
+        self.__role = role

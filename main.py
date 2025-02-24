@@ -4,6 +4,7 @@ from internal.api.login import router as login_router
 from internal.api.service_status import router as service_status_router
 from internal.api.exception_handlers import generic_exception_handler, validation_exception_handler
 from config.config import get_config, set_config
+import uvicorn
 
 app = FastAPI()
 
@@ -19,5 +20,4 @@ if __name__ == "__main__":
     set_config("health", True)
     set_config("ready", True)
 
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=get_config("api_port"))
