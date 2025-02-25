@@ -12,7 +12,7 @@ def create_jwt_token(data, expires_delta: timedelta):
 def create_access_token(user):
     return create_jwt_token(
         {
-            "user_id": user["user_id"],
+            "id": user["id"],
             "username": user["username"],
             "email": user["email"],
             "role": user["role"]
@@ -23,7 +23,7 @@ def create_access_token(user):
 
 def create_refresh_token(user):
     return create_jwt_token(
-        {"user_id": user["user_id"]},
+        {"id": user["id"]},
         timedelta(days=get_config("refresh_token_expire_days"))
     )
 

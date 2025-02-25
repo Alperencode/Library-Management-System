@@ -49,7 +49,7 @@ def login_user(request: LoginRequest, response: Response):
         )
 
     user_data = {
-        "user_id": user.get_id(),
+        "id": user.get_id(),
         "username": user.get_username(),
         "email": user.get_email(),
         "role": user.get_role()

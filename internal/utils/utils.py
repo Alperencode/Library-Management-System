@@ -19,7 +19,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
 
 
-def get_secret_key(env_path=".env"):
+def get_secret_key(env_path=".env") -> str:
     load_dotenv()
     secret_key = os.getenv("SECRET_KEY")
 
