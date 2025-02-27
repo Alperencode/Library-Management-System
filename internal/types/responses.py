@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from internal.models.user import User
 
 
 class SuccessResponse(BaseModel):
@@ -13,3 +14,13 @@ class FailResponse(BaseModel):
 
 class VersionResponse(SuccessResponse):
     version: str = Field(None, examples=["v0.1.0"])
+
+
+class UserResponse(SuccessResponse):
+    user: User = Field(None, examples=[{
+            "username": "test",
+            "email": "test@example.com",
+            "password": "test123",
+            "role": "user"
+        }]
+    )

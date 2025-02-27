@@ -9,21 +9,16 @@ def create_jwt_token(data, expires_delta: timedelta):
     return jwt.encode(to_encode, get_config("secret_key"), algorithm=get_config("algorithm"))
 
 
-def create_access_token(user):
+def create_access_token(user_id):
     return create_jwt_token(
-        {
-            "id": user["id"],
-            "username": user["username"],
-            "email": user["email"],
-            "role": user["role"]
-        },
+        {"id": user_id},
         timedelta(minutes=get_config("access_token_expire_minutes"))
     )
 
 
-def create_refresh_token(user):
+def create_refresh_token(user_id):
     return create_jwt_token(
-        {"id": user["id"]},
+        {"id": user_id},
         timedelta(days=get_config("refresh_token_expire_days"))
     )
 

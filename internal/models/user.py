@@ -1,15 +1,20 @@
+from pydantic import BaseModel
 from internal.utils.utils import (
     hash_password, verify_password, generate_user_id
 )
 
 
-class User():
-    def __init__(self, username, email, password, role):
+class User(BaseModel):
+    def __init__(
+        self, username: str, email: str, password: str,
+        role: str, access_token: str = ""
+    ):
         self.__id = generate_user_id()
         self.__username = username
         self.__email = email
         self.__password = hash_password(password)
         self.__role = role
+        self.__access_token = access_token
 
     def get_id(self):
         return self.__id
@@ -40,3 +45,9 @@ class User():
 
     def set_role(self, role):
         self.__role = role
+
+    def get_access_token(self):
+        return self.__access_token
+
+    def set_access_token(self, access_token):
+        self.__access_token = access_token
