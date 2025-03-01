@@ -18,9 +18,11 @@ class VersionResponse(SuccessResponse):
 
 class UserResponse(SuccessResponse):
     user: User = Field(None, examples=[{
+            "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
             "username": "test",
             "email": "test@example.com",
             "password": "test123",
-            "role": "user"
+            "role": "user",
+            "refresh_token": ""
         }]
     )

@@ -1,38 +1,39 @@
-from pydantic import EmailStr, Field
-from fastapi import Request
+from pydantic import EmailStr, Field, BaseModel
 from internal.models.user import User
 
 SUCCESS = "Success"
 FAIL = "Fail"
 
 
-class LoginRequest(Request):
+class LoginRequest(BaseModel):
     email: EmailStr
     password: str
     remember_me: bool = False
 
 
-class RegisterRequest(Request):
+class RegisterRequest(BaseModel):
     email: EmailStr
     name: str
     password: str
 
 
-class RefreshTokenRequest(Request):
+class RefreshTokenRequest(BaseModel):
     user: User = Field(None, examples=[{
+            "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
             "username": "test",
             "email": "test@example.com",
-            "password": "test123",
-            "role": "user"
+            "role": "user",
+            "refresh_token": ""
         }]
     )
 
 
-class UserRequest(Request):
+class UserRequest(BaseModel):
     user: User = Field(None, examples=[{
+            "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
             "username": "test",
             "email": "test@example.com",
-            "password": "test123",
-            "role": "user"
+            "role": "user",
+            "refresh_token": ""
         }]
     )
