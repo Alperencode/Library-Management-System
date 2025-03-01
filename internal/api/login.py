@@ -68,7 +68,7 @@ def login_user(request: LoginRequest, response: Response):
 
     if request.remember_me:
         refresh_token = create_refresh_token(user.id)
-        user.set_refresh_token(refresh_token)
+        user.refresh_token = refresh_token
 
         response.set_cookie(
             key="refresh_token",
@@ -92,7 +92,14 @@ def refresh_token(request: Request, body: RefreshTokenRequest, response: Respons
     # If the session is still active, allow silent refresh
     if user:
         new_access_token = create_access_token(user.id)
-        response.set_cookie(key="access_token", value=new_access_token, httponly=True, secure=True, samesite="None")
+        response.set_cookie(
+            key="access_token",
+            value=new_access_token,
+            httponly=True,
+            secure=True,
+            samesite="None"
+        )
+
         return SuccessResponse(
             code=SUCCESS,
             message="Token refreshed"
