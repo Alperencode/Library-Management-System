@@ -21,3 +21,13 @@ if __name__ == "__main__":
     set_config("ready", True)
 
     uvicorn.run(app, host="0.0.0.0", port=get_config("api_port"))
+
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8082"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
