@@ -1,22 +1,20 @@
-from typing import List
-from fastapi import APIRouter, Response, Request
+from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from internal.models.user import User
-from internal.types.responses import SuccessResponse, FailResponse, UserResponse
-from internal.tokens.tokens import verify_jwt_token, create_access_token, create_refresh_token
+from internal.models.user import User, PublicUser
+from internal.types.responses import SuccessResponse, FailResponse, PublicUserResponse
+from internal.tokens.tokens import create_access_token, create_refresh_token
+from internal.database.users import USER_DB
 from internal.types.types import (
-    LoginRequest, RegisterRequest, RefreshTokenRequest,
-    UserRequest, FAIL, SUCCESS
+    LoginRequest, UserRequest,
+    FAIL, SUCCESS
 )
 
 router = APIRouter()
 
-USER_DB: List[User] = []
 
-
-@router.post("/register", response_model=UserResponse)
-def register_user(request: RegisterRequest):
+@router.post("/register", response_model=PublicUserResponse)
+def register_user(request: UserRequest):
     global USER_DB
     for user in USER_DB:
         if request.email == user.email:
@@ -29,22 +27,28 @@ def register_user(request: RegisterRequest):
             )
 
     user = User(
-        username=request.name,
+        username=request.username,
         email=request.email,
         password=request.password,
         role="user",
     )
-    user.refresh_token = create_refresh_token(user.id)
-
     USER_DB.append(user)
-    return UserResponse(
+
+    public_user = PublicUser(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        role=user.role
+    )
+
+    return PublicUserResponse(
         code=SUCCESS,
         message="User registered successfully",
-        user=user
+        user=public_user
     )
 
 
-@router.post("/login", response_model=UserResponse)
+@router.post("/login", response_model=PublicUserResponse)
 def login_user(request: LoginRequest, response: Response):
     user = next((u for u in USER_DB if u.email == request.email), None)
 
@@ -68,7 +72,6 @@ def login_user(request: LoginRequest, response: Response):
 
     if request.remember_me:
         refresh_token = create_refresh_token(user.id)
-        user.refresh_token = refresh_token
 
         response.set_cookie(
             key="refresh_token",
@@ -78,63 +81,22 @@ def login_user(request: LoginRequest, response: Response):
             samesite="None"
         )
 
-    return UserResponse(
-        code=SUCCESS,
-        message="Login successful",
-        user=user
+    public_user = PublicUser(
+        id=user.id,
+        username=user.username,
+        email=user.email,
+        role=user.role
     )
 
-
-@router.post("/refresh-token", response_model=SuccessResponse)
-def refresh_token(request: Request, body: RefreshTokenRequest, response: Response):
-    user = body.user
-
-    # If the session is still active, allow silent refresh
-    if user:
-        new_access_token = create_access_token(user.id)
-        response.set_cookie(
-            key="access_token",
-            value=new_access_token,
-            httponly=True,
-            secure=True,
-            samesite="None"
-        )
-
-        return SuccessResponse(
-            code=SUCCESS,
-            message="Token refreshed"
-        )
-
-    # Else, check if any refresh token exists
-    refresh_token = request.cookies.get("refresh_token")
-    decoded_refresh = verify_jwt_token(refresh_token) if refresh_token else None
-    if decoded_refresh:
-        if user and user.refresh_token == refresh_token:
-            new_access_token = create_access_token(user.id)
-            response.set_cookie(
-                key="access_token",
-                value=new_access_token,
-                httponly=True,
-                secure=True,
-                samesite="None"
-            )
-            return SuccessResponse(code=SUCCESS, message="Token refreshed")
-
-    # If there is no refresh token, require authentication
-    return JSONResponse(status_code=401, content=jsonable_encoder(
-        FailResponse(
-            code=FAIL,
-            message="Authentication required"
-        ))
+    return PublicUserResponse(
+        code=SUCCESS,
+        message="Login successful",
+        user=public_user
     )
 
 
 @router.post("/logout", response_model=SuccessResponse)
-def logout_user(request: UserRequest, response: Response):
-    user = next((u for u in USER_DB if u.email == request.email), None)
-    if user:
-        user.refresh_token = None
-
+def logout_user(response: Response):
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
 

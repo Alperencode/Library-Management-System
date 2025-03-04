@@ -11,10 +11,10 @@ class LoginRequest(BaseModel):
     remember_me: bool = False
 
 
-class RegisterRequest(BaseModel):
+class UserRequest(BaseModel):
     email: EmailStr
-    name: str
-    password: str
+    username: str = Field(None, examples=["example"])
+    password: str = Field(None, examples=["example123"])
 
 
 class RefreshTokenRequest(BaseModel):
@@ -23,17 +23,5 @@ class RefreshTokenRequest(BaseModel):
             "username": "test",
             "email": "test@example.com",
             "role": "user",
-            "refresh_token": ""
-        }]
-    )
-
-
-class UserRequest(BaseModel):
-    user: User = Field(None, examples=[{
-            "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-            "username": "test",
-            "email": "test@example.com",
-            "role": "user",
-            "refresh_token": ""
         }]
     )
