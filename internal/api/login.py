@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.post("/register", response_model=PublicUserResponse)
-def register_user(request: UserRequest):
+def register_user(request: UserRequest, response: Response):
     global USER_DB
     for user in USER_DB:
         if request.email == user.email:
@@ -34,17 +34,24 @@ def register_user(request: UserRequest):
     )
     USER_DB.append(user)
 
-    public_user = PublicUser(
-        id=user.id,
-        username=user.username,
-        email=user.email,
-        role=user.role
+    access_token = create_access_token(user.id)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="None"
     )
 
     return PublicUserResponse(
         code=SUCCESS,
         message="User registered successfully",
-        user=public_user
+        user=PublicUser(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            role=user.role
+        )
     )
 
 
@@ -81,17 +88,15 @@ def login_user(request: LoginRequest, response: Response):
             samesite="None"
         )
 
-    public_user = PublicUser(
-        id=user.id,
-        username=user.username,
-        email=user.email,
-        role=user.role
-    )
-
     return PublicUserResponse(
         code=SUCCESS,
         message="Login successful",
-        user=public_user
+        user=PublicUser(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            role=user.role
+        )
     )
 
 
