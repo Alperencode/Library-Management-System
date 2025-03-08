@@ -11,7 +11,18 @@ router = APIRouter()
 
 @router.post("/refresh-token", response_model=SuccessResponse)
 async def refresh_token(request: Request, response: Response, body: UserRequest | None = None):
-    # Try to get user from body
+    # 1) Check if there is valid access_token
+    present_access_token = request.cookies.get("access_token")
+    decoded_access = verify_jwt_token(present_access_token) if present_access_token else None
+
+    if decoded_access:
+        # If there is a valid access_token, do not refresh and return
+        user_id = decoded_access.get("id")
+        u = next((u for u in USER_DB if u.id == user_id), None)
+        if u:
+            return SuccessResponse(code=SUCCESS, message="There is already valid access_token exists")
+
+    # 2) Try to get user from body
     user = None
     try:
         body = await request.json()
@@ -33,7 +44,7 @@ async def refresh_token(request: Request, response: Response, body: UserRequest 
             )
             return SuccessResponse(code=SUCCESS, message="Token refreshed")
 
-    # If no user is in the request body, check for refresh_token
+    # 3) If no user is in the request body, check for refresh_token
     refresh_token = request.cookies.get("refresh_token")
     decoded_refresh = verify_jwt_token(refresh_token) if refresh_token else None
 

@@ -6,7 +6,7 @@ from config.config import get_config
 from internal.utils.utils import hash_password
 from internal.database.users import USER_DB
 from internal.types.responses import FailResponse, PublicUserResponse
-from internal.types.types import SUCCESS, FAIL, UserRequest
+from internal.types.types import SUCCESS, FAIL, UserUpdateRequest
 from internal.models.user import User, PublicUser
 
 router = APIRouter()
@@ -52,7 +52,7 @@ def get_current_user_info(user: User = Depends(get_current_user)):
 
 
 @router.patch("/me", response_model=PublicUserResponse)
-def update_user_info(update_data: UserRequest, user: User = Depends(get_current_user)):
+def update_user_info(update_data: UserUpdateRequest, user: User = Depends(get_current_user)):
     existing_user = next((u for u in USER_DB if u.id == user.id), None)
     if not existing_user:
         return JSONResponse(status_code=404, content=jsonable_encoder(
