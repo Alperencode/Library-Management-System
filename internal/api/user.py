@@ -1,7 +1,6 @@
 import jwt
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordBearer
 from fastapi.encoders import jsonable_encoder
 from config.config import get_config
 from internal.utils.utils import hash_password
@@ -11,17 +10,21 @@ from internal.types.types import SUCCESS, FAIL, UserRequest
 from internal.models.user import User, PublicUser
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/access_token")
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(request: Request):
+    # Check for access_token cookie
+    access_token = request.cookies.get("access_token")
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Authentication required")
+
     try:
-        payload = jwt.decode(token, get_config("secret_key"), algorithms=[get_config("algorithm")])
+        payload = jwt.decode(access_token, get_config("secret_key"), algorithms=[get_config("algorithm")])
         user_id = payload.get("id")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-        # Fetch user from list
+        # Fetch user from database
         user = next((u for u in USER_DB if u.id == user_id), None)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -36,17 +39,15 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @router.get("/me", response_model=PublicUserResponse)
 def get_current_user_info(user: User = Depends(get_current_user)):
-    public_user = PublicUser(
-        id=user.id,
-        username=user.username,
-        email=user.email,
-        role=user.role
-    )
-
     return PublicUserResponse(
         code=SUCCESS,
         message="User details retrieved successfully",
-        user=public_user
+        user=PublicUser(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            role=user.role
+        )
     )
 
 
@@ -68,15 +69,13 @@ def update_user_info(update_data: UserRequest, user: User = Depends(get_current_
     if update_data.password:
         existing_user.password = hash_password(update_data.password)
 
-    public_user = PublicUser(
-        id=user.id,
-        username=user.username,
-        email=user.email,
-        role=user.role
-    )
-
     return PublicUserResponse(
         code=SUCCESS,
         message="User details updated successfully",
-        user=public_user
+        user=PublicUser(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            role=user.role
+        )
     )
