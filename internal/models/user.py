@@ -8,7 +8,6 @@ class User(BaseModel):
     email: str
     password: str
     role: str
-    refresh_token: str = ""
 
     @field_validator("password", mode="before")
     @classmethod
@@ -18,7 +17,14 @@ class User(BaseModel):
     def check_password(self, plain_password: str) -> bool:
         return verify_password(plain_password, self.password)
 
-    def to_dict(self):
-        user_data = self.model_dump()
-        del user_data["password"]
-        return user_data
+    def __setattr__(self, name, value):
+        if name == "id" and hasattr(self, "id"):
+            raise AttributeError("The 'id' field is immutable and cannot be changed after creation.")
+        super().__setattr__(name, value)
+
+
+class PublicUser(BaseModel):
+    id: str
+    username: str
+    email: str
+    role: str

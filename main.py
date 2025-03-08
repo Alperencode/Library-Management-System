@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from internal.api.login import router as login_router
 from internal.api.service_status import router as service_status_router
+from internal.api.user import router as user_router
+from internal.api.token import router as token_router
 from internal.api.exception_handlers import generic_exception_handler, validation_exception_handler
 from config.config import get_config, set_config
 import uvicorn
@@ -10,6 +12,8 @@ app = FastAPI()
 
 # Routers
 app.include_router(login_router, prefix=get_config("api_prefix"), tags=["Authenticate and Session Management"])
+app.include_router(token_router, prefix=get_config("api_prefix"), tags=["Token Management"])
+app.include_router(user_router, prefix=get_config("api_prefix"), tags=["User Management"])
 app.include_router(service_status_router, prefix=get_config("api_prefix"), tags=["Service Status"])
 
 # Exception handlers

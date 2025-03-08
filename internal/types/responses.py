@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from internal.models.user import User
+from internal.models.user import PublicUser
 
 
 class SuccessResponse(BaseModel):
@@ -16,13 +16,16 @@ class VersionResponse(SuccessResponse):
     version: str = Field(None, examples=["v0.1.0"])
 
 
-class UserResponse(SuccessResponse):
-    user: User = Field(None, examples=[{
+class PublicUserResponse(SuccessResponse):
+    user: PublicUser = Field(None, examples=[{
             "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
             "username": "test",
             "email": "test@example.com",
-            "password": "test123",
             "role": "user",
-            "refresh_token": ""
         }]
     )
+
+
+class TokenResponse(SuccessResponse):
+    access_token: str = Field(None, examples=["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."])
+    token_type: str = Field(None, examples=["bearer"])
