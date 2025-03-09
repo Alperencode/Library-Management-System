@@ -1,5 +1,4 @@
 from pydantic import EmailStr, Field, BaseModel
-from internal.models.user import User
 from typing import Optional
 
 
@@ -19,17 +18,11 @@ class UserRequest(BaseModel):
     password: str = Field(None, examples=["example123"])
 
 
+class IDRequest(BaseModel):
+    id: str = Field(None, examples=["67cdec2c6cd51597b698e636"])
+
+
 class UserUpdateRequest(BaseModel):
     email: Optional[EmailStr] = None
     username: Optional[str] = Field(None, examples=["example"])
     password: Optional[str] = Field(None, examples=["example123"])
-
-
-class RefreshTokenRequest(BaseModel):
-    user: User = Field(None, examples=[{
-            "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-            "username": "test",
-            "email": "test@example.com",
-            "role": "user",
-        }]
-    )
