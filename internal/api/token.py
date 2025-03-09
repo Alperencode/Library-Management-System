@@ -4,13 +4,13 @@ from fastapi.encoders import jsonable_encoder
 from internal.tokens.tokens import verify_jwt_token, create_access_token
 from internal.database.users import get_user_by_id
 from internal.types.responses import SuccessResponse, FailResponse
-from internal.types.types import FAIL, SUCCESS, UserRequest
+from internal.types.types import FAIL, SUCCESS, IDRequest
 
 router = APIRouter()
 
 
 @router.post("/refresh-token", response_model=SuccessResponse)
-async def refresh_token(request: Request, response: Response, body: UserRequest | None = None):
+async def refresh_token(request: Request, response: Response, request_body: IDRequest | None = None):
     # 1) Check if there is valid access_token
     present_access_token = request.cookies.get("access_token")
     decoded_access = verify_jwt_token(present_access_token) if present_access_token else None
@@ -22,17 +22,10 @@ async def refresh_token(request: Request, response: Response, body: UserRequest 
         if u:
             return SuccessResponse(code=SUCCESS, message="There is already valid access_token exists")
 
-    # 2) Try to get user from body
-    user = None
-    try:
-        body = await request.json()
-        user = body.get("user", None)
-    except Exception:
-        pass
-
-    if user:
-        # If there is a valid user in body, refresh the access token
-        u = await get_user_by_id(user.get("id"))
+    # 2) Try to get user from request's id
+    if request_body.id:
+        # If there is a valid user, refresh the access token
+        u = await get_user_by_id(request_body.id)
         if u:
             new_access_token = create_access_token(u.id)
             response.set_cookie(
