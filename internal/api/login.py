@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Request
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.models.user import User, PublicUser
+from internal.utils.utils import hash_password, verify_token_owner
 from internal.types.responses import SuccessResponse, FailResponse, PublicUserResponse
 from internal.tokens.tokens import create_access_token, create_refresh_token
-from internal.database.users import USER_DB
+from internal.database.users import create_user, get_user_by_email
 from internal.types.types import (
     LoginRequest, UserRequest,
     FAIL, SUCCESS
@@ -14,34 +15,59 @@ router = APIRouter()
 
 
 @router.post("/register", response_model=PublicUserResponse)
-def register_user(request: UserRequest, response: Response):
-    global USER_DB
-    for user in USER_DB:
-        if request.email == user.email:
-            return JSONResponse(
-                status_code=400,
-                content=jsonable_encoder(FailResponse(
-                    code=FAIL,
-                    message="Email already registered"
-                ))
-            )
+async def register_user(
+    request_body: UserRequest,
+    request: Request,
+    response: Response
+):
+    existing_user = await get_user_by_email(request_body.email)
+    if existing_user:
+        return JSONResponse(
+            status_code=400,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="Email already registered"
+            ))
+        )
 
     user = User(
-        username=request.username,
-        email=request.email,
-        password=request.password,
+        username=request_body.username,
+        email=request_body.email,
+        password=hash_password(request_body.password),
         role="user",
     )
-    USER_DB.append(user)
 
-    access_token = create_access_token(user.id)
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=True,
-        samesite="None"
-    )
+    created_user = await create_user(user)
+    if not created_user:
+        return JSONResponse(
+            status_code=500,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="Failed to create user"
+            ))
+        )
+
+    # Assign access_token to current user
+    if not verify_token_owner(request, user, "access_token"):
+        access_token = create_access_token(user.id)
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,
+            samesite="None"
+        )
+
+    # Assign refresh_token to current user
+    if not verify_token_owner(request, user, "refresh_token"):
+        refresh_token = create_refresh_token(user.id)
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="None"
+        )
 
     return PublicUserResponse(
         code=SUCCESS,
@@ -56,10 +82,13 @@ def register_user(request: UserRequest, response: Response):
 
 
 @router.post("/login", response_model=PublicUserResponse)
-def login_user(request: LoginRequest, response: Response):
-    user = next((u for u in USER_DB if u.email == request.email), None)
-
-    if not user or not user.check_password(request.password):
+async def login_user(
+    request_body: LoginRequest,
+    request: Request,
+    response: Response
+):
+    user = await get_user_by_email(request_body.email)
+    if not user or not user.check_password(request_body.password):
         return JSONResponse(
             status_code=401,
             content=jsonable_encoder(FailResponse(
@@ -68,25 +97,30 @@ def login_user(request: LoginRequest, response: Response):
             ))
         )
 
-    access_token = create_access_token(user.id)
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=True,
-        samesite="None"
-    )
-
-    if request.remember_me:
-        refresh_token = create_refresh_token(user.id)
-
+    # Assign access_token to current user
+    if not verify_token_owner(request, user, "access_token"):
+        access_token = create_access_token(user.id)
         response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
+            key="access_token",
+            value=access_token,
             httponly=True,
             secure=True,
             samesite="None"
         )
+
+    # If remember me is checked, assign refresh_token
+    if request_body.remember_me:
+        if not verify_token_owner(request, user, "refresh_token"):
+            refresh_token = create_refresh_token(user.id)
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh_token,
+                httponly=True,
+                secure=True,
+                samesite="None"
+            )
+    else:
+        response.delete_cookie("refresh_token")
 
     return PublicUserResponse(
         code=SUCCESS,
@@ -101,7 +135,7 @@ def login_user(request: LoginRequest, response: Response):
 
 
 @router.post("/logout", response_model=SuccessResponse)
-def logout_user(response: Response):
+async def logout_user(response: Response):
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
 
