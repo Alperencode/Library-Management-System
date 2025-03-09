@@ -1,21 +1,17 @@
-from pydantic import BaseModel, Field, field_validator
-from internal.utils.utils import hash_password, verify_password, generate_user_id
+from pydantic import BaseModel, Field
+from bson import ObjectId
+import bcrypt
 
 
 class User(BaseModel):
-    id: str = Field(default_factory=generate_user_id)
+    id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     username: str
     email: str
     password: str
     role: str
 
-    @field_validator("password", mode="before")
-    @classmethod
-    def hash_password(cls, value: str) -> str:
-        return hash_password(value)
-
     def check_password(self, plain_password: str) -> bool:
-        return verify_password(plain_password, self.password)
+        return bcrypt.checkpw(plain_password.encode(), self.password.encode())
 
     def __setattr__(self, name, value):
         if name == "id" and hasattr(self, "id"):
