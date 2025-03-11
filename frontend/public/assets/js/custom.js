@@ -202,17 +202,16 @@
 	        });
 	    });
 	});
-	
+
 	function onScroll(event) {
 		var scrollPos = $(document).scrollTop();
 		$('.nav a').each(function () {
 			var currLink = $(this);
 			var href = currLink.attr("href");
 	
-			// Ensure the href is valid and the target element exists
 			if (href && href.startsWith("#")) {
 				var refElement = $(href);
-				if (refElement.length) { // Check if refElement exists
+				if (refElement.length) {
 					if (
 						refElement.position().top <= scrollPos &&
 						refElement.position().top + refElement.height() > scrollPos
