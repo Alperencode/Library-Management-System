@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/assets/css/fontawesome.css">
+    <link rel="stylesheet" href="/static/assets/css/templatemo-edu-meeting.css">
+    <link rel="stylesheet" href="/static/denemee.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            background: url('/static/assets/images/meetings-bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    <script>
+        fetch("/static/Header/header.html")
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("header-placeholder").innerHTML = data;
+        });
+    </script>
+
+    <div id="app">
+        <div class='bold-line'></div>
+        <div class='container'>
+            <div class='window'>
+                <div class='overlay'></div>
+                <div class='content'>
+                    <h2 style='text-align: center; color: #f5a425;'>Sign Up</h2>
+                    <div class='input-fields'>
+                        <input type='text' v-model="username" placeholder='Username' class='input-line full-width'>
+                        <input type='email' v-model="email" placeholder='Email' class='input-line full-width'>
+                        <input type='password' v-model="password" placeholder='Password' class='input-line full-width'>
+                    </div>
+                    <div>
+                        <button class='ghost-round full-width' @click="register">Create Account</button>
+                    </div>
+
+                    <div class="alert-container">
+                        <div :class="alertClass" class="screenAlert-icon show-alert" v-if="message">
+                            <span v-if="messageType === 'success'" class="screenAlert-line screenAlert-tip animateSuccessTip"></span>
+                            <span v-if="messageType === 'success'" class="screenAlert-line screenAlert-long animateSuccessLong"></span>
+
+                            <span v-if="messageType === 'error'" class="screenAlert-x-mark">
+                                <span class="screenAlert-line screenAlert-left animateXLeft"></span>
+                                <span class="screenAlert-line screenAlert-right animateXRight"></span>
+                            </span>
+                        </div>
+                        <p :class="{ 'success-text': messageType === 'success', 'error-text': messageType === 'error' }">{{ message }}</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+    <script>
+        fetch("/static/Footer/footer.html")
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("footer-placeholder").innerHTML = data;
+        });
+    </script>
+
+    <script>
+        Vue.createApp({
+            data() {
+                return {
+                    username: "",
+                    email: "",
+                    password: "",
+                    message: "",
+                    messageType: ""
+                };
+            },
+            computed: {
+                alertClass() {
+                    return {
+                        "screenAlert-success": this.messageType === "success",
+                        "screenAlert-error": this.messageType === "error",
+                        "show-alert": this.message.length > 0
+                    };
+                }
+            },
+            methods: {
+                async register() {
+                    try {
+                        const response = await axios.post("http://127.0.0.1:8000/api/v1/register", {
+                            name: this.username,
+                            email: this.email,
+                            password: this.password
+                        });
+                        this.message = response.data.message;
+                        this.messageType = "success";
+                    } catch (error) {
+                        this.message = error.response?.data?.message || "Registration failed";
+                        this.messageType = "error";
+                    }
+                }
+            }
+        }).mount("#app");
+    </script>
+</body>
+</html>
