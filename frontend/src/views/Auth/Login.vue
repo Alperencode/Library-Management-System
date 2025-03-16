@@ -1,23 +1,19 @@
 <template>
   <div class="auth-container">
     <MainHeader />
-    <div class="login-box">
-      <h2>Login</h2>
-      <form @submit.prevent="login">
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" v-model="email" placeholder="Email" required />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" v-model="password" placeholder="Password" required />
-        </div>
-        <div class="form-group remember-me">
+    <div class="content">
+    <h2 class="title">Login</h2>
+      <div class="input-fields">
+            <input type="email" v-model="email" placeholder="Email" class="input-line full-width" />
+            <input type="password" v-model="password" placeholder="Password" class="input-line full-width" />
+      </div>
+      <div class="remember-me">
           <input type="checkbox" id="rememberMe" v-model="rememberMe" />
           <label for="rememberMe">Remember Me</label>
         </div>
-        <button class="btn-primary" type="submit">Sign in</button>
-      </form>
+        <div class="spacer"></div>
+      <button class="ghost-round full-width " @click="login">Login</button>
+      <p v-if="message" :class="alertClass">{{ message }}</p>
     </div>
     <MainFooter />
   </div>
@@ -38,14 +34,14 @@ export default {
       email: "",
       password: "",
       rememberMe: false,
-      message: "",
-      messageType: "",
+      message: "", 
+      messageType: "" 
     };
   },
   computed: {
     alertClass() {
-      return this.messageType === "success" ? "screenAlert-success" : "screenAlert-error";
-    },
+      return this.messageType === "success" ? "success-message" : "error-message";
+    }
   },
   methods: {
     async login() {
@@ -53,27 +49,66 @@ export default {
         const response = await axios.post("http://127.0.0.1:8000/api/v1/login", {
           email: this.email,
           password: this.password,
-          remember_me: this.rememberMe,
+          remember_me: this.rememberMe
         });
-        this.message = response.data.message;
+
+        this.message = response.data.message; 
         this.messageType = "success";
       } catch (error) {
-        this.message = error.response?.data?.message || "Login failed";
+        this.message = error.response?.data?.message || "Login failed"; 
         this.messageType = "error";
       }
-    },
+    }
   },
 };
 </script>
 
 <style scoped>
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 14px;
+  color: white;
+}
+
+.remember-me input {
+  margin-right: 5px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.spacer {
+  height: 20px;
+}
+
+.success-message {
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.error-message {
+  color: #ff4d4d;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
 .auth-container {
   width: 100vw;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: url('@/assets/images/meetings-bg.jpg') no-repeat center center fixed;
+  background: url('@/assets/images/meetings-bg.jpg');
   position: fixed;
   top: 0;
   left: 0;
@@ -91,7 +126,7 @@ export default {
 
 body {
     font-family: 'Lato', sans-serif;
-    background: url('@/assets/images/meetings-bg.jpg') no-repeat center center fixed;
+    background: url('@/assets/images/meetings-bg.jpg');
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -106,13 +141,13 @@ body {
 }
 
 h2 {
-  color: white; /* Login yazısını görünür hale getir */
+  color: white;
   text-align: center;
   font-size: 24px;
 }
 
 label {
-  color: white; /* Remember Me yazısını görünür hale getir */
+  color: white;
   font-size: 16px;
 }
 
@@ -130,19 +165,6 @@ label {
     margin-top: -30px;
     position: relative;
     cursor: pointer;
-}
-
-.btn-primary {
-    background-color: #007bff;
-    border: none;
-    padding: 10px;
-    font-size: 18px;
-    width: 100%;
-    border-radius: 5px;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
 }
 
 input[type="checkbox"] {
@@ -171,14 +193,6 @@ input[type="checkbox"]:checked::after {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.footer {
-    text-align: center;
-    color: white;
-    position: absolute;
-    bottom: 10px;
-    width: 100%;
 }
 
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,300,100,500);
@@ -249,8 +263,10 @@ button:focus {
 }
 
 .ghost-round:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: #d4881a;
+  border-color: #d4881a;
+  color: white;
+  box-shadow: 0 0 10px rgba(245, 164, 37, 0.7);
   transition: all .2s ease;
 }
 
@@ -275,6 +291,8 @@ button:focus {
 }
 
 .content {
+  width: 600px; /* Aynı genişlikte olacak */
+  min-height: 300px; /* Aynı yüksekliği vermek için */
   padding-left: 30px;
   padding-right: 30px;
   display: flex;

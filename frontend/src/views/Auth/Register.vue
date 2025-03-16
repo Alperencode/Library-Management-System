@@ -1,15 +1,14 @@
-
-
 <template>
   <div class="auth-container">
     <MainHeader />
     <div class="content">
-          <h2 class="title">Sign Up</h2>
+          <h2 class="title">Register</h2>
           <div class="input-fields">
             <input type="text" v-model="username" placeholder="Username" class="input-line full-width" />
             <input type="email" v-model="email" placeholder="Email" class="input-line full-width" />
             <input type="password" v-model="password" placeholder="Password" class="input-line full-width" />
           </div>
+          <div class="spacer"></div>
           <button class="ghost-round full-width" @click="register">Create Account</button>
   
           <div class="alert-container" v-if="message">
@@ -46,14 +45,14 @@
     },
     computed: {
       alertClass() {
-        return this.messageType === "success" ? "screenAlert-success" : "screenAlert-error";
+        return this.messageType === "success" ? "success-message" : "error-message";
       },
     },
     methods: {
       async register() {
         try {
           const response = await axios.post("http://127.0.0.1:8000/api/v1/register", {
-            name: this.username,
+            username: this.username,
             email: this.email,
             password: this.password,
           });
@@ -69,17 +68,39 @@
   </script>
   
   <style scoped>
+
+.success-text {
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.error-text {
+  color: #ff4d4d;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.spacer {
+  height: 20px;
+}
   .auth-container {
   width: 100vw;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: url('@/assets/images/meetings-bg.jpg') no-repeat center center fixed;
+  background: url('@/assets/images/meetings-bg.jpg');
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 9999; /* Ana içeriğin üstüne çıkarır */
+  z-index: 9999;
 }
 body {
     font-family: 'Lato', sans-serif;
@@ -99,13 +120,13 @@ body {
 }
 
 h2 {
-  color: white; /* Login yazısını görünür hale getir */
+  color: white;
   text-align: center;
   font-size: 24px;
 }
 
 label {
-  color: white; /* Remember Me yazısını görünür hale getir */
+  color: white;
   font-size: 16px;
 }
 
@@ -134,10 +155,6 @@ label {
     border-radius: 5px;
 }
 
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-
 input[type="checkbox"] {
   appearance: none;
   width: 20px;
@@ -164,14 +181,6 @@ input[type="checkbox"]:checked::after {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.footer {
-    text-align: center;
-    color: white;
-    position: absolute;
-    bottom: 10px;
-    width: 100%;
 }
 
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,300,100,500);
@@ -242,8 +251,10 @@ button:focus {
 }
 
 .ghost-round:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: #d48d29;
+  border-color: #d48d29;
+  color: white;
+  box-shadow: 0 0 10px rgba(245, 164, 37, 0.7);
   transition: all .2s ease;
 }
 
@@ -268,6 +279,8 @@ button:focus {
 }
 
 .content {
+  width: 600px;
+  min-height: 300px;
   padding-left: 30px;
   padding-right: 30px;
   display: flex;
