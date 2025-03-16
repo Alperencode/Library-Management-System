@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from internal.utils.logger import logger
 from internal.tokens.tokens import verify_jwt_token, create_access_token
 from internal.database.users import get_user_by_id
 from internal.types.responses import SuccessResponse, FailResponse
@@ -27,14 +28,12 @@ async def refresh_token(request: Request, response: Response, request_body: IDRe
         # If there is a valid user, refresh the access token
         u = await get_user_by_id(request_body.id)
         if u:
-            new_access_token = create_access_token(u.id)
-            response.set_cookie(
-                key="access_token",
-                value=new_access_token,
-                httponly=True,
-                secure=True,
-                samesite="None"
-            )
+            err = create_access_token(u.id, response)
+            if err:
+                logger.error(f"Failed to create access token in refresh-token endpoint: {err}")
+                return JSONResponse(status_code=500, content=jsonable_encoder(
+                    FailResponse(code=FAIL, message="Failed to create access token using request id"))
+                )
             return SuccessResponse(code=SUCCESS, message="Token refreshed")
 
     # 3) If no user is in the request body, check for refresh_token
@@ -46,14 +45,12 @@ async def refresh_token(request: Request, response: Response, request_body: IDRe
         user_id = decoded_refresh.get("id")
         u = await get_user_by_id(user_id)
         if u:
-            new_access_token = create_access_token(u.id)
-            response.set_cookie(
-                key="access_token",
-                value=new_access_token,
-                httponly=True,
-                secure=True,
-                samesite="None"
-            )
+            err = create_access_token(u.id, response)
+            if err:
+                logger.error(f"Failed to create access token in refresh-token endpoint: {err}")
+                return JSONResponse(status_code=500, content=jsonable_encoder(
+                    FailResponse(code=FAIL, message="Failed to create access token using refresh token"))
+                )
             return SuccessResponse(code=SUCCESS, message="Token refreshed")
 
     # 4) Require authentication

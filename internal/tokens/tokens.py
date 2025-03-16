@@ -1,4 +1,5 @@
 import jwt
+from fastapi import Response
 from datetime import datetime, timedelta
 from config.config import get_config
 
@@ -9,18 +10,48 @@ def create_jwt_token(data, expires_delta: timedelta):
     return jwt.encode(to_encode, get_config("secret_key"), algorithm=get_config("algorithm"))
 
 
-def create_access_token(user_id):
-    return create_jwt_token(
-        {"id": user_id},
-        timedelta(minutes=get_config("access_token_expire_minutes"))
-    )
+def create_access_token(user_id, response: Response):
+    try:
+        expire_minutes = get_config("access_token_expire_minutes")
+        access_token = create_jwt_token(
+            {"id": user_id},
+            timedelta(minutes=expire_minutes)
+        )
+
+        # Convert minutes to seconds
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=True,
+            samesite="None",
+            max_age=expire_minutes * 60
+        )
+        return None
+    except Exception as e:
+        return e
 
 
-def create_refresh_token(user_id):
-    return create_jwt_token(
-        {"id": user_id},
-        timedelta(days=get_config("refresh_token_expire_days"))
-    )
+def create_refresh_token(user_id, response: Response):
+    try:
+        expire_days = get_config("refresh_token_expire_days")
+        refresh_token = create_jwt_token(
+            {"id": user_id},
+            timedelta(days=expire_days)
+        )
+
+        # Convert days to seconds
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            samesite="None",
+            max_age=expire_days * 24 * 60 * 60
+        )
+        return None
+    except Exception as e:
+        return e
 
 
 def verify_jwt_token(token):
