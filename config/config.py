@@ -32,8 +32,8 @@ if not conf["secret_key"] or not conf["algorithm"]:
     sys.exit(1)
 
 # MongoDB Configuration
-conf["mongodb_user"] = os.environ.get("MONGODB_USERNAME", "")
-conf["mongodb_pass"] = os.environ.get("MONGODB_PASSWORD", "")
+conf["mongodb_user"] = os.getenv("MONGODB_USERNAME")
+conf["mongodb_pass"] = os.getenv("MONGODB_PASSWORD")
 conf["mongodb_host"] = os.environ.get("MONGODB_HOST", "127.0.0.1:27017")
 conf["mongodb_database"] = os.environ.get("MONGODB_DATABASE", "library_management_system")
 
