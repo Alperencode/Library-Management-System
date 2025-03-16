@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Response, Request
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from internal.utils.logger import logger
 from internal.models.user import User, PublicUser
 from internal.utils.utils import hash_password, verify_token_owner
 from internal.types.responses import SuccessResponse, FailResponse, PublicUserResponse
@@ -23,7 +24,7 @@ async def register_user(
     existing_user = await get_user_by_email(request_body.email)
     if existing_user:
         return JSONResponse(
-            status_code=400,
+            status_code=409,
             content=jsonable_encoder(FailResponse(
                 code=FAIL,
                 message="Email already registered"
@@ -43,31 +44,21 @@ async def register_user(
             status_code=500,
             content=jsonable_encoder(FailResponse(
                 code=FAIL,
-                message="Failed to create user"
+                message="Failed to create user in database"
             ))
         )
 
     # Assign access_token to current user
     if not verify_token_owner(request, user, "access_token"):
-        access_token = create_access_token(user.id)
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            secure=True,
-            samesite="None"
-        )
+        err = create_access_token(user.id, response)
+        if err:
+            logger.error(f"Failed to create access token while registering new user: {err}")
 
     # Assign refresh_token to current user
     if not verify_token_owner(request, user, "refresh_token"):
-        refresh_token = create_refresh_token(user.id)
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=True,
-            samesite="None"
-        )
+        err = create_refresh_token(user.id)
+        if err:
+            logger.error(f"Failed to create refresh token while registering new user: {err}")
 
     return PublicUserResponse(
         code=SUCCESS,
@@ -99,26 +90,16 @@ async def login_user(
 
     # Assign access_token to current user
     if not verify_token_owner(request, user, "access_token"):
-        access_token = create_access_token(user.id)
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            secure=True,
-            samesite="None"
-        )
+        err = create_access_token(user.id, response)
+        if err:
+            logger.error(f"Failed to create access token while loggin in the user: {err}")
 
     # If remember me is checked, assign refresh_token
     if request_body.remember_me:
         if not verify_token_owner(request, user, "refresh_token"):
-            refresh_token = create_refresh_token(user.id)
-            response.set_cookie(
-                key="refresh_token",
-                value=refresh_token,
-                httponly=True,
-                secure=True,
-                samesite="None"
-            )
+            err = create_refresh_token(user.id, response)
+            if err:
+                logger.error(f"Failed to create refresh token while loggin in the user: {err}")
     else:
         response.delete_cookie("refresh_token")
 
