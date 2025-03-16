@@ -18,8 +18,8 @@
               </li>
               <li class="scroll-to-section"><a href="#courses">Courses</a></li>
               <li class="scroll-to-section"><a href="#contact">Contact Us</a></li>
-              <li><RouterLink to="/login">Sign In</RouterLink></li>
-              <li><RouterLink to="/register">Sign Up</RouterLink></li>
+              <li><RouterLink to="/login">Login</RouterLink></li>
+              <li><RouterLink to="/register">Register</RouterLink></li>
             </ul>
             <a class="menu-trigger"><span>Menu</span></a>
           </nav>
@@ -38,7 +38,7 @@ export default {
   methods: {
     loadCustomScript() {
       const script = document.createElement("script");
-      script.src = "/assets/js/custom.js";
+  //    script.src = "/assets/js/custom.js";
       script.async = true;
       document.body.appendChild(script);
     },

@@ -18,5 +18,6 @@ export default {
     position: absolute;
     bottom: 0;
     left: 0;
+    padding: 1%;
   }
   </style>
