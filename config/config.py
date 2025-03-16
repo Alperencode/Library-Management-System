@@ -1,8 +1,16 @@
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
+from internal.utils.logger import logger
 import os
+import sys
+
+# Check if .env exists
+dotenv_path = find_dotenv()
+if not dotenv_path:
+    logger.warning(".env file not found. Exiting program.")
+    sys.exit(1)
 
 # Load .env file
-load_dotenv()
+load_dotenv(override=True)
 
 VERSION = "v0.1.0"
 Health = False
@@ -13,10 +21,15 @@ conf = {}
 # API Configuration
 conf["api_port"] = int(os.environ.get("API_PORT", "8000"))
 conf["api_prefix"] = os.environ.get("API_PREFIX", "/api/v1")
-conf["algorithm"] = os.environ.get("ALGORITHM", "")
 conf["access_token_expire_minutes"] = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 conf["refresh_token_expire_days"] = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+conf["algorithm"] = os.getenv("ALGORITHM")
 conf["secret_key"] = os.getenv("SECRET_KEY")
+
+# Check required variables
+if not conf["secret_key"] or not conf["algorithm"]:
+    logger.error("SECRET_KEY or ALGORITHM is not set. Exiting program.")
+    sys.exit(1)
 
 # MongoDB Configuration
 conf["mongodb_user"] = os.environ.get("MONGODB_USERNAME", "")
