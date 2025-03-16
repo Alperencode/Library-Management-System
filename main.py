@@ -33,5 +33,3 @@ if __name__ == "__main__":
     set_config("ready", True)
 
     uvicorn.run(app, host="0.0.0.0", port=get_config("api_port"))
-
-
