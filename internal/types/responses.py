@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
+from internal.models.book import Book
 
 
 class SuccessResponse(BaseModel):
@@ -29,3 +30,11 @@ class PublicUserResponse(SuccessResponse):
 class TokenResponse(SuccessResponse):
     access_token: str = Field(None, examples=["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."])
     token_type: str = Field(None, examples=["bearer"])
+
+
+class BookResponse(SuccessResponse):
+    book: Book = Field(...)
+
+
+class BookListResponse(SuccessResponse):
+    books: list[Book] = Field(default_factory=list)
