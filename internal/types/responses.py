@@ -38,3 +38,7 @@ class BookResponse(SuccessResponse):
 
 class BookListResponse(SuccessResponse):
     books: list[Book] = Field(default_factory=list)
+
+
+class CategoryListResponse(SuccessResponse):
+    categories: list[str] = Field(default_factory=list)
