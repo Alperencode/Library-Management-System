@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
-from internal.models.book import Book
+from internal.models.book import Book, ExternalBookPreview
 
 
 class SuccessResponse(BaseModel):
@@ -42,3 +42,7 @@ class BookListResponse(SuccessResponse):
 
 class CategoryListResponse(SuccessResponse):
     categories: list[str] = Field(default_factory=list)
+
+
+class ExternalBookListResponse(SuccessResponse):
+    books: list[ExternalBookPreview] = Field(None)

@@ -1,14 +1,17 @@
-from fastapi import APIRouter, Query
+from rapidfuzz import fuzz
+from fastapi import APIRouter, Query, Body
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from internal.database.books import get_all_books, get_book_by_id
+from internal.database.books import get_all_books, get_book_by_id, create_book
 from internal.types.types import SUCCESS, FAIL
-from rapidfuzz import fuzz
+from internal.utils.google_books import search_google_books, fetch_google_book
+from internal.models.book import ExternalBookPreview
 from internal.types.responses import (
     FailResponse,
     BookListResponse,
     BookResponse,
     CategoryListResponse,
+    ExternalBookListResponse
 )
 
 router = APIRouter()
@@ -137,4 +140,59 @@ async def related_books(book_id: str):
         code=SUCCESS,
         message="Related books retrieved successfully",
         books=sorted_related
+    )
+
+
+@router.get("/books/search/external", response_model=ExternalBookListResponse)
+async def search_books_external(q: str = Query(..., min_length=1)):
+    results = search_google_books(q)
+    if not results:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(
+                FailResponse(code=FAIL, message="No books found from external source")
+            )
+        )
+
+    books = [
+        ExternalBookPreview(
+            id=item["id"],
+            title=item["title"],
+            authors=item["authors"],
+            categories=item["categories"],
+        )
+        for item in results
+    ]
+
+    return ExternalBookListResponse(
+        code=SUCCESS,
+        message="Books found via external search",
+        books=books
+    )
+
+
+@router.post("/books/add/external", response_model=BookResponse)
+async def add_book_from_external(volume_id: str = Body(..., embed=True)):
+    book = fetch_google_book(volume_id)
+    if not book:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(
+                FailResponse(code=FAIL, message="Book not found or incomplete from external source")
+            )
+        )
+
+    created = await create_book(book)
+    if not created:
+        return JSONResponse(
+            status_code=500,
+            content=jsonable_encoder(
+                FailResponse(code=FAIL, message="Failed to insert book into database")
+            )
+        )
+
+    return BookResponse(
+        code=SUCCESS,
+        message="Book added successfully from external source",
+        book=created
     )

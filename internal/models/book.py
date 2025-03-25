@@ -30,3 +30,10 @@ class Book(BaseModel):
                 "The 'id' field is immutable and cannot be changed after creation."
             )
         super().__setattr__(name, value)
+
+
+class ExternalBookPreview(BaseModel):
+    id: str
+    title: str
+    authors: List[str]
+    categories: List[str]
