@@ -18,8 +18,14 @@
               </li>
               <li class="scroll-to-section"><a href="#courses">Courses</a></li>
               <li class="scroll-to-section"><a href="#contact">Contact Us</a></li>
-              <li><RouterLink to="/login">Login</RouterLink></li>
-              <li><RouterLink to="/register">Register</RouterLink></li>
+              <li v-if="user" class="user-greeting">
+                <span>Welcome, {{ user.username }}</span>
+              </li>
+              <li v-if="user">
+                <a href="javascript:void(0)" @click="logout">Logout</a>
+              </li>
+              <li v-if="!user"><RouterLink to="/login">Login</RouterLink></li>
+              <li v-if="!user"><RouterLink to="/register">Register</RouterLink></li>
             </ul>
             <a class="menu-trigger"><span>Menu</span></a>
           </nav>
@@ -30,18 +36,34 @@
 </template>
 
 <script>
+import { computed } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
+
 export default {
-  name: "MainHeader",
-  mounted() {
-    this.loadCustomScript();
-  },
-  methods: {
-    loadCustomScript() {
-      const script = document.createElement("script");
-  //    script.src = "/assets/js/custom.js";
-      script.async = true;
-      document.body.appendChild(script);
-    },
+  setup() {
+    const store = useStore();
+    const router = useRouter();
+    const user = computed(() => store.state.user);
+
+    const logout = () => {
+      store.commit("logout");
+      router.push("/login");
+    };
+
+    return { user, logout };
   },
 };
 </script>
+
+<style scoped>
+.user-greeting {
+  font-size: 17px;
+  font-weight: bold;
+  color: #f5a425;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  padding: 0 15px; 
+}
+</style>

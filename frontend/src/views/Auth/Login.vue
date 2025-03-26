@@ -21,8 +21,11 @@
 
 <script>
 import axios from "axios";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 import MainHeader from "@/components/MainHeader.vue";
 import MainFooter from "@/components/MainFooter.vue";
+
 export default {
   name: "AuthLogin",
   components: {
@@ -43,6 +46,12 @@ export default {
       return this.messageType === "success" ? "success-message" : "error-message";
     }
   },
+  setup() {
+    const router = useRouter();
+    const store = useStore();
+
+    return { router, store };
+  },
   methods: {
     async login() {
       try {
@@ -50,18 +59,35 @@ export default {
           email: this.email,
           password: this.password,
           remember_me: this.rememberMe
-        });
+        }, { withCredentials: true });
 
         this.message = response.data.message; 
         this.messageType = "success";
+
+        await this.fetchUser();
+
+        this.router.push("/");
       } catch (error) {
         this.message = error.response?.data?.message || "Login failed"; 
         this.messageType = "error";
+      }
+    },
+
+    async fetchUser() {
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/v1/me", { withCredentials: true });
+
+        if (response.data.user) {
+          this.store.commit("setUser", response.data.user);
+        }
+      } catch (error) {
+        console.error("Kullanıcı bilgileri alınamadı:", error);
       }
     }
   },
 };
 </script>
+
 
 <style scoped>
 
