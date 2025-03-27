@@ -24,7 +24,7 @@ async def refresh_token(request: Request, response: Response, request_body: IDRe
             return SuccessResponse(code=SUCCESS, message="There is already valid access_token exists")
 
     # 2) Try to get user from request's id
-    if request_body.id:
+    if request_body and request_body.id:
         # If there is a valid user, refresh the access token
         u = await get_user_by_id(request_body.id)
         if u:

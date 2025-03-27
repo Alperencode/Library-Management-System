@@ -23,51 +23,69 @@
   </div>
 </template>
   
-  <script>
-  import axios from "axios";
-  import MainHeader from "@/components/MainHeader.vue";
-  import MainFooter from "@/components/MainFooter.vue";
-  
-  export default {
-    name: "AuthRegister",
-    components: {
-      MainHeader,
-      MainFooter,
+<script>
+import api from "@/api/axios";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
+import MainHeader from "@/components/MainHeader.vue";
+import MainFooter from "@/components/MainFooter.vue";
+
+export default {
+  name: "AuthRegister",
+  components: {
+    MainHeader,
+    MainFooter,
+  },
+  data() {
+    return {
+      username: "",
+      email: "",
+      password: "",
+      message: "",
+      messageType: "",
+    };
+  },
+  computed: {
+    alertClass() {
+      return this.messageType === "success" ? "success-message" : "error-message";
     },
-    data() {
-      return {
-        username: "",
-        email: "",
-        password: "",
-        message: "",
-        messageType: "",
-      };
+  },
+  setup() {
+    const router = useRouter();
+    const store = useStore();
+    return { router, store };
+  },
+  methods: {
+    async register() {
+      try {
+        const response = await api.post("/register", {
+          username: this.username,
+          email: this.email,
+          password: this.password,
+        });
+
+        this.message = response.data.message;
+        this.messageType = "success";
+
+        await this.fetchUser();
+        this.router.push("/");
+      } catch (error) {
+        this.message = error.response?.data?.message || "Registration failed";
+        this.messageType = "error";
+      }
     },
-    computed: {
-      alertClass() {
-        return this.messageType === "success" ? "success-message" : "error-message";
-      },
+
+    async fetchUser() {
+      const response = await api.get("/me");
+      if (response.data.user) {
+        this.store.commit("setUser", response.data.user);
+      }
     },
-    methods: {
-      async register() {
-        try {
-          const response = await axios.post("http://127.0.0.1:8000/api/v1/register", {
-            username: this.username,
-            email: this.email,
-            password: this.password,
-          });
-          this.message = response.data.message;
-          this.messageType = "success";
-        } catch (error) {
-          this.message = error.response?.data?.message || "Registration failed";
-          this.messageType = "error";
-        }
-      },
-    },
-  };
-  </script>
-  
-  <style scoped>
+  },
+};
+</script>
+
+<style scoped>
 
 .success-text {
   color: #4caf50;
