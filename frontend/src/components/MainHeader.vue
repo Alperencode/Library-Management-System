@@ -39,6 +39,7 @@
 import { computed } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
+import api from "@/api/axios";
 
 export default {
   setup() {
@@ -46,12 +47,17 @@ export default {
     const router = useRouter();
     const user = computed(() => store.state.user);
 
-    const logout = () => {
+    const logout = async () => {
+      await api.post("/logout");
+
       store.commit("logout");
       router.push("/login");
     };
 
-    return { user, logout };
+    return {
+      user,
+      logout,
+    };
   },
 };
 </script>
@@ -64,6 +70,6 @@ export default {
   opacity: 0.8;
   display: flex;
   align-items: center;
-  padding: 0 15px; 
+  padding: 0 15px;
 }
 </style>

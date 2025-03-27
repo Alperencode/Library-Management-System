@@ -1,16 +1,17 @@
 <template>
   <div id="app">
-    <MainHeader v-if="!isAuthPage" />
+    <MainHeader />
     <router-view />
-    <MainFooter v-if="!isAuthPage" />
+    <MainFooter />
   </div>
 </template>
 
 <script>
+import { onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
+import { useAuth } from "@/composables/useAuth";
 import MainHeader from "@/components/MainHeader.vue";
 import MainFooter from "@/components/MainFooter.vue";
-import { computed } from "vue";
-import { useRoute } from "vue-router";
 
 export default {
   components: {
@@ -19,18 +20,15 @@ export default {
   },
   setup() {
     const route = useRoute();
-    const isAuthPage = computed(() => route.path === "/login" || route.path === "/register");
-    return { isAuthPage };
+    const { fetchUser } = useAuth();
+
+    onMounted(() => {
+      fetchUser();
+    });
+
+    const hideLayout = computed(() => route.meta.hideLayout);
+
+    return { hideLayout };
   },
 };
 </script>
-
-<style>
-#app {
-  overflow-x: hidden;
-}
-
-.router-container {
-  overflow: hidden;
-}
-</style>
