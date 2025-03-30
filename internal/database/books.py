@@ -6,6 +6,14 @@ from datetime import datetime
 
 
 async def create_book(book: Book) -> Optional[Book]:
+    if not book.isbn:
+        return None
+
+    # Check for an existing book with the same ISBN
+    existing = await books_collection.find_one({"isbn": book.isbn})
+    if existing:
+        return None
+
     book_data = book.model_dump(by_alias=True)
     result = await books_collection.insert_one(book_data)
     if result.inserted_id:
