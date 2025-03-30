@@ -9,6 +9,9 @@ logger = logging.getLogger("library_management_api")
 
 
 def initialize_logger():
+    if LOG_FILE.exists():
+        LOG_FILE.unlink()
+
     logger.setLevel(logging.INFO)
 
     if logger.hasHandlers():

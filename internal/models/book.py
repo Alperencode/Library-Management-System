@@ -4,11 +4,16 @@ from bson import ObjectId
 from datetime import datetime
 
 
+class BookCategory(BaseModel):
+    category: Optional[str] = None
+    subcategory: Optional[str] = None
+
+
 class Book(BaseModel):
     id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     title: str
     authors: List[str]
-    categories: List[str]
+    categories: List[BookCategory]
     language: Optional[str] = None
     page_count: Optional[int] = None
     isbn: Optional[str] = None
@@ -32,8 +37,19 @@ class Book(BaseModel):
         super().__setattr__(name, value)
 
 
+class BookPreview(BaseModel):
+    id: str
+    title: str
+    authors: List[str]
+    categories: List[BookCategory]
+    publisher: Optional[str] = None
+    cover_image: Optional[str] = None
+    borrowed: bool = False
+    isbn: Optional[str] = None
+
+
 class ExternalBookPreview(BaseModel):
     id: str
     title: str
     authors: List[str]
-    categories: List[str]
+    categories: List[BookCategory]

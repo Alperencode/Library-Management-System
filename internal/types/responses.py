@@ -1,6 +1,7 @@
+from typing import List
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
-from internal.models.book import Book, ExternalBookPreview
+from internal.models.book import Book, BookPreview, ExternalBookPreview
 
 
 class SuccessResponse(BaseModel):
@@ -40,9 +41,30 @@ class BookListResponse(SuccessResponse):
     books: list[Book] = Field(default_factory=list)
 
 
-class CategoryListResponse(SuccessResponse):
-    categories: list[str] = Field(default_factory=list)
+class BookPreviewListResponse(SuccessResponse):
+    books: List[BookPreview]
 
 
 class ExternalBookListResponse(SuccessResponse):
     books: list[ExternalBookPreview] = Field(None)
+
+
+class BulkExternalBookAddResponse(BaseModel):
+    code: str
+    message: str
+    success_count: int
+    failed_count: int
+    failed_isbns: List[str]
+
+
+class CategoryListResponse(SuccessResponse):
+    categories: list[str] = Field(default_factory=list)
+
+
+class GroupedCategory(BaseModel):
+    category: str
+    subcategories: List[str]
+
+
+class GroupedCategoryListResponse(SuccessResponse):
+    categories: List[GroupedCategory]
