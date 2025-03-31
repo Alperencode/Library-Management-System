@@ -7,7 +7,7 @@
             <RouterLink to="/" class="logo">Edu Meeting</RouterLink>
             <ul class="nav">
               <li class="scroll-to-section"><RouterLink to="/" class="active">Home</RouterLink></li>
-              <li><RouterLink to="/meetings">Meetings</RouterLink></li>
+              <li><RouterLink to="/books">Books</RouterLink></li>
               <li class="scroll-to-section"><a href="#apply">Apply Now</a></li>
               <li class="has-sub">
                 <a href="javascript:void(0)">Pages</a>

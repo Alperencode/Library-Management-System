@@ -1,19 +1,21 @@
 <template>
-  <div class="auth-container">
+  <div class="login-page">
     <MainHeader />
-    <div class="content">
-    <h2 class="title">Login</h2>
-      <div class="input-fields">
-            <input type="email" v-model="email" placeholder="Email" class="input-line full-width" />
-            <input type="password" v-model="password" placeholder="Password" class="input-line full-width" />
-      </div>
-      <div class="remember-me">
+    <div class="login-wrapper">
+      <div class="login-form-container">
+        <h2 class="title">Login</h2>
+        <div class="input-fields">
+          <input type="email" v-model="email" placeholder="Email" class="input-line full-width" />
+          <input type="password" v-model="password" placeholder="Password" class="input-line full-width" />
+        </div>
+        <div class="remember-me">
           <input type="checkbox" id="rememberMe" v-model="rememberMe" />
           <label for="rememberMe">Remember Me</label>
         </div>
         <div class="spacer"></div>
-      <button class="ghost-round full-width " @click="login">Login</button>
-      <p v-if="message" :class="alertClass">{{ message }}</p>
+        <button class="ghost-round full-width" @click="login">Login</button>
+        <p v-if="message" :class="alertClass">{{ message }}</p>
+      </div>
     </div>
     <MainFooter />
   </div>
@@ -84,6 +86,85 @@ export default {
 
 <style scoped>
 
+.login-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 92.3vh;
+  background: url('@/assets/images/meetings-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+}
+
+.login-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 30px;
+  color: white;
+}
+
+.title {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.input-fields {
+  margin-top: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.input-line {
+  background: none;
+  margin-bottom: 10px;
+  line-height: 2.4em;
+  color: #fff;
+  font-family: Roboto, sans-serif;
+  font-weight: 300;
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
+  transition: all 0.2s ease;
+}
+
+.ghost-round {
+  cursor: pointer;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 25px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 1.2rem;
+  line-height: 2.5em;
+  margin-top: auto;
+  transition: all 0.2s ease;
+}
+
+.ghost-round:hover {
+  background: #d4881a;
+  border-color: #d4881a;
+  color: white;
+  box-shadow: 0 0 10px rgba(245, 164, 37, 0.7);
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin-top: 10px;
+}
+.remember-me input {
+  margin-right: 5px;
+}
+.spacer {
+  height: 20px;
+}
 .remember-me {
   display: flex;
   align-items: center;
@@ -135,13 +216,27 @@ export default {
 }
 
 .auth-page {
-  width: 100vw;
-  height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8f9fa;
+  flex-direction: column;
+  min-height: 100vh;
+  background: url('@/assets/images/meetings-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
 }
+
+.auth-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 
 body {
     font-family: 'Lato', sans-serif;
@@ -310,10 +405,9 @@ button:focus {
 }
 
 .content {
-  width: 600px; /* Aynı genişlikte olacak */
-  min-height: 300px; /* Aynı yüksekliği vermek için */
-  padding-left: 30px;
-  padding-right: 30px;
+  width: 600px;
+  min-height: 300px;
+  padding: 0 30px;
   display: flex;
   flex-flow: column;
   z-index: 5;
