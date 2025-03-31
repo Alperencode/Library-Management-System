@@ -1,7 +1,5 @@
 <template>
   <div class="user-page" v-if="user">
-    <MainHeader />
-
     <aside class="sidebar">
       <div class="username">{{ user.username }}</div>
       <nav class="menu">
@@ -26,9 +24,6 @@
           </li>
         </ul>
       </nav>
-      <footer class="sidebar-footer">
-        <p>Library Management System</p>
-      </footer>
     </aside>
 
     <main class="content">
@@ -38,23 +33,16 @@
       </div>
     </main>
 
-    <MainFooter />
   </div>
 </template>
 
 <script>
 import { useRouter } from "vue-router";
 import { useStore, mapState } from "vuex";
-import MainHeader from "@/components/MainHeader.vue";
-import MainFooter from "@/components/MainFooter.vue";
 import api from "@/api/axios";
 
 export default {
   name: "UserPage",
-  components: {
-    MainHeader,
-    MainFooter,
-  },
   computed: {
     ...mapState({
       user: (state) => state.user,
