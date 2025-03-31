@@ -4,11 +4,11 @@
       <div class="row">
         <div class="col-12">
           <nav class="main-nav">
-            <RouterLink to="/" class="logo">Edu Meeting</RouterLink>
+            <RouterLink to="/" class="logo">Library Management System</RouterLink>
             <ul class="nav">
               <li class="scroll-to-section"><RouterLink to="/" class="active">Home</RouterLink></li>
-              <li><RouterLink to="/meetings">Meetings</RouterLink></li>
-              <li class="scroll-to-section"><a href="#apply">Apply Now</a></li>
+              <li><RouterLink to="/books">Books</RouterLink></li>
+              <!--- <li class="scroll-to-section"><a href="#apply">Apply Now</a></li>
               <li class="has-sub">
                 <a href="javascript:void(0)">Pages</a>
                 <ul class="sub-menu">
@@ -18,8 +18,11 @@
               </li>
               <li class="scroll-to-section"><a href="#courses">Courses</a></li>
               <li class="scroll-to-section"><a href="#contact">Contact Us</a></li>
+              -->
               <li v-if="user" class="user-greeting">
-                <span>Welcome, {{ user.username }}</span>
+                <RouterLink to="/user-page">
+                  <span>Welcome, {{ user.username }}</span>
+                </RouterLink>
               </li>
               <li v-if="user">
                 <a href="javascript:void(0)" @click="logout">Logout</a>

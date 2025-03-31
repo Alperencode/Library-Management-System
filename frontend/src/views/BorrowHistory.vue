@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Borrow History</h1>
-    <p>Geçmişte ödünç aldığın kitaplar burada.</p>
+    <h2>Borrow History</h2>
+    <p>Here you see your borrowed books history.</p>
   </div>
 </template>
