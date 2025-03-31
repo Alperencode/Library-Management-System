@@ -1,24 +1,19 @@
 <template>
-  <div class="auth-container">
+  <div class="register-page">
     <MainHeader />
-    <div class="content">
-          <h2 class="title">Register</h2>
-          <div class="input-fields">
-            <input type="text" v-model="username" placeholder="Username" class="input-line full-width" />
-            <input type="email" v-model="email" placeholder="Email" class="input-line full-width" />
-            <input type="password" v-model="password" placeholder="Password" class="input-line full-width" />
-          </div>
-          <div class="spacer"></div>
-          <button class="ghost-round full-width" @click="register">Create Account</button>
-  
-          <div class="alert-container" v-if="message">
-            <div :class="alertClass">
-              <span v-if="messageType === 'success'" class="success-icon"></span>
-              <span v-if="messageType === 'error'" class="error-icon"></span>
-            </div>
-            <p :class="{ 'success-text': messageType === 'success', 'error-text': messageType === 'error' }">{{ message }}</p>
-          </div>
+    <div class="register-wrapper">
+      <div class="register-form-container">
+        <h2 class="title">Register</h2>
+        <div class="input-fields">
+          <input type="text" v-model="name" placeholder="Name" class="input-line full-width" />
+          <input type="email" v-model="email" placeholder="Email" class="input-line full-width" />
+          <input type="password" v-model="password" placeholder="Password" class="input-line full-width" />
         </div>
+        <div class="spacer"></div>
+        <button class="ghost-round full-width" @click="register">Register</button>
+        <p v-if="message" :class="alertClass">{{ message }}</p>
+      </div>
+    </div>
     <MainFooter />
   </div>
 </template>
@@ -87,6 +82,76 @@ export default {
 
 <style scoped>
 
+.register-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 92.3vh;
+  background: url('@/assets/images/meetings-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+}
+
+.register-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-form-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 30px;
+  color: white;
+}
+
+.title {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.input-fields {
+  margin-top: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.input-line {
+  background: none;
+  margin-bottom: 10px;
+  line-height: 2.4em;
+  color: #fff;
+  font-family: Roboto, sans-serif;
+  font-weight: 300;
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
+  transition: all 0.2s ease;
+}
+
+.ghost-round {
+  cursor: pointer;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 25px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 1.2rem;
+  line-height: 2.5em;
+  margin-top: auto;
+  transition: all 0.2s ease;
+}
+
+.ghost-round:hover {
+  background: #d4881a;
+  border-color: #d4881a;
+  color: white;
+  box-shadow: 0 0 10px rgba(245, 164, 37, 0.7);
+}
+
+.spacer {
+  height: 20px;
+}
 .success-text {
   color: #4caf50;
   font-weight: bold;

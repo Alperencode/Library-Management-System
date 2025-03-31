@@ -1,23 +1,23 @@
 <template>
-    <footer class="footer text-center">
-      <div class="container">
-        <p>Copyright © 2025 Library Management System</p>
-      </div>
-    </footer>
-  </template>
-  
+  <footer class="footer bg-transparent text-white">
+    <div class="container">
+      <p>Copyright © 2025 Library Management System</p>
+    </div>
+  </footer>
+</template>
+
 <script>
 export default {
   name: "MainFooter",
 };
 </script>
-  
-  <style scoped>
-  .footer {
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding: 1%;
-  }
-  </style>
+
+<style scoped>
+.footer {
+  background-color: transparent !important;
+  color: white;
+  padding: 20px 0;
+  width: 100%;
+  margin-top: auto;
+}
+</style>

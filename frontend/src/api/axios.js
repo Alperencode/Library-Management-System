@@ -27,8 +27,8 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config
 
-    const isAuthCall = ['/refresh-token', '/login'].some(path => originalRequest.url.includes(path));
-    if (err.response?.status === 401 && !originalRequest._retry && !isAuthCall) {
+    const ignoreCall = ['/', '/refresh-token', '/login', '/books'].some(path => originalRequest.url.includes(path));
+    if (err.response?.status === 401 && !originalRequest._retry && !ignoreCall) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })

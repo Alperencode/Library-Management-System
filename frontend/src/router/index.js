@@ -4,6 +4,7 @@ import Register from "@/views/Auth/Register.vue";
 import HomeView from "@/views/HomeView.vue";
 import MeetingDetails from "@/views/MeetingDetails.vue";
 import UserPage from "@/views/UserPage.vue";
+import BooksPage from "@/views/BooksPage.vue";
 
 // Sub-pages of User-Page
 import AccountManagement from "@/views/AccountManagement.vue";
@@ -17,6 +18,7 @@ const routes = [
   { path: "/login", component: Login },
   { path: "/register", component: Register },
   { path: "/meetings", component: MeetingDetails },
+  { path: '/books', component: BooksPage },
 
   {
     path: "/user-page",

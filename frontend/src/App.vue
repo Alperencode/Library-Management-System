@@ -1,8 +1,10 @@
 <template>
-  <div id="app">
-    <MainHeader />
-    <router-view />
-    <MainFooter />
+  <div id="app" class="layout">
+    <MainHeader v-if="!hideLayout" />
+    <main class="content">
+      <router-view />
+    </main>
+    <MainFooter v-if="!hideLayout" />
   </div>
 </template>
 
@@ -40,3 +42,28 @@ export default {
   },
 };
 </script>
+
+<style>
+
+#app {
+  background-image: url('@/assets/images/meetings-page-bg.jpg');
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+body {
+  background-image: url('@/assets/images/meetings-page-bg.jpg');
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+}
+
+.content {
+  padding-top: 73px;
+}
+</style>
