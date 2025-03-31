@@ -1,26 +1,82 @@
+import pycountry
+from rapidfuzz import fuzz
+from typing import Optional
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from internal.models.book import BookPreview
 from internal.database.books import get_all_books, get_book_by_id
-from internal.types.types import SUCCESS, FAIL
-from rapidfuzz import fuzz
+from internal.types.types import SUCCESS, FAIL, LanguageItem
 from internal.types.responses import (
     FailResponse,
     BookListResponse,
     BookResponse,
-    CategoryListResponse,
+    GroupedCategoryListResponse,
+    GroupedCategory,
+    BookPreviewListResponse,
+    PaginatedBookPreviewListResponse,
+    LanguageListResponse
 )
 
 router = APIRouter()
 
 
-@router.get("/books", response_model=BookListResponse)
-async def list_books():
-    books = await get_all_books()
-    return BookListResponse(
+@router.get("/books", response_model=PaginatedBookPreviewListResponse)
+async def list_books(
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=100),
+    category: Optional[str] = Query(None),
+    subcategory: Optional[str] = Query(None),
+    language: Optional[str] = Query(None),
+    available_only: bool = Query(False)
+):
+    all_books = await get_all_books()
+
+    # Apply filters
+    filtered_books = []
+    for book in all_books:
+        if available_only and book.available_copies <= 0:
+            continue
+        if language and (book.language or "").lower() != language.lower():
+            continue
+        if category:
+            if not any(cat.category and cat.category.lower() == category.lower() for cat in book.categories):
+                continue
+        if subcategory:
+            if not any(cat.subcategory and cat.subcategory.lower() == subcategory.lower() for cat in book.categories):
+                continue
+
+        filtered_books.append(book)
+
+    total_books = len(filtered_books)
+    start = (page - 1) * limit
+    end = start + limit
+    last_page = (total_books + limit - 1) // limit
+
+    paginated_books = filtered_books[start:end]
+
+    previews = [
+        BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn
+        )
+        for book in paginated_books
+    ]
+
+    return PaginatedBookPreviewListResponse(
         code=SUCCESS,
         message="Books retrieved successfully",
-        books=books
+        books=previews,
+        total=total_books,
+        page=page,
+        has_next=end < total_books,
+        last_page=last_page
     )
 
 
@@ -73,16 +129,32 @@ async def search_books(q: str = Query(..., min_length=1)):
     )
 
 
-@router.get("/books/search/categories", response_model=CategoryListResponse)
+@router.get("/books/search/categories", response_model=GroupedCategoryListResponse)
 async def list_categories():
     books = await get_all_books()
-    categories_set = set()
+    category_map: dict[str, set[str]] = {}
+
     for book in books:
-        categories_set.update(book.categories or [])
-    return CategoryListResponse(
+        for cat in book.categories or []:
+            if not cat.category:
+                continue
+            category = cat.category.strip()
+            subcategory = cat.subcategory.strip() if cat.subcategory else None
+
+            if category not in category_map:
+                category_map[category] = set()
+            if subcategory:
+                category_map[category].add(subcategory)
+
+    grouped = [
+        GroupedCategory(category=cat, subcategories=sorted(subs))
+        for cat, subs in sorted(category_map.items())
+    ]
+
+    return GroupedCategoryListResponse(
         code=SUCCESS,
-        message="Categories retrieved successfully",
-        categories=sorted(categories_set)
+        message="Categories grouped successfully",
+        categories=grouped
     )
 
 
@@ -97,7 +169,7 @@ async def list_popular_books():
     )
 
 
-@router.get("/books/{book_id}/related", response_model=BookListResponse)
+@router.get("/books/{book_id}/related", response_model=BookPreviewListResponse)
 async def related_books(book_id: str):
     original = await get_book_by_id(book_id)
     if not original:
@@ -108,33 +180,72 @@ async def related_books(book_id: str):
             )
         )
 
-    # TO-DO: Get only category matched books in future
-    books = await get_all_books()
-    threshold = 60
+    original_categories = {c.category.lower() for c in original.categories if c.category}
+    original_isbn = original.isbn
+    all_books = await get_all_books()
     related = []
 
-    for book in books:
-        if book.id == original.id:
+    for book in all_books:
+        if book.id == original.id or (original_isbn and book.isbn == original_isbn):
             continue
 
-        # First, try to match category.
-        category_match = any(cat in original.categories for cat in book.categories)
-
-        # If category doesn't matches, try to fuzzy match
-        if not category_match:
-            fuzzy_score = max(
-                fuzz.partial_ratio(cat1.lower(), cat2.lower())
-                for cat1 in original.categories for cat2 in book.categories
-            ) if book.categories and original.categories else 0
-
-            if fuzzy_score >= threshold:
+        for cat in book.categories or []:
+            if cat.category and cat.category.lower() in original_categories:
                 related.append(book)
-        else:
-            related.append(book)
+                break
+
+    if not related:
+        threshold = 60
+        for book in all_books:
+            if book.id == original.id or (original_isbn and book.isbn == original_isbn):
+                continue
+
+            score = 0
+            for oc in original.categories:
+                for bc in book.categories or []:
+                    oc_full = f"{oc.category} / {oc.subcategory}" if oc.subcategory else oc.category
+                    bc_full = f"{bc.category} / {bc.subcategory}" if bc.subcategory else bc.category
+                    score = max(score, fuzz.partial_ratio(oc_full.lower(), bc_full.lower()))
+
+            if score >= threshold:
+                related.append(book)
 
     sorted_related = sorted(related, key=lambda x: (x.borrow_count, x.added_at), reverse=True)
-    return BookListResponse(
+
+    previews = [
+        BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn
+        )
+        for book in sorted_related
+    ]
+
+    return BookPreviewListResponse(
         code=SUCCESS,
         message="Related books retrieved successfully",
-        books=sorted_related
+        books=previews
+    )
+
+
+@router.get("/books/search/languages", response_model=LanguageListResponse)
+async def list_languages():
+    books = await get_all_books()
+    language_codes = {book.language for book in books if book.language}
+
+    languages: list[LanguageItem] = []
+    for code in sorted(language_codes):
+        lang = pycountry.languages.get(alpha_2=code)
+        if lang:
+            languages.append(LanguageItem(Language=lang.name, Key=code))
+
+    return LanguageListResponse(
+        code=SUCCESS,
+        message="Languages retrieved successfully",
+        languages=languages
     )

@@ -26,3 +26,8 @@ class UserUpdateRequest(BaseModel):
     email: Optional[EmailStr] = None
     username: Optional[str] = Field(None, examples=["example"])
     password: Optional[str] = Field(None, examples=["example123"])
+
+
+class LanguageItem(BaseModel):
+    Language: str
+    Key: str

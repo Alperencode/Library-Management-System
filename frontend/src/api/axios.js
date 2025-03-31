@@ -6,27 +6,37 @@ const api = axios.create({
   withCredentials: true,
 })
 
+const plainAxios = axios.create({
+  baseURL: 'http://127.0.0.1:8000/api/v1',
+  withCredentials: true,
+})
+
 let isRefreshing = false
 let failedQueue = []
 let hasRedirected = false
 
 const processQueue = (error) => {
-  failedQueue.forEach(prom => {
-    error ? prom.reject(error) : prom.resolve()
+  failedQueue.forEach(({ resolve, reject }) => {
+    error ? reject(error) : resolve()
   })
   failedQueue = []
 }
 
 api.interceptors.response.use(
-  res => res,
-  async err => {
+  (res) => res,
+  async (err) => {
     const originalRequest = err.config
 
-    if (err.response?.status === 401 && !originalRequest._retry) {
+    const isAuthCall = ['/refresh-token', '/login'].some(path => originalRequest.url.includes(path));
+    if (err.response?.status === 401 && !originalRequest._retry && !isAuthCall) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
-        }).then(() => api(originalRequest))
+        }).then(() => {
+          if (!hasRedirected) {
+            return api(originalRequest)
+          }
+        })
       }
 
       originalRequest._retry = true
@@ -34,22 +44,25 @@ api.interceptors.response.use(
 
       try {
         const userId = store.state.user?.id || null
-
-        await api.post(
+        await plainAxios.post(
           '/refresh-token',
-          userId ? { id: userId } : null,
+          userId ? { id: userId } : {},
           { withCredentials: true }
         )
-
         processQueue(null)
-        return api(originalRequest)
-      } catch (refreshErr) {
-        processQueue(refreshErr)
+        if (!hasRedirected) {
+          return api(originalRequest)
+        }
+      } catch (error) {
+        processQueue(error)
         if (!hasRedirected) {
           hasRedirected = true
-          window.location.href = '/login'
+          const router = require('@/router').default;
+          if (router.currentRoute.value.path !== '/login') {
+            router.push('/login');
+          }
         }
-        return Promise.reject(refreshErr)
+        return Promise.reject(error)
       } finally {
         isRefreshing = false
       }

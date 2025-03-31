@@ -1,6 +1,8 @@
+from typing import List
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
-from internal.models.book import Book
+from internal.models.book import Book, BookPreview, ExternalBookPreview
+from .types import LanguageItem
 
 
 class SuccessResponse(BaseModel):
@@ -40,5 +42,42 @@ class BookListResponse(SuccessResponse):
     books: list[Book] = Field(default_factory=list)
 
 
+class BookPreviewListResponse(SuccessResponse):
+    books: List[BookPreview]
+
+
+class PaginatedBookPreviewListResponse(SuccessResponse):
+    books: List[BookPreview]
+    total: int
+    page: int
+    has_next: bool
+    last_page: int
+
+
+class ExternalBookListResponse(SuccessResponse):
+    books: list[ExternalBookPreview] = Field(None)
+
+
+class BulkExternalBookAddResponse(BaseModel):
+    code: str
+    message: str
+    success_count: int
+    failed_count: int
+    failed_isbns: List[str]
+
+
 class CategoryListResponse(SuccessResponse):
     categories: list[str] = Field(default_factory=list)
+
+
+class GroupedCategory(BaseModel):
+    category: str
+    subcategories: List[str]
+
+
+class GroupedCategoryListResponse(SuccessResponse):
+    categories: List[GroupedCategory]
+
+
+class LanguageListResponse(SuccessResponse):
+    languages: List[LanguageItem]
