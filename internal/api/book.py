@@ -1,29 +1,82 @@
+import pycountry
 from rapidfuzz import fuzz
+from typing import Optional
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.models.book import BookPreview
 from internal.database.books import get_all_books, get_book_by_id
-from internal.types.types import SUCCESS, FAIL
+from internal.types.types import SUCCESS, FAIL, LanguageItem
 from internal.types.responses import (
     FailResponse,
     BookListResponse,
     BookResponse,
     GroupedCategoryListResponse,
     GroupedCategory,
-    BookPreviewListResponse
+    BookPreviewListResponse,
+    PaginatedBookPreviewListResponse,
+    LanguageListResponse
 )
 
 router = APIRouter()
 
 
-@router.get("/books", response_model=BookListResponse)
-async def list_books():
-    books = await get_all_books()
-    return BookListResponse(
+@router.get("/books", response_model=PaginatedBookPreviewListResponse)
+async def list_books(
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=100),
+    category: Optional[str] = Query(None),
+    subcategory: Optional[str] = Query(None),
+    language: Optional[str] = Query(None),
+    available_only: bool = Query(False)
+):
+    all_books = await get_all_books()
+
+    # Apply filters
+    filtered_books = []
+    for book in all_books:
+        if available_only and book.available_copies <= 0:
+            continue
+        if language and (book.language or "").lower() != language.lower():
+            continue
+        if category:
+            if not any(cat.category and cat.category.lower() == category.lower() for cat in book.categories):
+                continue
+        if subcategory:
+            if not any(cat.subcategory and cat.subcategory.lower() == subcategory.lower() for cat in book.categories):
+                continue
+
+        filtered_books.append(book)
+
+    total_books = len(filtered_books)
+    start = (page - 1) * limit
+    end = start + limit
+    last_page = (total_books + limit - 1) // limit
+
+    paginated_books = filtered_books[start:end]
+
+    previews = [
+        BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn
+        )
+        for book in paginated_books
+    ]
+
+    return PaginatedBookPreviewListResponse(
         code=SUCCESS,
         message="Books retrieved successfully",
-        books=books
+        books=previews,
+        total=total_books,
+        page=page,
+        has_next=end < total_books,
+        last_page=last_page
     )
 
 
@@ -177,4 +230,22 @@ async def related_books(book_id: str):
         code=SUCCESS,
         message="Related books retrieved successfully",
         books=previews
+    )
+
+
+@router.get("/books/search/languages", response_model=LanguageListResponse)
+async def list_languages():
+    books = await get_all_books()
+    language_codes = {book.language for book in books if book.language}
+
+    languages: list[LanguageItem] = []
+    for code in sorted(language_codes):
+        lang = pycountry.languages.get(alpha_2=code)
+        if lang:
+            languages.append(LanguageItem(Language=lang.name, Key=code))
+
+    return LanguageListResponse(
+        code=SUCCESS,
+        message="Languages retrieved successfully",
+        languages=languages
     )

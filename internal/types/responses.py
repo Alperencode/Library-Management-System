@@ -2,6 +2,7 @@ from typing import List
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
 from internal.models.book import Book, BookPreview, ExternalBookPreview
+from .types import LanguageItem
 
 
 class SuccessResponse(BaseModel):
@@ -45,6 +46,14 @@ class BookPreviewListResponse(SuccessResponse):
     books: List[BookPreview]
 
 
+class PaginatedBookPreviewListResponse(SuccessResponse):
+    books: List[BookPreview]
+    total: int
+    page: int
+    has_next: bool
+    last_page: int
+
+
 class ExternalBookListResponse(SuccessResponse):
     books: list[ExternalBookPreview] = Field(None)
 
@@ -68,3 +77,7 @@ class GroupedCategory(BaseModel):
 
 class GroupedCategoryListResponse(SuccessResponse):
     categories: List[GroupedCategory]
+
+
+class LanguageListResponse(SuccessResponse):
+    languages: List[LanguageItem]

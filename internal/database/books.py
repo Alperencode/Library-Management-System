@@ -26,6 +26,11 @@ async def get_book_by_id(book_id: str) -> Optional[Book]:
     return Book(**book_data) if book_data else None
 
 
+async def get_book_by_isbn(isbn: str) -> Optional[Book]:
+    book_data = await books_collection.find_one({"isbn": isbn})
+    return Book(**book_data) if book_data else None
+
+
 async def get_all_books() -> List[Book]:
     books_cursor = books_collection.find()
     books = [Book(**doc) async for doc in books_cursor]

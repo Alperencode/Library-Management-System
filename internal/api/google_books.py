@@ -1,7 +1,8 @@
+import asyncio
 from fastapi import APIRouter, Query, Body
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from internal.database.books import create_book
+from internal.database.books import create_book, get_book_by_isbn
 from internal.types.types import SUCCESS, FAIL
 from internal.utils.google_books import search_google_books, fetch_google_book
 from internal.models.book import BookPreview
@@ -15,7 +16,7 @@ from internal.types.responses import (
 router = APIRouter()
 
 
-@router.get("/google-books/search/external", response_model=ExternalBookListResponse)
+@router.get("/google-books/search", response_model=ExternalBookListResponse)
 async def search_books_external(q: str = Query(..., min_length=1)):
     results = search_google_books(q)
     if not results:
@@ -43,7 +44,7 @@ async def search_books_external(q: str = Query(..., min_length=1)):
     )
 
 
-@router.post("/google-books/add/external", response_model=BookResponse)
+@router.post("/google-books/add", response_model=BookResponse)
 async def add_book_from_external(volume_id: str = Body(..., embed=True)):
     book = fetch_google_book(volume_id)
     if not book:
@@ -70,7 +71,7 @@ async def add_book_from_external(volume_id: str = Body(..., embed=True)):
     )
 
 
-@router.post("/google-books/add/external/bulk", response_model=BulkExternalBookAddResponse)
+@router.post("/google-books/add/bulk", response_model=BulkExternalBookAddResponse)
 async def bulk_add_books_from_external(
     isbns: list[str] = Body(..., embed=True)
 ):
@@ -78,6 +79,12 @@ async def bulk_add_books_from_external(
     failed_isbns = []
 
     for isbn in isbns:
+        exists = await get_book_by_isbn(isbn)
+        if exists:
+            continue
+
+        # Add small delay
+        await asyncio.sleep(0.3)
         matches = search_google_books(isbn)
         if not matches:
             failed_isbns.append(isbn)
