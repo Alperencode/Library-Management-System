@@ -1,10 +1,9 @@
 <template>
-  <div class="user-page">
-    <!-- Header -->
+  <div class="user-page" v-if="user">
     <MainHeader />
 
     <aside class="sidebar">
-      <div class="username">{{ user?.username || "Guest" }}</div>
+      <div class="username">{{ user.username }}</div>
       <nav class="menu">
         <ul>
           <li>
@@ -22,7 +21,6 @@
           <li>
             <RouterLink to="/user-page/history">Borrow History</RouterLink>
           </li>
-          <!-- Logout Butonu -->
           <li>
             <button @click="logout">Logout</button>
           </li>
@@ -35,7 +33,7 @@
 
     <main class="content">
       <div class="page-content">
-        <h2>Welcome, {{ user?.username || "Guest" }}!</h2>
+        <h2>Welcome, {{ user.username }}!</h2>
         <router-view></router-view>
       </div>
     </main>
@@ -46,10 +44,10 @@
 
 <script>
 import { useRouter } from "vue-router";
-import { mapState } from "vuex";
+import { useStore, mapState } from "vuex";
 import MainHeader from "@/components/MainHeader.vue";
 import MainFooter from "@/components/MainFooter.vue";
-import axios from "axios"; // Axios importunu unutmayın
+import api from "@/api/axios";
 
 export default {
   name: "UserPage",
@@ -61,67 +59,22 @@ export default {
     ...mapState({
       user: (state) => state.user,
     }),
-    username() {
-      return this.user ? this.user.username : "Guest";
-    },
   },
   setup() {
     const router = useRouter();
+    const store = useStore();
 
-    // Logout fonksiyonu
     const logout = async () => {
-      const token = localStorage.getItem("token");
-
-      if (token) {
-        try {
-          // Logout API'sine istek gönder
-          const response = await axios.post("/api/v1/logout", { token: token });
-
-          if (response.data.code === "Success") {
-            // Logout başarılı olduğunda, token'ı sil ve login sayfasına yönlendir
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            router.push("/auth/login");
-          } else {
-            console.error("Logout failed:", response.data.message);
-          }
-        } catch (error) {
-          console.error("Logout API request failed:", error);
-        }
-      } else {
-        // Token yoksa, direkt login sayfasına yönlendir
-        router.push("/auth/login");
+      try {
+        await api.post("/logout");
+        store.commit("setUser", null);
+        router.push("/");
+      } catch (error) {
+        console.error("Logout API request failed:", error);
       }
     };
 
-    // Refresh token fonksiyonu
-    const refreshToken = async () => {
-      const token = localStorage.getItem("token");
-
-      if (token) {
-        try {
-          const response = await axios.post("/api/v1/refresh-token", {
-            id: token,
-          });
-
-          // Başarılı olduğunda yapılacak işlemler
-          if (response.data.code === "Success") {
-            console.log("Token refresh successful");
-            // Yeni token'ı localStorage'a kaydet
-            localStorage.setItem("token", response.data.newToken); // Yanıtı backend'inizden uygun şekilde almak gerekebilir
-          }
-        } catch (error) {
-          console.error("Token refresh failed:", error);
-        }
-      } else {
-        console.log("No token found");
-      }
-    };
-
-    // Sayfa yüklendiğinde token'ı yenileyebilirsiniz
-    refreshToken(); // Ya da bu işlemi bir yere bağlı yapabilirsiniz
-
-    return { logout, refreshToken };
+    return { logout };
   },
 };
 </script>

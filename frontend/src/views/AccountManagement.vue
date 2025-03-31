@@ -3,6 +3,16 @@
     <h2>Account Management</h2>
     <form @submit.prevent="updateAccount">
       <div class="form-group">
+        <label for="username">New Username:</label>
+        <input
+          type="text"
+          id="username"
+          v-model="username"
+          placeholder="New Username"
+        />
+      </div>
+
+      <div class="form-group">
         <label for="email">New Email:</label>
         <input
           type="email"
@@ -39,13 +49,14 @@
 </template>
 
 <script>
-import api from "@/api/axios"; // API istekleri için mevcut axios instance'ı kullanılıyor.
+import api from "@/api/axios";
 import { useStore } from "vuex";
 
 export default {
   name: "AccountManagement",
   data() {
     return {
+      username: "",
       email: "",
       newPassword: "",
       confirmPassword: "",
@@ -66,22 +77,30 @@ export default {
   },
   methods: {
     async updateAccount() {
-      if (this.newPassword !== this.confirmPassword) {
+      if (this.newPassword && this.newPassword !== this.confirmPassword) {
         this.message = "Passwords do not match!";
         this.messageType = "error";
         return;
       }
 
+      const payload = {};
+      if (this.username) payload.username = this.username;
+      if (this.email) payload.email = this.email;
+      if (this.newPassword) payload.password = this.newPassword;
+
+      if (Object.keys(payload).length === 0) {
+        this.message = "Please fill at least one field to update.";
+        this.messageType = "error";
+        return;
+      }
+
       try {
-        const response = await api.patch("/me", {
-          email: this.email,
-          password: this.newPassword,
-        });
+        const response = await api.patch("/me", payload);
 
         this.message = response.data.message || "Account updated successfully!";
         this.messageType = "success";
 
-        await this.fetchUser(); // Kullanıcı bilgilerini güncelle
+        await this.fetchUser();
       } catch (error) {
         this.message = error.response?.data?.message || "Update failed";
         this.messageType = "error";

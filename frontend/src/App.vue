@@ -12,6 +12,8 @@ import { useRoute } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import MainHeader from "@/components/MainHeader.vue";
 import MainFooter from "@/components/MainFooter.vue";
+import api from "@/api/axios";
+
 
 export default {
   components: {
@@ -22,8 +24,14 @@ export default {
     const route = useRoute();
     const { fetchUser } = useAuth();
 
-    onMounted(() => {
-      fetchUser();
+    onMounted(async () => {
+      try {
+        await fetchUser();
+      } catch (error) {
+        await api.post('/refresh-token', {}, { withCredentials: true });
+        await fetchUser();
+        console.log("failed to fetch the user")
+      }
     });
 
     const hideLayout = computed(() => route.meta.hideLayout);
