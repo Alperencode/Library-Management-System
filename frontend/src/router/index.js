@@ -5,7 +5,7 @@ import HomeView from "@/views/HomeView.vue";
 import MeetingDetails from "@/views/MeetingDetails.vue";
 import UserPage from "@/views/UserPage.vue";
 
-// UserPage içindeki alt bileşenler
+// Sub-pages of User-Page
 import AccountManagement from "@/views/AccountManagement.vue";
 import BorrowedBooks from "@/views/BorrowedBooks.vue";
 import RequestedBooks from "@/views/RequestedBooks.vue";
@@ -20,7 +20,7 @@ const routes = [
 
   {
     path: "/user-page",
-    component: UserPage, // Sidebarı sabitledim
+    component: UserPage,
     children: [
       { path: "account", component: AccountManagement },
       { path: "borrowed", component: BorrowedBooks },
