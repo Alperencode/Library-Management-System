@@ -84,7 +84,7 @@ const books = ref([])
 const limit = ref(24)
 const lastPage = ref(1)
 const searchQuery = ref('')
-const currentPage = ref(1)
+const currentPage = ref(Number(localStorage.getItem('currentPage')) || 1)
 const selectedCategory = ref('')
 const selectedSubcategory = ref('')
 const selectedLanguage = ref(null)
@@ -140,6 +140,7 @@ const handlePageChange = (newPage) => {
   currentPage.value = newPage
   localStorage.setItem('currentPage', newPage)
   fetchBooks()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const paginatedBooks = books
