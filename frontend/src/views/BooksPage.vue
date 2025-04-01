@@ -4,40 +4,64 @@
     <section class="meetings-page" id="meetings">
       <div class="container two-column-layout">
         <div class="sidebar">
-          <FiltersPanel />
+          <FiltersPanel
+            @update:category="selectedCategory = $event"
+            @update:subcategory="selectedSubcategory = $event"
+          />
         </div>
         <div class="main-content">
           <SearchBar v-model="searchQuery" @order="orderBy" />
           <div v-if="paginatedBooks.length === 0" class="no-results">
-            <p class="no-results-text">No books found for "{{ searchQuery }}"</p>
+            <p class="no-results-text">
+              No books found for "{{ searchQuery }}"
+            </p>
           </div>
-          <div class="row grid">
-            <div
-              v-for="(meeting, index) in paginatedBooks"
-              :key="index"
-              class="meeting-item"
-              :ref="el => setBooksRef(meeting.title, el)"
-            >
-              <div class="meeting-box">
-                <div class="thumb">
-                  <router-link :to="meeting.link">
-                    <img :src="meeting.image" :alt="meeting.title" />
-                  </router-link>
-                </div>
-                <div class="down-content">
-                  <router-link :to="meeting.link">
-                    <h4>{{ meeting.title }}</h4>
-                  </router-link>
-                  <p v-html="meeting.description"></p>
+          <div v-else>
+            <div class="row grid">
+              <div
+                v-for="(book, index) in paginatedBooks"
+                :key="index"
+                class="meeting-item"
+                :ref="el => setBooksRef(book.title, el)"
+              >
+                <div class="meeting-box">
+                  <div class="thumb">
+                    <router-link :to="book.link">
+                      <img
+                        :src="book.image"
+                        :alt="book.title"
+                        class="book-thumbnail"
+                      />
+                    </router-link>
+                  </div>
+                  <div class="down-content">
+                    <router-link :to="book.link">
+                      <h4 class="book-title">{{ book.title }}</h4>
+                    </router-link>
+                    <p class="text-ellipsis" :title="book.authors.join(', ')">
+                      <strong>Author:</strong> {{ book.authors.join(', ') || 'Unknown' }}
+                    </p>
+                    <p class="text-ellipsis" :title="book.publisher">
+                      <strong>Publisher:</strong> {{ book.publisher }}
+                    </p>
+                    <p>
+                      <strong>Status:</strong>
+                      <span
+                        :class="book.borrowed ? 'status-badge taken' : 'status-badge available'"
+                      >
+                        {{ book.borrowed ? 'Taken' : 'Available' }}
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <PaginationControl
-            :totalPages="totalPages"
-            :currentPage="currentPage"
-            @update:currentPage="currentPage = $event"
-          />
+            <PaginationControl
+              :currentPage="currentPage"
+              :lastPage="lastPage"
+              @update:currentPage="handlePageChange"
+            />
+          </div>    
         </div>
       </div>
     </section>
@@ -45,113 +69,79 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
-import MainHeader from '@/components/MainHeader.vue';
-import FiltersPanel from './FiltersPanel.vue';
-import SearchBar from './SearchBar.vue';
-import PaginationControl from './PaginationControl.vue';
+import { ref, watch, onMounted } from 'vue'
+import MainHeader from '@/components/MainHeader.vue'
+import FiltersPanel from './FiltersPanel.vue'
+import SearchBar from './SearchBar.vue'
+import PaginationControl from './PaginationControl.vue'
+import api from '@/api/axios'
+import defaultCover from '@/assets/images/default-cover.png'
 
-const searchQuery = ref('');
-const currentPage = ref(1);
-const itemsPerPage = 9;
+const books = ref([])
+const limit = ref(24)
+const lastPage = ref(1)
+const searchQuery = ref('')
+const currentPage = ref(1)
+const selectedCategory = ref('')
+const selectedSubcategory = ref('')
 
-const books = ref([
-  {
-    title: 'New Lecturers Meeting',
-    dateMonth: 'Nov',
-    dateDay: '12',
-    image: '/assets/images/meeting-01.jpg',
-    link: '/meeting/1',
-    description: 'Morbi in libero blandit lectus<br>cursus ullamcorper.',
-  },
-  {
-    title: 'Online Teaching Techniques',
-    dateMonth: 'Nov',
-    dateDay: '14',
-    image: '/assets/images/meeting-02.jpg',
-    link: '/meeting/2',
-    description: 'Morbi in libero blandit lectus<br>cursus ullamcorper.',
-  },
-  {
-    title: 'deneme',
-    dateMonth: 'Nov',
-    dateDay: '12',
-    image: '/assets/images/meeting-01.jpg',
-    link: '/meeting/1',
-    description: 'Morbi in libero blandit lectus<br>cursus ullamcorper.',
-  },
-  {
-    title: 'test',
-    dateMonth: 'Nov',
-    dateDay: '12',
-    image: '/assets/images/meeting-01.jpg',
-    link: '/meeting/1',
-    description: 'Morbi in libero blandit lectus<br>cursus ullamcorper.',
-  },
-  {
-    title: 'simal',
-    dateMonth: 'Nov',
-    dateDay: '12',
-    image: '/assets/images/meeting-01.jpg',
-    link: '/meeting/1',
-    description: 'Morbi in libero blandit lectus<strong>cursus ullamcorper.</strong>',
-  },
-  {
-    title: 'alperen',
-    dateMonth: 'Nov',
-    dateDay: '12',
-    image: '/assets/images/meeting-01.jpg',
-    link: '/meeting/1',
-    description: 'Morbi in libero blandit lectus<br>cursus ullamcorper.',
-  },
-  {
-    title: 'emirhan',
-    dateMonth: 'Nov',
-    dateDay: '12',
-    image: '/assets/images/meeting-01.jpg',
-    link: '/meeting/1',
-    description: 'Morbi in libero blandit lectus<br>cursus ullamcorper.',
-  },
-]);
-
-const BooksRefs = ref({});
+const BooksRefs = ref({})
 const setBooksRef = (title, el) => {
-  BooksRefs.value[title] = el;
-};
+  BooksRefs.value[title] = el
+}
 
-const filteredBooks = computed(() =>
-  books.value.filter((m) =>
-    m.title.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-);
+const fetchBooks = async () => {
+  try {
+    const res = await api.get('/books', {
+      params: {
+        page: currentPage.value,
+        limit: limit.value,
+        category: selectedCategory.value || undefined,
+        subcategory: selectedSubcategory.value || undefined,
+      },
+    })
+    books.value = res.data.books.map(book => ({
+      id: book.id,
+      title: book.title || 'No Title',
+      image: book.cover_image || defaultCover,
+      link: `/book/${book.id}`,
+      authors: book.authors || [],
+      publisher: book.publisher || 'Unknown',
+      borrowed: book.borrowed || false,
+    }))
+    lastPage.value = res.data.last_page || 1
+  } catch (err) {
+    console.error('Books could not be retrieved:', err)
+  }
+}
 
-const totalPages = computed(() =>
-  Math.ceil(filteredBooks.value.length / itemsPerPage)
-);
+onMounted(fetchBooks)
+watch([searchQuery, selectedCategory, selectedSubcategory], async () => {
+  currentPage.value = 1
+  await fetchBooks()
+})
 
-const paginatedBooks = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  return filteredBooks.value.slice(start, start + itemsPerPage);
-});
+const handlePageChange = (newPage) => {
+  currentPage.value = newPage
+  localStorage.setItem('currentPage', newPage)
+  fetchBooks()
+}
+
+const paginatedBooks = books
 
 const orderBy = (type) => {
   if (type === 'az') {
-    books.value.sort((a, b) => a.title.localeCompare(b.title));
+    books.value.sort((a, b) => a.title.localeCompare(b.title))
   } else if (type === 'za') {
-    books.value.sort((a, b) => b.title.localeCompare(a.title));
+    books.value.sort((a, b) => b.title.localeCompare(a.title))
   }
-};
+}
 
 watch(searchQuery, async () => {
-  currentPage.value = 1;
-  await nextTick();
-  const firstBook = filteredBooks.value[0];
-  if (!firstBook) return;
-  const firstRef = BooksRefs.value[firstBook.title];
-  if (firstRef && typeof firstRef.scrollIntoView === 'function') {
-    firstRef.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-});
+  currentPage.value = 1
+  await fetchBooks()
+})
+
 </script>
 
 <style scoped>
@@ -228,10 +218,71 @@ watch(searchQuery, async () => {
   border-radius: 8px;
   background-color: white;
   height: 100%;
+  min-height: 100px;
 }
 
-.thumb img {
-  width: 100%;
-  border-radius: 6px;
+.thumb {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 180px;
+  background-color: #ffffff;
+  padding: 8px;
+  overflow: hidden;
+  border-radius: 8px;
 }
+
+.book-thumbnail {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.down-content {
+  text-align: left;
+  padding: 10px;
+}
+
+.down-content h4 {
+  margin-bottom: 8px;
+}
+
+.down-content p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.book-title {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  margin-left: 6px;
+  color: white;
+  min-width: 80px;
+  text-align: center;
+}
+
+.status-badge.taken {
+  background-color: #e74c3c;
+}
+
+.status-badge.available {
+  background-color: #27ae60;
+}
+
 </style>
