@@ -25,17 +25,46 @@ router = APIRouter()
 async def list_books(
     page: int = Query(1, ge=1),
     limit: int = Query(25, ge=1, le=100),
+    q: Optional[str] = Query(None, min_length=1),
     category: Optional[str] = Query(None),
     subcategory: Optional[str] = Query(None),
     language: Optional[str] = Query(None),
-    available_only: bool = Query(False)
+    available_only: bool = Query(False),
+    most_borrowed: bool = Query(False),
+    recently_added: bool = Query(False),
+    max_page_count: Optional[int] = Query(None, ge=1)
 ):
     all_books = await get_all_books()
-
-    # Apply filters
+    threshold = 60
     filtered_books = []
+
     for book in all_books:
-        if available_only and book.available_copies <= 0:
+        # If search query is present, apply fuzzy matching
+        if q:
+            title_match = fuzz.partial_ratio(q.lower(), book.title.lower())
+
+            author_match = (
+                max(fuzz.partial_ratio(q.lower(), author.lower()) for author in book.authors)
+                if book.authors else 0
+            )
+
+            cat_scores = []
+            for cat in book.categories or []:
+                if cat.category:
+                    cat_scores.append(fuzz.partial_ratio(q.lower(), cat.category.lower()))
+                if cat.subcategory:
+                    cat_scores.append(fuzz.partial_ratio(q.lower(), cat.subcategory.lower()))
+            category_match = max(cat_scores) if cat_scores else 0
+
+            publisher_match = fuzz.partial_ratio(q.lower(), book.publisher.lower()) if book.publisher else 0
+
+            if not any(score >= threshold for score in [title_match, author_match, category_match, publisher_match]):
+                continue
+
+        # Apply filters (after search filtering, if applicable)
+        if available_only and book.borrowed:
+            continue
+        if max_page_count and book.page_count and book.page_count > max_page_count:
             continue
         if language and (book.language or "").lower() != language.lower():
             continue
@@ -48,10 +77,18 @@ async def list_books(
 
         filtered_books.append(book)
 
+    # Apply sorting
+    if most_borrowed:
+        filtered_books.sort(key=lambda b: b.borrow_count, reverse=True)
+    elif recently_added:
+        filtered_books.sort(key=lambda b: b.added_at, reverse=True)
+
     total_books = len(filtered_books)
+    last_page = (total_books + limit - 1) // limit
+
+    page = min(page, last_page) if last_page > 0 else 1
     start = (page - 1) * limit
     end = start + limit
-    last_page = (total_books + limit - 1) // limit
 
     paginated_books = filtered_books[start:end]
 
@@ -75,7 +112,7 @@ async def list_books(
         books=previews,
         total=total_books,
         page=page,
-        has_next=end < total_books,
+        has_next=end < total_books and page < last_page,
         last_page=last_page
     )
 
@@ -105,8 +142,20 @@ async def search_books(q: str = Query(..., min_length=1)):
 
     for book in all_books:
         title_match = fuzz.partial_ratio(q.lower(), book.title.lower())
-        author_match = max(fuzz.partial_ratio(q.lower(), author.lower()) for author in book.authors or [])
-        category_match = max(fuzz.partial_ratio(q.lower(), cat.lower()) for cat in book.categories or [])
+
+        author_match = (
+            max(fuzz.partial_ratio(q.lower(), author.lower()) for author in book.authors)
+            if book.authors else 0
+        )
+
+        cat_scores = []
+        for cat in book.categories or []:
+            if cat.category:
+                cat_scores.append(fuzz.partial_ratio(q.lower(), cat.category.lower()))
+            if cat.subcategory:
+                cat_scores.append(fuzz.partial_ratio(q.lower(), cat.subcategory.lower()))
+        category_match = max(cat_scores) if cat_scores else 0
+
         publisher_match = fuzz.partial_ratio(q.lower(), book.publisher.lower()) if book.publisher else 0
 
         if any(score >= threshold for score in [title_match, author_match, category_match, publisher_match]):
