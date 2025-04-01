@@ -20,8 +20,8 @@
         </button>
         <transition name="fade">
           <ul v-if="orderMenuOpen" class="order-menu">
-            <li @click="emitOrder('most')">Most borrowed</li>
-            <li @click="emitOrder('recent')">Recently added</li>
+            <li @click="emitOrder('most')">Most Borrowed</li>
+            <li @click="emitOrder('recent')">Recently Added</li>
             <li @click="emitOrder('az')">A - Z</li>
             <li @click="emitOrder('za')">Z - A</li>
           </ul>
@@ -31,24 +31,26 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue';
-  
-  const props = defineProps({
-    modelValue: String
-  });
-  const emit = defineEmits(['update:modelValue', 'order']);
-  
-  const orderMenuOpen = ref(false);
-  
-  const toggleOrderMenu = () => {
-    orderMenuOpen.value = !orderMenuOpen.value;
-  };
-  
-  const emitOrder = (type) => {
-    emit('order', type);
-    orderMenuOpen.value = false;
-  };
-  </script>
+import { ref, defineProps, defineEmits } from 'vue'
+
+const props = defineProps({
+  modelValue: String
+})
+
+const emit = defineEmits(['update:modelValue', 'order'])
+
+const orderMenuOpen = ref(false)
+
+const toggleOrderMenu = () => {
+  orderMenuOpen.value = !orderMenuOpen.value
+}
+
+const emitOrder = (type) => {
+  emit('order', type)
+  orderMenuOpen.value = false
+}
+
+</script>
   
   <style scoped>
   .search-bar {

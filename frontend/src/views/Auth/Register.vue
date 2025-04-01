@@ -1,11 +1,10 @@
 <template>
   <div class="register-page">
-    <MainHeader />
     <div class="register-wrapper">
       <div class="register-form-container">
         <h2 class="title">Register</h2>
         <div class="input-fields">
-          <input type="text" v-model="name" placeholder="Name" class="input-line full-width" />
+          <input type="text" v-model="username" placeholder="Name" class="input-line full-width" />
           <input type="email" v-model="email" placeholder="Email" class="input-line full-width" />
           <input type="password" v-model="password" placeholder="Password" class="input-line full-width" />
         </div>
@@ -14,7 +13,6 @@
         <p v-if="message" :class="alertClass">{{ message }}</p>
       </div>
     </div>
-    <MainFooter />
   </div>
 </template>
   
@@ -22,15 +20,10 @@
 import api from "@/api/axios";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import MainHeader from "@/components/MainHeader.vue";
-import MainFooter from "@/components/MainFooter.vue";
 
 export default {
   name: "AuthRegister",
-  components: {
-    MainHeader,
-    MainFooter,
-  },
+
   data() {
     return {
       username: "",

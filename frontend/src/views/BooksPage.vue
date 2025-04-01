@@ -7,6 +7,9 @@
           <FiltersPanel
             @update:category="selectedCategory = $event"
             @update:subcategory="selectedSubcategory = $event"
+            @update:language="selectedLanguage = $event"
+            @update:onlyAvailable="onlyAvailable = $event"
+            @update:maxPageCount="maxPageCount = $event"
           />
         </div>
         <div class="main-content">
@@ -84,6 +87,12 @@ const searchQuery = ref('')
 const currentPage = ref(1)
 const selectedCategory = ref('')
 const selectedSubcategory = ref('')
+const selectedLanguage = ref(null)
+const onlyAvailable = ref(false)
+const maxPageCount = ref(null)
+const mostBorrowed = ref(false)
+const recentlyAdded = ref(false)
+const order = ref(null)
 
 const BooksRefs = ref({})
 const setBooksRef = (title, el) => {
@@ -96,8 +105,14 @@ const fetchBooks = async () => {
       params: {
         page: currentPage.value,
         limit: limit.value,
+        q: searchQuery.value || undefined,
         category: selectedCategory.value || undefined,
         subcategory: selectedSubcategory.value || undefined,
+        language: selectedLanguage.value || undefined,
+        available_only: onlyAvailable.value,
+        max_page_count: maxPageCount.value || undefined,
+        most_borrowed: mostBorrowed.value,
+        recently_added: recentlyAdded.value,
       },
     })
     books.value = res.data.books.map(book => ({
@@ -116,7 +131,7 @@ const fetchBooks = async () => {
 }
 
 onMounted(fetchBooks)
-watch([searchQuery, selectedCategory, selectedSubcategory], async () => {
+watch([order, selectedCategory, selectedSubcategory, onlyAvailable, maxPageCount], async () => {
   currentPage.value = 1
   await fetchBooks()
 })
@@ -130,17 +145,28 @@ const handlePageChange = (newPage) => {
 const paginatedBooks = books
 
 const orderBy = (type) => {
+  mostBorrowed.value = false;
+  recentlyAdded.value = false;
+
   if (type === 'az') {
-    books.value.sort((a, b) => a.title.localeCompare(b.title))
+    books.value.sort((a, b) => a.title.localeCompare(b.title));
   } else if (type === 'za') {
-    books.value.sort((a, b) => b.title.localeCompare(a.title))
+    books.value.sort((a, b) => b.title.localeCompare(a.title));
+  } else if (type === 'most') {
+    mostBorrowed.value = true;
+    fetchBooks();
+  } else if (type === 'recent') {
+    recentlyAdded.value = true;
+    fetchBooks();
   }
-}
+};
 
 watch(searchQuery, async () => {
   currentPage.value = 1
   await fetchBooks()
 })
+
+watch(selectedLanguage, () => fetchBooks())
 
 </script>
 
@@ -156,7 +182,7 @@ watch(searchQuery, async () => {
 }
 
 .sidebar {
-  width: 250px;
+  width: 320px;
   background-color: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
@@ -283,6 +309,24 @@ watch(searchQuery, async () => {
 
 .status-badge.available {
   background-color: #27ae60;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: #f5a425;
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: #ffbb55;
 }
 
 </style>
