@@ -97,20 +97,18 @@ async def get_book(book_id: str):
     )
 
 
-@router.get("/books/search/", response_model=BookListResponse)
+@router.get("/books/search/", response_model=BookPreviewListResponse)
 async def search_books(q: str = Query(..., min_length=1)):
     all_books = await get_all_books()
     threshold = 60
     matched = []
 
     for book in all_books:
-        # Check fuzzy matches across multiple fields:
         title_match = fuzz.partial_ratio(q.lower(), book.title.lower())
         author_match = max(fuzz.partial_ratio(q.lower(), author.lower()) for author in book.authors or [])
         category_match = max(fuzz.partial_ratio(q.lower(), cat.lower()) for cat in book.categories or [])
         publisher_match = fuzz.partial_ratio(q.lower(), book.publisher.lower()) if book.publisher else 0
 
-        # Fuzzy treshold
         if any(score >= threshold for score in [title_match, author_match, category_match, publisher_match]):
             matched.append(book)
 
@@ -122,10 +120,24 @@ async def search_books(q: str = Query(..., min_length=1)):
             )
         )
 
-    return BookListResponse(
+    previews = [
+        BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn
+        )
+        for book in matched
+    ]
+
+    return BookPreviewListResponse(
         code=SUCCESS,
         message="Books found successfully",
-        books=matched
+        books=previews
     )
 
 
