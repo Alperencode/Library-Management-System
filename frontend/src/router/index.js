@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "@/views/Auth/Login.vue";
 import Register from "@/views/Auth/Register.vue";
 import HomeView from "@/views/HomeView.vue";
-import MeetingDetails from "@/views/MeetingDetails.vue";
 import UserPage from "@/views/UserPage.vue";
 import BooksPage from "@/views/BooksPage.vue";
+import BookDetails from "@/views/BookDetails.vue";
 
 // Sub-pages of User-Page
 import AccountManagement from "@/views/AccountManagement.vue";
@@ -17,7 +17,7 @@ const routes = [
   { path: "/", component: HomeView },
   { path: "/login", component: Login },
   { path: "/register", component: Register },
-  { path: "/meetings", component: MeetingDetails },
+  { path: '/books/:id', component: BookDetails },
   { path: '/books', component: BooksPage },
 
   {

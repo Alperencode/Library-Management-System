@@ -119,7 +119,7 @@ const fetchBooks = async () => {
       id: book.id,
       title: book.title || 'No Title',
       image: book.cover_image || defaultCover,
-      link: `/book/${book.id}`,
+      link: `/books/${book.id}`,
       authors: book.authors || [],
       publisher: book.publisher || 'Unknown',
       borrowed: book.borrowed || false,
