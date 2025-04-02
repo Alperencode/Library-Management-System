@@ -34,12 +34,20 @@ def search_google_books(query: str) -> List[Dict[str, Any]]:
                 title = info.get("title")
                 authors = info.get("authors", [])
                 categories = info.get("categories", [])
+                publisher = info.get("publisher")
+                image_links = info.get("imageLinks", {})
+                cover_image = image_links.get("thumbnail") or image_links.get("smallThumbnail")
+                isbn = _extract_isbn(info.get("industryIdentifiers", []))
+
                 if volume_id and title:
                     results.append({
                         "id": volume_id,
                         "title": title,
                         "authors": authors,
-                        "categories": categories
+                        "categories": categories,
+                        "publisher": publisher,
+                        "cover_image": cover_image,
+                        "isbn": isbn
                     })
             if results:
                 return results

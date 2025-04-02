@@ -1,7 +1,7 @@
 from typing import List
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
-from internal.models.book import Book, BookPreview, ExternalBookPreview
+from internal.models.book import Book, BookPreview
 from .types import LanguageItem
 
 
@@ -52,10 +52,6 @@ class PaginatedBookPreviewListResponse(SuccessResponse):
     page: int
     has_next: bool
     last_page: int
-
-
-class ExternalBookListResponse(SuccessResponse):
-    books: list[ExternalBookPreview] = Field(None)
 
 
 class BulkExternalBookAddResponse(BaseModel):
