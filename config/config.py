@@ -25,10 +25,12 @@ conf["access_token_expire_minutes"] = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MI
 conf["refresh_token_expire_days"] = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 conf["algorithm"] = os.getenv("ALGORITHM")
 conf["secret_key"] = os.getenv("SECRET_KEY")
+conf["environment"] = os.getenv("ENVIRONMENT")
+
 
 # Check required variables
-if not conf["secret_key"] or not conf["algorithm"]:
-    logger.error("SECRET_KEY or ALGORITHM is not set. Exiting program.")
+if not conf["secret_key"] or not conf["algorithm"] or not conf["environment"]:
+    logger.error("SECRET_KEY, ALGORITHM or ENVIRONMENT is not set. Exiting program.")
     sys.exit(1)
 
 # MongoDB Configuration

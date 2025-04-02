@@ -17,15 +17,14 @@ def create_access_token(user_id, response: Response):
             {"id": user_id},
             timedelta(minutes=expire_minutes)
         )
+        cookie_opts = _get_cookie_options()
 
-        # Convert minutes to seconds
         response.set_cookie(
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=True,
-            samesite="None",
-            max_age=expire_minutes * 60
+            max_age=expire_minutes * 60,
+            **cookie_opts
         )
         return None
     except Exception as e:
@@ -39,15 +38,14 @@ def create_refresh_token(user_id, response: Response):
             {"id": user_id},
             timedelta(days=expire_days)
         )
+        cookie_opts = _get_cookie_options()
 
-        # Convert days to seconds
         response.set_cookie(
             key="refresh_token",
             value=refresh_token,
             httponly=True,
-            secure=True,
-            samesite="None",
-            max_age=expire_days * 24 * 60 * 60
+            max_age=expire_days * 24 * 60 * 60,
+            **cookie_opts
         )
         return None
     except Exception as e:
@@ -59,3 +57,10 @@ def verify_jwt_token(token):
         return jwt.decode(token, get_config("secret_key"), algorithms=[get_config("algorithm")])
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return None
+
+
+def _get_cookie_options():
+    environment = get_config("environment")
+    if environment == "dev":
+        return {"secure": False, "samesite": "Lax"}
+    return {"secure": True, "samesite": "None"}

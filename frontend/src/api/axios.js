@@ -2,12 +2,12 @@ import axios from 'axios'
 import store from '@/store'
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/v1',
+  baseURL: 'http://localhost:8000/api/v1',
   withCredentials: true,
 })
 
 const plainAxios = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api/v1',
+  baseURL: 'http://localhost:8000/api/v1',
   withCredentials: true,
 })
 
@@ -27,7 +27,7 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config
 
-    const ignoreCall = ['/', '/refresh-token', '/login', '/books'].some(path => originalRequest.url.includes(path));
+    const ignoreCall = ['/refresh-token', '/login', '/books'].some(path => originalRequest.url.includes(path));
     if (err.response?.status === 401 && !originalRequest._retry && !ignoreCall) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
