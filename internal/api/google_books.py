@@ -5,18 +5,18 @@ from fastapi.encoders import jsonable_encoder
 from internal.database.books import create_book, get_book_by_isbn
 from internal.types.types import SUCCESS, FAIL
 from internal.utils.google_books import search_google_books, fetch_google_book
-from internal.models.book import BookPreview
+from internal.models.book import BookPreview, BookCategory
 from internal.types.responses import (
     FailResponse,
     BookResponse,
-    ExternalBookListResponse,
-    BulkExternalBookAddResponse
+    BookPreviewListResponse,
+    BulkExternalBookAddResponse,
 )
 
 router = APIRouter()
 
 
-@router.get("/google-books/search", response_model=ExternalBookListResponse)
+@router.get("/google-books/search", response_model=BookPreviewListResponse)
 async def search_books_external(q: str = Query(..., min_length=1)):
     results = search_google_books(q)
     if not results:
@@ -31,13 +31,19 @@ async def search_books_external(q: str = Query(..., min_length=1)):
         BookPreview(
             id=item["id"],
             title=item["title"],
-            authors=item["authors"],
-            categories=item["categories"],
+            authors=item.get("authors", []),
+            categories=[
+                BookCategory(category=cat) for cat in item.get("categories", [])
+            ],
+            publisher=item.get("publisher"),
+            cover_image=item.get("cover_image"),
+            isbn=item.get("isbn"),
+            borrowed=False
         )
         for item in results
     ]
 
-    return ExternalBookListResponse(
+    return BookPreviewListResponse(
         code=SUCCESS,
         message="Books found via external search",
         books=books

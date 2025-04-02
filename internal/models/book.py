@@ -46,10 +46,3 @@ class BookPreview(BaseModel):
     cover_image: Optional[str] = None
     borrowed: bool = False
     isbn: Optional[str] = None
-
-
-class ExternalBookPreview(BaseModel):
-    id: str
-    title: str
-    authors: List[str]
-    categories: List[BookCategory]
