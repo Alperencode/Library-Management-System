@@ -1,40 +1,13 @@
-import jwt
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from config.config import get_config
-from internal.utils.utils import hash_password
+from internal.utils.utils import hash_password, get_current_user
 from internal.database.users import get_user_by_id, update_user
 from internal.types.responses import FailResponse, PublicUserResponse
 from internal.types.types import SUCCESS, FAIL, UserUpdateRequest
 from internal.models.user import User, PublicUser
 
 router = APIRouter()
-
-
-async def get_current_user(request: Request):
-    # Check for access_token cookie
-    access_token = request.cookies.get("access_token")
-    if not access_token:
-        raise HTTPException(status_code=401, detail="Authentication required")
-
-    try:
-        payload = jwt.decode(access_token, get_config("secret_key"), algorithms=[get_config("algorithm")])
-        user_id = payload.get("id")
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
-
-        # Fetch user from database
-        user = await get_user_by_id(user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        return user
-
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 @router.get("/me", response_model=PublicUserResponse)
@@ -46,7 +19,12 @@ async def get_current_user_info(user: User = Depends(get_current_user)):
             id=user.id,
             username=user.username,
             email=user.email,
-            role=user.role
+            role=user.role,
+            borrowed_books=user.borrowed_books,
+            borrowed_history=user.borrowed_history,
+            overdue_books=user.overdue_books,
+            notify_me_list=user.notify_me_list,
+            penalty_amount=user.penalty_amount
         )
     )
 

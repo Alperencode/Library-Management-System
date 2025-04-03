@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from bson import ObjectId
+from typing import Optional, List
 import bcrypt
 
 
@@ -9,6 +10,11 @@ class User(BaseModel):
     email: str
     password: str
     role: str
+    borrowed_books: Optional[List[str]] = []
+    borrowed_history: Optional[List[str]] = []
+    overdue_books: Optional[List[str]] = []
+    notify_me_list: Optional[List[str]] = []
+    penalty_amount: Optional[str] = []
 
     def check_password(self, plain_password: str) -> bool:
         return bcrypt.checkpw(plain_password.encode(), self.password.encode())
@@ -24,3 +30,8 @@ class PublicUser(BaseModel):
     username: str
     email: str
     role: str
+    borrowed_books: Optional[List[str]] = []
+    borrowed_history: Optional[List[str]] = []
+    overdue_books: Optional[List[str]] = []
+    notify_me_list: Optional[List[str]] = []
+    penalty_amount: Optional[str] = []

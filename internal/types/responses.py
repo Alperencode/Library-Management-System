@@ -20,13 +20,7 @@ class VersionResponse(SuccessResponse):
 
 
 class PublicUserResponse(SuccessResponse):
-    user: PublicUser = Field(None, examples=[{
-            "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-            "username": "test",
-            "email": "test@example.com",
-            "role": "user",
-        }]
-    )
+    user: PublicUser = Field(None)
 
 
 class TokenResponse(SuccessResponse):
