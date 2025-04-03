@@ -24,10 +24,13 @@ class Book(BaseModel):
     borrow_count: int = 0
     return_date: Optional[datetime] = None
     added_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+    borrowed_at: datetime = Field(default_factory=datetime.now)
     available_copies: int = 1
     total_copies: int = 1
+    currently_borrowed_by: Optional[str] = None
     last_borrowed_by: Optional[str] = None
+    notify_me_list: List[str] = []
+    has_extended: bool = False
 
     def __setattr__(self, name, value):
         if name == "id" and hasattr(self, "id"):
@@ -46,3 +49,5 @@ class BookPreview(BaseModel):
     cover_image: Optional[str] = None
     borrowed: bool = False
     isbn: Optional[str] = None
+    borrowed_at: Optional[datetime] = None
+    return_date: Optional[datetime] = None

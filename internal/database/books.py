@@ -2,7 +2,6 @@ from internal.database.database import books_collection
 from internal.models.book import Book
 from typing import Optional, List
 from bson import ObjectId
-from datetime import datetime
 
 
 async def create_book(book: Book) -> Optional[Book]:
@@ -38,7 +37,6 @@ async def get_all_books() -> List[Book]:
 
 
 async def update_book(book: Book) -> bool:
-    book.updated_at = datetime.now()
     book_data = book.model_dump(by_alias=True)
     result = await books_collection.update_one(
         {"_id": book.id}, {"$set": book_data}

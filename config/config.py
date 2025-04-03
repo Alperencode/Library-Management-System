@@ -23,15 +23,27 @@ conf["api_port"] = int(os.environ.get("API_PORT", "8000"))
 conf["api_prefix"] = os.environ.get("API_PREFIX", "/api/v1")
 conf["access_token_expire_minutes"] = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 conf["refresh_token_expire_days"] = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
-conf["algorithm"] = os.getenv("ALGORITHM")
-conf["secret_key"] = os.getenv("SECRET_KEY")
-conf["environment"] = os.getenv("ENVIRONMENT")
 
+# Required variables
+required_envs = {
+    "algorithm": os.getenv("ALGORITHM"),
+    "secret_key": os.getenv("SECRET_KEY"),
+    "environment": os.getenv("ENVIRONMENT"),
+    "email_host": os.getenv("EMAIL_HOST"),
+    "email_port": os.getenv("EMAIL_PORT"),
+    "email_username": os.getenv("EMAIL_USERNAME"),
+    "email_password": os.getenv("EMAIL_PASSWORD"),
+}
 
 # Check required variables
-if not conf["secret_key"] or not conf["algorithm"] or not conf["environment"]:
-    logger.error("SECRET_KEY, ALGORITHM or ENVIRONMENT is not set. Exiting program.")
+missing_keys = [key for key, value in required_envs.items() if not value]
+if missing_keys:
+    logger.error(f"Missing required environment variables: {', '.join(missing_keys)}. Exiting program.")
     sys.exit(1)
+
+# Assign required variables to config
+conf.update(required_envs)
+conf["email_port"] = int(conf["email_port"])
 
 # MongoDB Configuration
 conf["mongodb_user"] = os.getenv("MONGODB_USERNAME")
