@@ -37,7 +37,7 @@ const routes = [
 
   // User-Pages
   {
-    path: "/User-Pages",
+    path: "/user-page",
     component: UserPage,
     children: [
       { path: "account", component: AccountManagement },

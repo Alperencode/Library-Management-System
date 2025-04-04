@@ -6,8 +6,17 @@
           <nav class="main-nav">
             <RouterLink to="/" class="logo">Library Management System</RouterLink>
             <ul class="nav">
-              <li class="scroll-to-section"><RouterLink to="/" class="active">Home</RouterLink></li>
-              <li><RouterLink to="/books">Books</RouterLink></li>
+              <li class="scroll-to-section">
+                <RouterLink to="/" class="active">Home</RouterLink>
+              </li>
+              <li :class="{ 'has-sub': user }">
+                <RouterLink to="/books">Books</RouterLink>
+                <ul v-if="user" class="sub-menu">
+                  <li>
+                    <RouterLink to="/request-book">Request a Book</RouterLink>
+                  </li>
+                </ul>
+              </li>
               <!--- <li class="scroll-to-section"><a href="#apply">Apply Now</a></li>
               <li class="has-sub">
                 <a href="javascript:void(0)">Pages</a>
@@ -27,8 +36,12 @@
               <li v-if="user">
                 <a href="javascript:void(0)" @click="logout">Logout</a>
               </li>
-              <li v-if="!user"><RouterLink to="/login">Login</RouterLink></li>
-              <li v-if="!user"><RouterLink to="/register">Register</RouterLink></li>
+              <li v-if="!user">
+                <RouterLink to="/login">Login</RouterLink>
+              </li>
+              <li v-if="!user">
+                <RouterLink to="/register">Register</RouterLink>
+              </li>
             </ul>
             <a class="menu-trigger"><span>Menu</span></a>
           </nav>
@@ -74,5 +87,20 @@ export default {
   display: flex;
   align-items: center;
   padding: 0 15px;
+}
+
+nav .nav li.has-sub {
+  position: relative;
+}
+
+nav .nav li.has-sub .sub-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background-color: white;
+  padding: 10px 0;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 </style>

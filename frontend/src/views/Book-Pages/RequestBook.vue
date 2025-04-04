@@ -1,69 +1,40 @@
 <template>
   <div>
-    <MainHeader />
     <section class="meetings-page" id="meetings">
       <div class="container">
         <div class="main-content">
-          <!-- Search Bar (Butonları kaldırılmış haliyle) -->
           <div class="search-bar">
-            <input
-              class="input-line full-width"
-              type="text"
-              v-model="searchQuery"
-              placeholder="Search by Author, Title, Publisher, ISBN..."
-            />
+            <input class="input-line full-width" type="text" :value="searchQuery" @input="updateSearchQuery"
+              @keyup.enter="performSearch" placeholder="Search by Author, Title, Publisher, ISBN..." />
           </div>
-
-          <div v-if="books.length === 0" class="no-results">
+          <div v-if="books.length === 0 && searchPerformed" class="no-results">
             <p class="no-results-text">
               No books found for "{{ searchQuery }}"
             </p>
           </div>
           <div v-else>
             <div class="row grid">
-              <div
-                v-for="(book, index) in books"
-                :key="index"
-                class="meeting-item"
-              >
+              <div v-for="(book, index) in books" :key="index" class="meeting-item">
                 <div class="meeting-box">
                   <div class="thumb">
-                    <router-link :to="`/book/${book.id}`">
-                      <img
-                        :src="book.cover_image"
-                        :alt="book.title"
-                        class="book-thumbnail"
-                      />
-                    </router-link>
+                    <img :src="book.cover_image" :alt="book.title" class="book-thumbnail" />
                   </div>
                   <div class="down-content">
-                    <router-link :to="`/book/${book.id}`">
-                      <h4 class="book-title">{{ book.title }}</h4>
-                    </router-link>
+                    <h4 class="book-title">{{ book.title }}</h4>
                     <p class="text-ellipsis" :title="book.authors.join(', ')">
-                      <strong>Author:</strong>
-                      {{ book.authors.join(", ") || "Unknown" }}
+                      <strong>Author:</strong> {{ book.authors.join(', ') || 'Unknown' }}
                     </p>
                     <p class="text-ellipsis" :title="book.publisher">
                       <strong>Publisher:</strong> {{ book.publisher }}
                     </p>
-                    <p>
-                      <strong>Status:</strong>
-                      <span
-                        :class="
-                          book.borrowed
-                            ? 'status-badge taken'
-                            : 'status-badge available'
-                        "
-                      >
-                        {{ book.borrowed ? "Taken" : "Available" }}
-                      </span>
-                    </p>
-                    <button
-                      class="request-button"
-                      @click="requestBook(book)"
-                      :disabled="book.borrowed"
+                    <p
+                      v-if="book.categories"
+                      class="text-ellipsis"
+                      :title="book.categories"
                     >
+                      <strong>Categories:</strong> {{ book.categories }}
+                    </p>
+                    <button class="request-button" @click="requestBook(book)">
                       Request
                     </button>
                   </div>
@@ -78,22 +49,22 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
-import MainHeader from "@/components/MainHeader.vue";
-import api from "@/api/axios";
-import defaultCover from "@/assets/images/default-cover.png";
+import { ref, watch } from "vue"
+import api from "@/api/axios"
+import defaultCover from "@/assets/images/default-cover.png"
 
-const books = ref([]);
-const searchQuery = ref("");
-const currentPage = ref(1);
-const limit = ref(24);
+const books = ref([])
+const searchQuery = ref("")
+const searchPerformed = ref(false)
+const currentPage = ref(1)
+const limit = ref(24)
 
 const fetchBooks = async () => {
   if (!searchQuery.value.trim()) {
-    books.value = [];
-    return;
+    books.value = []
+    searchPerformed.value = false
+    return
   }
-
   try {
     const res = await api.get("/google-books/search", {
       params: {
@@ -101,40 +72,53 @@ const fetchBooks = async () => {
         page: currentPage.value,
         limit: limit.value,
       },
-    });
-
-    console.log("API Response:", res.data);
-
-    books.value = res.data.books.map((book) => ({
-      id: book.id,
-      title: book.title || "No Title",
-      cover_image: book.cover_image || defaultCover,
-      link: `/book/${book.id}`,
-      authors: book.authors || [],
-      publisher: book.publisher || "Unknown",
-      borrowed: book.borrowed || false,
-    }));
+    })
+    books.value = res.data.books.map((book) => {
+      let categoriesString = ""
+      if (Array.isArray(book.categories) && book.categories.length > 0) {
+        categoriesString = book.categories
+          .map((cat) => {
+            let main = cat.category || "Unknown Category"
+            if (cat.subcategory) {
+              main += ` - ${cat.subcategory}`
+            }
+            return main
+          })
+          .join(", ")
+      }
+      return {
+        id: book.id,
+        title: book.title || "No Title",
+        cover_image: book.cover_image || defaultCover,
+        authors: book.authors || [],
+        publisher: book.publisher || "Unknown",
+        categories: categoriesString
+      }
+    })
+    searchPerformed.value = true
   } catch (err) {
-    console.error("Books could not be retrieved:", err);
+    books.value = []
+    searchPerformed.value = true
   }
-};
+}
 
-watch(searchQuery, async () => {
-  currentPage.value = 1;
-  await fetchBooks();
-});
+watch(searchQuery, () => {
+  books.value = []
+  searchPerformed.value = false
+})
 
-onMounted(fetchBooks);
+const performSearch = () => {
+  currentPage.value = 1
+  fetchBooks()
+}
+
+const updateSearchQuery = (event) => {
+  searchQuery.value = event.target.value
+}
 
 const requestBook = (book) => {
-  if (book.borrowed) {
-    console.log(`Book "${book.title}" is already taken.`);
-    return;
-  }
-
-  console.log(`Request sent for book: ${book.title} (ID: ${book.id})`);
-  // Gerçek API entegrasyonu olduğunda burada bir POST isteği yapacağım
-};
+  console.log(`Request sent for book: ${book.title} (ID: ${book.id})`)
+}
 </script>
 
 <style scoped>
@@ -204,6 +188,7 @@ const requestBook = (book) => {
 .meeting-item {
   width: 100%;
 }
+
 @media (min-width: 768px) {
   .meeting-item {
     width: calc(33.333% - 20px);
@@ -237,16 +222,17 @@ const requestBook = (book) => {
 }
 
 .down-content {
-  text-align: left;
-  padding: 10px;
+  text-align: left !important;
 }
 
 .book-title {
   text-align: center;
+  overflow: hidden;
   margin-bottom: 8px;
 }
 
 .text-ellipsis {
+  margin: 0 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -255,17 +241,6 @@ const requestBook = (book) => {
   max-width: 100%;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 6px;
-  margin-left: 6px;
-  color: white;
-  min-width: 80px;
-  text-align: center;
-}
 
 .status-badge.taken {
   background-color: #e74c3c;

@@ -907,13 +907,9 @@ export default {
 </script>
 
 <style scoped>
-/* Bring in all the original CSS references */
 @import "@/vendor/bootstrap/css/bootstrap.min.css";
 @import "@/assets/css/fontawesome.css";
 @import "@/assets/css/templatemo-edu-meeting.css";
 @import "@/assets/css/owl.css";
 @import "@/assets/css/lightbox.css";
-
-/* If these paths are incorrect in your project setup,
-   change them accordingly. */
 </style>

@@ -1,7 +1,5 @@
 <template>
   <div class="scan-page">
-    <MainHeader />
-
     <h2 class="scan-title">Scan a Book</h2>
 
     <div class="scan-options">
@@ -24,16 +22,12 @@
         </div>
       </div>
     </div>
-
-    <MainFooter />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import MainHeader from "@/components/MainHeader.vue";
-import MainFooter from "@/components/MainFooter.vue";
 
 const router = useRouter();
 
@@ -78,7 +72,7 @@ const goToIsbnSearch = () => {
   background-size: cover;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: top;
 }
 
 .scan-title {

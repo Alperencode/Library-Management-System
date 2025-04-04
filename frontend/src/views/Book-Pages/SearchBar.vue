@@ -4,10 +4,10 @@
         class="input-line full-width"
         type="text"
         :value="props.modelValue"
-        @input="emit('update:modelValue', $event.target.value)"
+        @keyup.enter="emit('update:modelValue', $event.target.value)"
         placeholder="Search by Author, Title, Publisher, ISBN..."
       />
-      <button class="barcode-button">
+      <button class="barcode-button" @click="router.push('/scan-book')">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
           <path d="M2 4h1v16H2V4zm2 0h2v16H4V4zm4 0h1v16H8V4zm2 0h2v16h-2V4zm4 0h1v16h-1V4zm2 0h2v16h-2V4zm4 0h1v16h-1V4z"/>
         </svg>
@@ -30,8 +30,10 @@
     </div>
   </template>
   
-  <script setup>
+<script setup>
 import { ref, defineProps, defineEmits } from 'vue'
+import { useRouter } from 'vue-router'
+
 
 const props = defineProps({
   modelValue: String
@@ -39,6 +41,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'order'])
 
+const router = useRouter()
 const orderMenuOpen = ref(false)
 
 const toggleOrderMenu = () => {
