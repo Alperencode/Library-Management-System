@@ -1,7 +1,7 @@
 <template>
   <div class="user-page" v-if="user">
     <aside class="sidebar">
-      <div class="username">{{ user.username }}</div>
+      <div class="username">Hi, {{ user.username }}!</div>
       <nav class="menu">
         <ul>
           <li>
@@ -94,13 +94,17 @@ export default {
 }
 
 .username {
+  display: inline-block;
+  width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-align: center;
   font-size: 18px;
   font-weight: bold;
   padding: 12px;
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.1);
-  width: 80%;
   margin-bottom: 20px;
 }
 

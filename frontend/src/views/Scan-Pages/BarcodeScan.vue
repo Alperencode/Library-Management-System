@@ -1,7 +1,5 @@
 <template>
     <div class="how-to-page">
-      <MainHeader />
-  
       <h2 class="how-to-title">How to Use Barcode Scan</h2>
       <p class="how-to-description">
         Follow the instructions below to scan using Barcode:
@@ -10,13 +8,10 @@
   
       <button class="scan-btn" @click="startBarcodeScan">Start Barcode Scan</button>
   
-      <MainFooter />
     </div>
   </template>
   
   <script setup>
-  import MainHeader from "@/components/MainHeader.vue";
-  import MainFooter from "@/components/MainFooter.vue";
   
   const startBarcodeScan = () => {
     alert("Barcode scan started (Not implemented)"); 
@@ -33,7 +28,7 @@
     background-size: cover;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: top;
   }
   
   .how-to-title {

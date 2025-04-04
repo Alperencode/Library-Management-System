@@ -1,6 +1,5 @@
 <template>
   <div>
-    <MainHeader />
     <section class="meetings-page" id="meetings">
       <div class="container two-column-layout">
         <div class="sidebar">
@@ -14,7 +13,7 @@
         </div>
         <div class="main-content">
           <SearchBar v-model="searchQuery" @order="orderBy" />
-          <div v-if="paginatedBooks.length === 0" class="no-results">
+          <div v-if="paginatedBooks.length === 0  && searchQuery.length != 0" class="no-results">
             <p class="no-results-text">
               No books found for "{{ searchQuery }}"
             </p>
@@ -73,7 +72,6 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import MainHeader from '@/components/MainHeader.vue'
 import FiltersPanel from './FiltersPanel.vue'
 import SearchBar from './SearchBar.vue'
 import PaginationControl from './PaginationControl.vue'

@@ -1,7 +1,5 @@
 <template>
     <div class="how-to-page">
-      <MainHeader />
-  
       <h2 class="how-to-title">How to Use RFID Scan</h2>
       <p class="how-to-description">
         Follow the instructions below to scan using RFID:
@@ -26,15 +24,11 @@
           <button class="scan-btn" @click="submitIsbn">Submit ISBN</button>
         </div>
       </div>
-  
-      <MainFooter />
     </div>
   </template>
   
   <script setup>
   import { ref } from "vue";
-  import MainHeader from "@/components/MainHeader.vue";
-  import MainFooter from "@/components/MainFooter.vue";
   
   const rfidFailed = ref(false); 
   const manualIsbn = ref(""); 
@@ -42,12 +36,7 @@
   
   const startRfidScan = () => {
     setTimeout(() => {
-      const success = Math.random() > 0.5; 
-      if (!success) {
-        rfidFailed.value = true;
-      } else {
-        alert("RFID scan successful! Book found.");
-      }
+      rfidFailed.value = true;
     }, 2000);
   };
   
@@ -113,7 +102,7 @@
     background-size: cover;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: top;
   }
   
   .how-to-title {

@@ -1,7 +1,5 @@
 <template>
     <div class="how-to-page">
-      <MainHeader />
-  
       <h2 class="how-to-title">How to Use ISBN Search</h2>
       <p class="how-to-description">
         To search for a book by ISBN:
@@ -19,15 +17,11 @@
       </div>
   
       <button v-else class="scan-btn" @click="startIsbnSearch">Start ISBN Search</button>
-  
-      <MainFooter />
     </div>
   </template>
   
   <script setup>
   import { ref } from "vue";
-  import MainHeader from "@/components/MainHeader.vue";
-  import MainFooter from "@/components/MainFooter.vue";
   
   const isbnInputVisible = ref(false);
   const isbn = ref(""); 
@@ -54,7 +48,7 @@
     background-size: cover;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: top;
   }
   
   .how-to-title {
