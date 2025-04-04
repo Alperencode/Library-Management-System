@@ -5,10 +5,7 @@
       <h2 class="how-to-title">How to Use ISBN Search</h2>
       <p class="how-to-description">
         To search for a book by ISBN:
-        <ul>
-          <li>Enter the book's ISBN into the search field.</li>
-          <li>Click "Submit" to get the book information based on the ISBN.</li>
-        </ul>
+        `This place will be replaced by instructions image`
       </p>
   
       <div v-if="isbnInputVisible" class="isbn-search-container">

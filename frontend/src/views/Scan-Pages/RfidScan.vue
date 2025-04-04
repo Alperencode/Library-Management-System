@@ -5,11 +5,7 @@
       <h2 class="how-to-title">How to Use RFID Scan</h2>
       <p class="how-to-description">
         Follow the instructions below to scan using RFID:
-        <ul>
-          <li>Ensure your RFID scanner is connected and working properly.</li>
-          <li>Scan the RFID tag on the book to get information.</li>
-          <li>The book information will appear on the screen after a successful scan.</li>
-        </ul>
+        `This place will be replaced by instructions image`
       </p>
   
       <button class="scan-btn" @click="startRfidScan">Start RFID Scan</button>

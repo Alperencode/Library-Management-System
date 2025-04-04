@@ -830,14 +830,13 @@ export default {
       // Dynamically load your JS files
       const scripts = [
         "vendor/jquery/jquery.min.js",
-        "vendor/bootstrap/js/bootstrap.bundle.min.js",
         "assets/js/isotope.min.js",
         "assets/js/owl-carousel.js",
         "assets/js/lightbox.js",
         "assets/js/tabs.js",
         "assets/js/video.js",
         "assets/js/slick-slider.js",
-        "assets/js/custom.js",
+        //"assets/js/custom.js",
       ];
 
       scripts.forEach((src) => {

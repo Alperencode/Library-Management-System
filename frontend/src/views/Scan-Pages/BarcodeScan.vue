@@ -5,11 +5,7 @@
       <h2 class="how-to-title">How to Use Barcode Scan</h2>
       <p class="how-to-description">
         Follow the instructions below to scan using Barcode:
-        <ul>
-          <li>Ensure your device's camera or scanner is working properly.</li>
-          <li>Point the camera at the barcode on the book to scan it.</li>
-          <li>The book information will appear on the screen after a successful scan.</li>
-        </ul>
+        `This place will be replaced by instructions image`
       </p>
   
       <button class="scan-btn" @click="startBarcodeScan">Start Barcode Scan</button>

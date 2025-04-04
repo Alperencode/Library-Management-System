@@ -1,6 +1,5 @@
 <template>
   <div class="login-page">
-    <MainHeader />
     <div class="login-wrapper">
       <div class="login-form-container">
         <h2 class="title">Login</h2>
@@ -17,7 +16,6 @@
         <p v-if="message" :class="alertClass">{{ message }}</p>
       </div>
     </div>
-    <MainFooter />
   </div>
 </template>
 
@@ -25,15 +23,10 @@
 import api from "@/api/axios";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import MainHeader from "@/components/MainHeader.vue";
-import MainFooter from "@/components/MainFooter.vue";
 
 export default {
   name: "AuthLogin",
-  components: {
-    MainHeader,
-    MainFooter,
-  },
+
   data() {
     return {
       email: "",
