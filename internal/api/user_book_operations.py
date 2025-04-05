@@ -181,7 +181,6 @@ async def borrow_book(book_id: str, user: User = Depends(get_current_user)):
     book.borrow_count += 1
     book.return_date = datetime.combine((datetime.now() + timedelta(weeks=1)).date(), time(23, 59))
     book.currently_borrowed_by = user.id
-    book.last_borrowed_by = user.id
     book.available_copies -= 1
     if book.available_copies < 1:
         book.borrowed = True
@@ -280,6 +279,7 @@ async def return_book(book_id: str, user: User = Depends(get_current_user)):
     if book.available_copies >= book.total_copies:
         book.borrowed = False
     book.currently_borrowed_by = None
+    book.last_borrowed_by = user.id
     book.return_date = None
     if book.available_copies > 0 and book.notify_me_list:
         for user_id in book.notify_me_list:
@@ -359,7 +359,7 @@ async def extend_return(book_id: str, user: User = Depends(get_current_user)):
             )
         )
 
-    book.return_date += timedelta(days=5)
+    book.return_date = (book.return_date + timedelta(days=5)).replace(hour=23, minute=59, second=0)
     book.has_extended = True
     updated_book = await update_book(book)
 
@@ -374,4 +374,37 @@ async def extend_return(book_id: str, user: User = Depends(get_current_user)):
     return SuccessResponse(
         code=SUCCESS,
         message=f"Return date extended by 5 days for '{book.title}'."
+    )
+
+
+@router.delete("/notify-me/{book_id}", response_model=SuccessResponse)
+async def remove_notify_me(book_id: str, user: User = Depends(get_current_user)):
+    book = await get_book_by_id(book_id)
+    if not book:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(
+                FailResponse(code=FAIL, message="Book not found")
+            )
+        )
+
+    if user.id in book.notify_me_list:
+        book.notify_me_list.remove(user.id)
+
+    if book_id in user.notify_me_list:
+        user.notify_me_list.remove(book_id)
+
+    book_updated = await update_book(book)
+    user_updated = await update_user(user)
+
+    if not book_updated or not user_updated:
+        return JSONResponse(
+            status_code=500,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL, message="Failed to update user or book data"
+            ))
+        )
+
+    return SuccessResponse(
+        code=SUCCESS, message="You have unsubscribed from notifications for this book"
     )

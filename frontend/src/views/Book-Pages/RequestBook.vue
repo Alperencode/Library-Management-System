@@ -27,14 +27,10 @@
                     <p class="text-ellipsis" :title="book.publisher">
                       <strong>Publisher:</strong> {{ book.publisher }}
                     </p>
-                    <p
-                      v-if="book.categories"
-                      class="text-ellipsis"
-                      :title="book.categories"
-                    >
+                    <p v-if="book.categories" class="text-ellipsis" :title="book.categories">
                       <strong>Categories:</strong> {{ book.categories }}
                     </p>
-                    <button class="request-button" @click="requestBook(book)">
+                    <button class="request-button" @click="requestBook(book)" :disabled="requestedBookIds.has(book.id)">
                       Request
                     </button>
                   </div>
@@ -49,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue"
+import { ref, watch, onMounted } from "vue"
 import api from "@/api/axios"
 import defaultCover from "@/assets/images/default-cover.png"
 
@@ -90,6 +86,7 @@ const fetchBooks = async () => {
         id: book.id,
         title: book.title || "No Title",
         cover_image: book.cover_image || defaultCover,
+        isbn: book.isbn || null,
         authors: book.authors || [],
         publisher: book.publisher || "Unknown",
         categories: categoriesString
@@ -116,8 +113,37 @@ const updateSearchQuery = (event) => {
   searchQuery.value = event.target.value
 }
 
-const requestBook = (book) => {
-  console.log(`Request sent for book: ${book.title} (ID: ${book.id})`)
+const requestedBookIds = ref(new Set())
+
+const fetchRequestedBooks = async () => {
+  try {
+    const res = await api.get("/request-book")
+    const ids = res.data.books.map((book) => book.id)
+    requestedBookIds.value = new Set(ids)
+  } catch (err) {
+    console.warn("Could not fetch requested books")
+  }
+}
+
+onMounted(fetchRequestedBooks)
+
+const requestBook = async (book) => {
+  try {
+    const payload = {
+      id: book.id,
+      title: book.title,
+      authors: book.authors,
+      isbn: book.isbn,
+      publisher: book.publisher,
+      cover_image: book.cover_image,
+    }
+
+    const res = await api.post("/request-book", payload)
+    alert(res.data.message || "Book request submitted successfully.")
+  } catch (err) {
+    const message = err?.response?.data?.message || "Failed to request the book."
+    alert(message)
+  }
 }
 </script>
 
