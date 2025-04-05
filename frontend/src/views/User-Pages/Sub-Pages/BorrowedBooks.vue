@@ -5,41 +5,39 @@
         <h2>Borrowed Books</h2>
         <p>Here you can see the books you have borrowed.</p>
 
-        <!-- If the user has no borrowed books, display a note -->
         <div v-if="borrowedBooks.length === 0" class="no-results">
           <p class="no-results-text">You have not borrowed any books yet.</p>
         </div>
 
-        <!-- Otherwise, display the books in a grid -->
         <div v-else>
           <div class="row grid">
-            <div
-              v-for="(book, index) in borrowedBooks"
-              :key="index"
-              class="meeting-item"
-            >
+            <div v-for="(book, index) in borrowedBooks" :key="index" class="meeting-item">
               <div class="meeting-box">
                 <div class="thumb">
                   <router-link :to="book.link">
-                    <img
-                      :src="book.image"
-                      :alt="book.title"
-                      class="book-thumbnail"
-                    />
+                    <img :src="book.image" :alt="book.title" class="book-thumbnail" />
                   </router-link>
                 </div>
+
                 <div class="down-content">
                   <router-link :to="book.link">
                     <h4 class="book-title">{{ book.title }}</h4>
                   </router-link>
                   <p class="text-ellipsis" :title="book.authors.join(', ')">
-                    <strong>Author:</strong>
-                    {{ book.authors.join(", ") || "Unknown" }}
+                    <strong>Author:</strong> {{ book.authors.join(", ") || "Unknown" }}
                   </p>
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
-                  <p></p>
+                  <p class="text-ellipsis" :title="book.borrowed_at">
+                    <strong>Borrowed At:</strong> {{ book.borrowed_at }}
+                  </p>
+                  <p class="text-ellipsis" :title="book.return_date">
+                    <strong>Return Date:</strong> {{ book.return_date }}
+                  </p>
+                  <button class="return-btn" @click="returnBook(book.id)">
+                    Return
+                  </button>
                 </div>
               </div>
             </div>
@@ -54,6 +52,14 @@
 import { ref, onMounted } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
+import { formatDate } from "@/utils/date";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const returnBook = () => {
+  router.push("/scan-book");
+};
 
 const borrowedBooks = ref([]);
 
@@ -64,10 +70,11 @@ const fetchBorrowedBooks = async () => {
       id: book.id,
       title: book.title || "No Title",
       image: book.cover_image || defaultCover,
-      link: `/book/${book.id}`,
+      link: `/books/${book.id}`,
       authors: book.authors || [],
       publisher: book.publisher || "Unknown",
-      borrowed: book.borrowed || false,
+      borrowed_at: formatDate(book.borrowed_at),
+      return_date: formatDate(book.return_date),
     }));
   } catch (error) {
     console.error("Error retrieving borrowed books:", error);
@@ -78,6 +85,23 @@ onMounted(fetchBorrowedBooks);
 </script>
 
 <style scoped>
+.return-btn {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.return-btn:hover {
+  background-color: #1e8449;
+}
+
 .borrowed-books {
   padding-top: 40px;
   min-height: auto;

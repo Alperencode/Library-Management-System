@@ -39,7 +39,7 @@
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
-                  <p><strong>Due Date:</strong> {{ book.due_date }}</p>
+                  <p><strong>Return Date was:</strong> {{ book.return_date }}</p>
                 </div>
               </div>
             </div>
@@ -54,6 +54,8 @@
 import { ref, onMounted } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
+import { formatDate } from "@/utils/date";
+
 
 const overdueBooks = ref([]);
 
@@ -64,10 +66,10 @@ const fetchOverdueBooks = async () => {
       id: book.id,
       title: book.title || "No Title",
       image: book.cover_image || defaultCover,
-      link: `/book/${book.id}`,
+      link: `/books/${book.id}`,
       authors: book.authors || [],
       publisher: book.publisher || "Unknown",
-      due_date: book.due_date || "Unknown",
+      return_date: formatDate(book.return_date),
     }));
   } catch (error) {
     console.error("Error retrieving overdue books:", error);

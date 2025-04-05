@@ -20,7 +20,7 @@
             <RouterLink to="/user-page/history">Borrow History</RouterLink>
           </li>
           <li>
-            <RouterLink to="/user-page/overdo">Overdo Books</RouterLink>
+            <RouterLink to="/user-page/overdue">Overdue Books</RouterLink>
           </li>
           <li>
             <button @click="logout">Logout</button>

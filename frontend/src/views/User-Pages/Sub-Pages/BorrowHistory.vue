@@ -32,12 +32,8 @@
                     <strong>Author:</strong>
                     {{ book.authors.join(", ") || "Unknown" }}
                   </p>
-                  <p>
-                    <strong>Borrowed Date:</strong> {{ book.borrowed_date }}
-                  </p>
-                  <p>
-                    <strong>Returned Date:</strong>
-                    {{ book.returned_date || "Not Returned Yet" }}
+                  <p class="text-ellipsis" :title="book.publisher">
+                    <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
                 </div>
               </div>
@@ -64,8 +60,7 @@ const fetchBorrowHistory = async () => {
       title: book.title || "No Title",
       image: book.cover_image || defaultCover,
       authors: book.authors || [],
-      borrowed_date: book.borrowed_date || "Unknown",
-      returned_date: book.returned_date || "Not Returned Yet",
+      publisher: book.publisher || "Unknown",
     }));
   } catch (error) {
     console.error("Error retrieving borrow history:", error);

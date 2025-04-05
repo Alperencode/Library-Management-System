@@ -38,8 +38,8 @@
                     <strong>Author:</strong>
                     {{ book.authors.join(", ") || "Unknown" }}
                   </p>
-                  <p>
-                    <strong>Requested On:</strong> {{ book.requested_date }}
+                  <p class="text-ellipsis" :title="book.publisher">
+                    <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
                   <button
                     class="remove-btn"
@@ -71,9 +71,10 @@ const fetchNotifyMeList = async () => {
       id: book.id,
       title: book.title || "No Title",
       image: book.cover_image || defaultCover,
-      link: `/book/${book.id}`,
+      link: `/books/${book.id}`,
       authors: book.authors || [],
-      requested_date: book.requested_date || "Unknown",
+      publisher: book.publisher || "Unknown",
+
     }));
   } catch (error) {
     console.error("Error retrieving notify me list:", error);
