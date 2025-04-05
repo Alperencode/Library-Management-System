@@ -20,6 +20,9 @@
             <RouterLink to="/user-page/history">Borrow History</RouterLink>
           </li>
           <li>
+            <RouterLink to="/user-page/overdue">Overdue Books</RouterLink>
+          </li>
+          <li>
             <button @click="logout">Logout</button>
           </li>
         </ul>
@@ -32,7 +35,6 @@
         <router-view></router-view>
       </div>
     </main>
-
   </div>
 </template>
 

@@ -1,26 +1,17 @@
 <template>
   <div class="scan-page">
     <h2 class="scan-title">Scan a Book</h2>
+    <p>Scan books to:</p>
+    <li>- Return a book you own</li>
+    <li>- Borrow a book you like</li>
+    <li>- Extend the return date</li>
+    <p></p>
+    <p>Feel free to use the options below to identify your book!</p>
 
     <div class="scan-options">
       <button class="scan-btn" @click="goToRfidScan">RFID Scan</button>
       <button class="scan-btn" @click="goToBarcodeScan">Barcode Scan</button>
       <button class="scan-btn" @click="goToIsbnSearch">ISBN Search</button>
-    </div>
-
-    <div v-if="popularBooks.length > 0" class="popular-books">
-      <h3 class="popular-title">You might also like</h3>
-      <div class="book-list">
-        <div class="book-item">
-          <img
-            src="https://via.placeholder.com/100x150"
-            alt="Book Image"
-            class="book-image"
-          />
-          <p class="book-title">Book 1</p>
-          <p class="book-author">Author 1</p>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -67,25 +58,32 @@ const goToIsbnSearch = () => {
 .scan-page {
   text-align: center;
   min-height: 100vh;
-  background: url("@/assets/images/meetings-bg.jpg") no-repeat center center
-    fixed;
+  background: url("@/assets/images/meetings-bg.jpg") no-repeat center center fixed;
   background-size: cover;
   display: flex;
   flex-direction: column;
-  justify-content: top;
+  justify-content: flex-start;
+  padding-top: 100px;
+  color: white;
 }
 
 .scan-title {
   font-size: 28px;
   font-weight: bold;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.scan-page p {
+  color: white;
+  font-size: 16px;
+  margin-bottom: 30px;
 }
 
 .scan-options {
   display: flex;
   justify-content: center;
   gap: 30px;
-  margin-top: 160px;
   margin-bottom: 30px;
 }
 
@@ -94,25 +92,27 @@ const goToIsbnSearch = () => {
   font-size: 20px;
   border: none;
   border-radius: 10px;
-  background-color: #007bff;
+  background-color: #3b63ff;
   color: white;
   cursor: pointer;
   transition: 0.3s;
-  max-width: 300px; /* Butonun maksimum genişliği */
-  width: 100%; /* Küçük ekranlarda tam genişlik kullanır */
+  max-width: 300px;
+  width: 100%;
 }
 
 .scan-btn:hover {
-  background-color: #0056b3;
+  background-color: #254edb;
 }
 
 .popular-books {
   margin-top: 50px;
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.85);
   border-radius: 10px;
   max-width: 900px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
+  color: #222;
 }
 
 .popular-title {
@@ -149,6 +149,7 @@ const goToIsbnSearch = () => {
   font-weight: bold;
   margin-top: 10px;
   font-size: 16px;
+  color: #333;
 }
 
 .book-author {

@@ -1,43 +1,45 @@
 <template>
   <div>
-    <section class="borrowed-books">
+    <section class="overdue-books">
       <div class="container">
-        <h2>Borrowed Books</h2>
-        <p>Here you can see the books you have borrowed.</p>
+        <h2>Overdue Books</h2>
+        <p>Here you can see the books that are overdue.</p>
 
-        <div v-if="borrowedBooks.length === 0" class="no-results">
-          <p class="no-results-text">You have not borrowed any books yet.</p>
+        <!-- Kullanıcının gecikmiş kitabı yoksa mesaj göster -->
+        <div v-if="overdueBooks.length === 0" class="no-results">
+          <p class="no-results-text">You have no overdue books.</p>
         </div>
 
+        <!-- Gecikmiş kitapları listele -->
         <div v-else>
           <div class="row grid">
-            <div v-for="(book, index) in borrowedBooks" :key="index" class="meeting-item">
+            <div
+              v-for="(book, index) in overdueBooks"
+              :key="index"
+              class="meeting-item"
+            >
               <div class="meeting-box">
                 <div class="thumb">
                   <router-link :to="book.link">
-                    <img :src="book.image" :alt="book.title" class="book-thumbnail" />
+                    <img
+                      :src="book.image"
+                      :alt="book.title"
+                      class="book-thumbnail"
+                    />
                   </router-link>
                 </div>
-
                 <div class="down-content">
                   <router-link :to="book.link">
                     <h4 class="book-title">{{ book.title }}</h4>
                   </router-link>
                   <p class="text-ellipsis" :title="book.authors.join(', ')">
-                    <strong>Author:</strong> {{ book.authors.join(", ") || "Unknown" }}
+                    <strong>Author:</strong>
+                    {{ book.authors.join(", ") || "Unknown" }}
                   </p>
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
-                  <p class="text-ellipsis" :title="book.borrowed_at">
-                    <strong>Borrowed At:</strong> {{ book.borrowed_at }}
-                  </p>
-                  <p class="text-ellipsis" :title="book.return_date">
-                    <strong>Return Date:</strong> {{ book.return_date }}
-                  </p>
-                  <button class="return-btn" @click="returnBook(book.id)">
-                    Return
-                  </button>
+                  <p><strong>Return Date was:</strong> {{ book.return_date }}</p>
                 </div>
               </div>
             </div>
@@ -53,56 +55,32 @@ import { ref, onMounted } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { formatDate } from "@/utils/date";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
 
-const returnBook = () => {
-  router.push("/scan-book");
-};
+const overdueBooks = ref([]);
 
-const borrowedBooks = ref([]);
-
-const fetchBorrowedBooks = async () => {
+const fetchOverdueBooks = async () => {
   try {
-    const res = await api.get("/borrowed");
-    borrowedBooks.value = res.data.books.map((book) => ({
+    const res = await api.get("/borrowed/overdue-books");
+    overdueBooks.value = res.data.books.map((book) => ({
       id: book.id,
       title: book.title || "No Title",
       image: book.cover_image || defaultCover,
       link: `/books/${book.id}`,
       authors: book.authors || [],
       publisher: book.publisher || "Unknown",
-      borrowed_at: formatDate(book.borrowed_at),
       return_date: formatDate(book.return_date),
     }));
   } catch (error) {
-    console.error("Error retrieving borrowed books:", error);
+    console.error("Error retrieving overdue books:", error);
   }
 };
 
-onMounted(fetchBorrowedBooks);
+onMounted(fetchOverdueBooks);
 </script>
 
 <style scoped>
-.return-btn {
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  font-size: 14px;
-  cursor: pointer;
-  margin-top: 10px;
-  width: 100%;
-  text-align: center;
-}
-
-.return-btn:hover {
-  background-color: #1e8449;
-}
-
-.borrowed-books {
+.overdue-books {
   padding-top: 40px;
   min-height: auto;
 }
@@ -113,7 +91,7 @@ onMounted(fetchBorrowedBooks);
 }
 
 .no-results {
-  color: #ffffff !important;
+  color: black !important;
   padding: 20px;
   font-size: 18px;
   text-align: center;
@@ -198,25 +176,5 @@ onMounted(fetchBorrowedBooks);
   display: block;
   width: 100%;
   max-width: 100%;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 6px;
-  margin-left: 6px;
-  color: white;
-  min-width: 80px;
-  text-align: center;
-}
-
-.status-badge.taken {
-  background-color: #e74c3c;
-}
-
-.status-badge.available {
-  background-color: #27ae60;
 }
 </style>
