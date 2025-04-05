@@ -38,6 +38,9 @@
                   <button class="return-btn" @click="returnBook(book.id)">
                     Return
                   </button>
+                  <button class="extend-btn" :disabled="book.has_extended" @click="extendReturn(book.id)">
+                    {{ book.has_extended ? "Already Extended" : "Extend Return" }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -72,6 +75,7 @@ const fetchBorrowedBooks = async () => {
       image: book.cover_image || defaultCover,
       link: `/books/${book.id}`,
       authors: book.authors || [],
+      has_extended: book.has_extended || false,
       publisher: book.publisher || "Unknown",
       borrowed_at: formatDate(book.borrowed_at),
       return_date: formatDate(book.return_date),
@@ -81,10 +85,39 @@ const fetchBorrowedBooks = async () => {
   }
 };
 
+const extendReturn = async (bookId) => {
+  try {
+    const res = await api.post(`/extend-return/${bookId}`);
+    alert(res.data.message);
+    await fetchBorrowedBooks();
+  } catch (err) {
+    const message = err?.response?.data?.message || "Failed to extend return date.";
+    alert(message);
+  }
+};
+
 onMounted(fetchBorrowedBooks);
 </script>
 
 <style scoped>
+.extend-btn {
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+.extend-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
 .return-btn {
   background-color: #27ae60;
   color: white;

@@ -2,6 +2,7 @@ from typing import List
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
 from internal.models.book import Book, BookPreview
+from internal.models.request import BookRequest
 from .types import LanguageItem
 
 
@@ -71,3 +72,7 @@ class GroupedCategoryListResponse(SuccessResponse):
 
 class LanguageListResponse(SuccessResponse):
     languages: List[LanguageItem]
+
+
+class BookRequestListResponse(SuccessResponse):
+    books: List[BookRequest]

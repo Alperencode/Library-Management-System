@@ -51,7 +51,7 @@ async def get_current_user(request: Request):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-async def send_email_to_subscribers(book, subject):
+async def send_email_to_subscribers(user, book, subject):
     try:
         host = get_config("email_host")
         port = get_config("email_port")
@@ -65,42 +65,26 @@ async def send_email_to_subscribers(book, subject):
             server.starttls()
             server.login(username, password)
 
-            remaining_notify_list = []
+            user_email = user.email
+            html_body = generate_html_email(book)
 
-            for user_id in book.notify_me_list:
-                user_doc = await get_user_by_id(user_id)
-                if not user_doc:
-                    logger.warning(f"User with ID {user_id} not found. Skipping.")
-                    remaining_notify_list.append(user_id)
-                    continue
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = formataddr((sender_name, sender_email))
+            msg["To"] = user_email
+            msg["Date"] = formatdate(localtime=True)
+            msg["Message-ID"] = make_msgid()
+            msg["Reply-To"] = sender_email
 
-                user_email = user_doc.email
-                html_body = generate_html_email(book)
+            part2 = MIMEText(html_body, "html", "utf-8")
+            msg.attach(part2)
 
-                msg = MIMEMultipart("alternative")
-                msg["Subject"] = subject
-                msg["From"] = formataddr((sender_name, sender_email))
-                msg["To"] = user_email
-                msg["Date"] = formatdate(localtime=True)
-                msg["Message-ID"] = make_msgid()
-                msg["Reply-To"] = sender_email
-
-                part2 = MIMEText(html_body, "html", "utf-8")
-                msg.attach(part2)
-
-                try:
-                    server.sendmail(sender_email, [user_email], msg.as_string())
-                    logger.info(f"Email sent successfully to {user_email}")
-                except smtplib.SMTPException as e:
-                    logger.error(f"Failed to send email to {user_email}: {e}")
-                    remaining_notify_list.append(user_id)
-
-            book.notify_me_list = remaining_notify_list
-            return book
+            server.sendmail(sender_email, [user_email], msg.as_string())
+            return True
 
     except Exception as e:
-        logger.error(f"Failed to connect to email server or send emails: {e}")
-        return book
+        logger.error(f"Failed to send email to {user.email}: {e}")
+        return False
 
 
 def generate_html_email(book) -> str:

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from typing import Optional, List
+from .request import BookRequest
 import bcrypt
 
 
@@ -13,6 +14,7 @@ class User(BaseModel):
     borrowed_books: Optional[List[str]] = []
     borrowed_history: Optional[List[str]] = []
     overdue_books: Optional[List[str]] = []
+    requested_books: Optional[list[BookRequest]] = None
     notify_me_list: Optional[List[str]] = []
     penalty_amount: Optional[str] = []
 
@@ -33,5 +35,6 @@ class PublicUser(BaseModel):
     borrowed_books: Optional[List[str]] = []
     borrowed_history: Optional[List[str]] = []
     overdue_books: Optional[List[str]] = []
+    requested_books: Optional[list[BookRequest]] = None
     notify_me_list: Optional[List[str]] = []
     penalty_amount: Optional[str] = []
