@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.utils.utils import get_current_user, send_email_to_subscribers
 from internal.database.books import get_book_by_id, update_book
-from internal.database.users import update_user
+from internal.database.users import update_user, get_user_by_id
 from internal.types.types import SUCCESS, FAIL
 from internal.models.user import User
 from internal.models.book import BookPreview
@@ -89,7 +89,7 @@ async def get_borrowed_history(user: User = Depends(get_current_user)):
     )
 
 
-@router.get("/notify-me-list", response_model=BookPreviewListResponse)
+@router.get("/notify-me", response_model=BookPreviewListResponse)
 async def get_notify_me_list(user: User = Depends(get_current_user)):
     if not user.notify_me_list:
         return BookPreviewListResponse(
@@ -215,7 +215,7 @@ async def borrow_book(book_id: str, user: User = Depends(get_current_user)):
     )
 
 
-@router.post("/notify/{book_id}", response_model=SuccessResponse)
+@router.post("/notify-me/{book_id}", response_model=SuccessResponse)
 async def notify_me(book_id: str, user: User = Depends(get_current_user)):
     book = await get_book_by_id(book_id)
     if not book:
@@ -282,8 +282,15 @@ async def return_book(book_id: str, user: User = Depends(get_current_user)):
     book.currently_borrowed_by = None
     book.return_date = None
     if book.available_copies > 0 and book.notify_me_list:
-        subject = f"Book '{book.title}' is now available"
-        book = await send_email_to_subscribers(book, subject)
+        for user_id in book.notify_me_list:
+            subject = f"Book '{book.title}' is now available"
+            sub_user = await get_user_by_id(user_id)
+            success = await send_email_to_subscribers(sub_user, book, subject)
+            if success:
+                sub_user.notify_me_list.remove(book_id)
+                sub_user_updated = await update_user(sub_user)
+            if sub_user_updated:
+                book.notify_me_list.remove(user_id)
 
     updated_book = await update_book(book)
     if not updated_book:

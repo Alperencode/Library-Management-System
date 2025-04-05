@@ -66,7 +66,7 @@ const notifyMeBooks = ref([]);
 
 const fetchNotifyMeList = async () => {
   try {
-    const res = await api.get("/notify-me-list");
+    const res = await api.get("/notify-me");
     notifyMeBooks.value = res.data.books.map((book) => ({
       id: book.id,
       title: book.title || "No Title",
@@ -83,7 +83,7 @@ const fetchNotifyMeList = async () => {
 
 const removeFromNotifyList = async (bookId) => {
   try {
-    await api.delete(`/notify-me-list/${bookId}`);
+    await api.delete(`/notify-me/${bookId}`);
     notifyMeBooks.value = notifyMeBooks.value.filter(
       (book) => book.id !== bookId
     );
