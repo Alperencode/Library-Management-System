@@ -7,9 +7,7 @@
 
         <!-- If the user has no borrowed books, display a note -->
         <div v-if="borrowedBooks.length === 0" class="no-results">
-          <p class="no-results-text">
-            You have not borrowed any books yet.
-          </p>
+          <p class="no-results-text">You have not borrowed any books yet.</p>
         </div>
 
         <!-- Otherwise, display the books in a grid -->
@@ -36,13 +34,12 @@
                   </router-link>
                   <p class="text-ellipsis" :title="book.authors.join(', ')">
                     <strong>Author:</strong>
-                    {{ book.authors.join(', ') || 'Unknown' }}
+                    {{ book.authors.join(", ") || "Unknown" }}
                   </p>
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
-                  <p>
-                  </p>
+                  <p></p>
                 </div>
               </div>
             </div>
@@ -54,38 +51,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import api from '@/api/axios'
-import defaultCover from '@/assets/images/default-cover.png'
+import { ref, onMounted } from "vue";
+import api from "@/api/axios";
+import defaultCover from "@/assets/images/default-cover.png";
 
-const borrowedBooks = ref([])
+const borrowedBooks = ref([]);
 
 const fetchBorrowedBooks = async () => {
   try {
-    const res = await api.get('/borrowed')
-    borrowedBooks.value = res.data.books.map(book => ({
+    const res = await api.get("/borrowed");
+    borrowedBooks.value = res.data.books.map((book) => ({
       id: book.id,
-      title: book.title || 'No Title',
+      title: book.title || "No Title",
       image: book.cover_image || defaultCover,
       link: `/book/${book.id}`,
       authors: book.authors || [],
-      publisher: book.publisher || 'Unknown',
+      publisher: book.publisher || "Unknown",
       borrowed: book.borrowed || false,
-    }))
+    }));
   } catch (error) {
-    console.error('Error retrieving borrowed books:', error)
+    console.error("Error retrieving borrowed books:", error);
   }
-}
+};
 
-onMounted(fetchBorrowedBooks)
+onMounted(fetchBorrowedBooks);
 </script>
 
 <style scoped>
-
-
 .borrowed-books {
-  padding-top: 80px;
-  min-height: 100vh;
+  padding-top: 40px;
+  min-height: auto;
 }
 
 .container {
@@ -104,10 +99,9 @@ onMounted(fetchBorrowedBooks)
 }
 
 .no-results-text {
-  color: rgb(226, 226, 226) !important;
+  color: black !important;
   font-size: 15px;
   font-weight: bold;
-  text-shadow: 1px 1px 3px black;
 }
 
 .grid {

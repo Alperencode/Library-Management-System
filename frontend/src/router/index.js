@@ -14,6 +14,7 @@ import BorrowedBooks from "@/views/User-Pages/Sub-Pages/BorrowedBooks.vue";
 import RequestedBooks from "@/views/User-Pages/Sub-Pages/RequestedBooks.vue";
 import NotifyMeList from "@/views/User-Pages/Sub-Pages/NotifyMe.vue";
 import BorrowHistory from "@/views/User-Pages/Sub-Pages/BorrowHistory.vue";
+import OverdoBooks from "@/views/User-Pages/Sub-Pages/OverdoBooks.vue"; // ✅ Yeni eklenen sayfa
 
 // Book-Pages
 import BooksPage from "@/views/Book-Pages/BooksPage.vue";
@@ -25,7 +26,6 @@ import ScanBook from "@/views/Scan-Pages/ScanBook.vue";
 import RfidScan from "@/views/Scan-Pages/RfidScan.vue";
 import BarcodeScan from "@/views/Scan-Pages/BarcodeScan.vue";
 import IsbnSearch from "@/views/Scan-Pages/IsbnSearch.vue";
-
 
 const routes = [
   // Homeview
@@ -45,12 +45,13 @@ const routes = [
       { path: "requested", component: RequestedBooks },
       { path: "notify", component: NotifyMeList },
       { path: "history", component: BorrowHistory },
+      { path: "overdo", component: OverdoBooks }, // ✅ OverdoBooks için yeni route
     ],
   },
 
   // Book-Pages
   { path: "/books", component: BooksPage },
-  { path: '/books/:id', component: BookDetails },
+  { path: "/books/:id", component: BookDetails },
   { path: "/request-book", component: RequestBook },
 
   // Scan-Pages

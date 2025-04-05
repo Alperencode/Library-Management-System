@@ -1,44 +1,45 @@
 <template>
   <div>
-    <section class="borrow-history">
+    <section class="overdue-books">
       <div class="container">
-        <h2>Borrow History</h2>
-        <p>Here you can see the books you have previously borrowed.</p>
+        <h2>Overdue Books</h2>
+        <p>Here you can see the books that are overdue.</p>
 
-        <!-- Eğer ödünç alınan kitap yoksa mesaj göster -->
-        <div v-if="borrowHistory.length === 0" class="no-results">
-          <p class="no-results-text">You have not borrowed any books yet.</p>
+        <!-- Kullanıcının gecikmiş kitabı yoksa mesaj göster -->
+        <div v-if="overdueBooks.length === 0" class="no-results">
+          <p class="no-results-text">You have no overdue books.</p>
         </div>
 
-        <!-- Ödünç alınan kitapları listele -->
+        <!-- Gecikmiş kitapları listele -->
         <div v-else>
           <div class="row grid">
             <div
-              v-for="(book, index) in borrowHistory"
+              v-for="(book, index) in overdueBooks"
               :key="index"
-              class="history-item"
+              class="meeting-item"
             >
-              <div class="history-box">
+              <div class="meeting-box">
                 <div class="thumb">
-                  <img
-                    :src="book.image"
-                    :alt="book.title"
-                    class="book-thumbnail"
-                  />
+                  <router-link :to="book.link">
+                    <img
+                      :src="book.image"
+                      :alt="book.title"
+                      class="book-thumbnail"
+                    />
+                  </router-link>
                 </div>
                 <div class="down-content">
-                  <h4 class="book-title">{{ book.title }}</h4>
-                  <p class="text-ellipsis">
+                  <router-link :to="book.link">
+                    <h4 class="book-title">{{ book.title }}</h4>
+                  </router-link>
+                  <p class="text-ellipsis" :title="book.authors.join(', ')">
                     <strong>Author:</strong>
                     {{ book.authors.join(", ") || "Unknown" }}
                   </p>
-                  <p>
-                    <strong>Borrowed Date:</strong> {{ book.borrowed_date }}
+                  <p class="text-ellipsis" :title="book.publisher">
+                    <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
-                  <p>
-                    <strong>Returned Date:</strong>
-                    {{ book.returned_date || "Not Returned Yet" }}
-                  </p>
+                  <p><strong>Due Date:</strong> {{ book.due_date }}</p>
                 </div>
               </div>
             </div>
@@ -54,29 +55,30 @@ import { ref, onMounted } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 
-const borrowHistory = ref([]);
+const overdueBooks = ref([]);
 
-const fetchBorrowHistory = async () => {
+const fetchOverdueBooks = async () => {
   try {
-    const res = await api.get("/borrowed/history");
-    borrowHistory.value = res.data.books.map((book) => ({
+    const res = await api.get("/borrowed/overdue-books");
+    overdueBooks.value = res.data.books.map((book) => ({
       id: book.id,
       title: book.title || "No Title",
       image: book.cover_image || defaultCover,
+      link: `/book/${book.id}`,
       authors: book.authors || [],
-      borrowed_date: book.borrowed_date || "Unknown",
-      returned_date: book.returned_date || "Not Returned Yet",
+      publisher: book.publisher || "Unknown",
+      due_date: book.due_date || "Unknown",
     }));
   } catch (error) {
-    console.error("Error retrieving borrow history:", error);
+    console.error("Error retrieving overdue books:", error);
   }
 };
 
-onMounted(fetchBorrowHistory);
+onMounted(fetchOverdueBooks);
 </script>
 
 <style scoped>
-.borrow-history {
+.overdue-books {
   padding-top: 40px;
   min-height: auto;
 }
@@ -87,7 +89,7 @@ onMounted(fetchBorrowHistory);
 }
 
 .no-results {
-  color: #ffffff !important;
+  color: black !important;
   padding: 20px;
   font-size: 18px;
   text-align: center;
@@ -101,6 +103,7 @@ onMounted(fetchBorrowHistory);
   font-size: 15px;
   font-weight: bold;
 }
+
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -108,17 +111,17 @@ onMounted(fetchBorrowHistory);
   margin-top: 20px;
 }
 
-.history-item {
+.meeting-item {
   width: 100%;
 }
 
 @media (min-width: 768px) {
-  .history-item {
+  .meeting-item {
     width: calc(33.333% - 20px);
   }
 }
 
-.history-box {
+.meeting-box {
   border: 1px solid #ccc;
   padding: 10px;
   border-radius: 8px;
