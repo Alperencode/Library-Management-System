@@ -93,7 +93,7 @@ def generate_html_email(book) -> str:
     cover_image = book.cover_image or "https://via.placeholder.com/100x150?text=No+Cover"
     authors = ", ".join(book.authors)
     description = book.description or "No description available."
-    borrow_link = f"{get_local_ip}:8085/books/{book.id}"
+    borrow_link = f"localhost:8085/books/{book.id}"
 
     return f"""
     <html>
