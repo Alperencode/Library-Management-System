@@ -16,20 +16,10 @@
                 <h2>Welcome to Education</h2>
                 <p>
                   This is an edu meeting HTML CSS template provided by
-                  <a
-                    rel="nofollow"
-                    href="https://templatemo.com/page/1"
-                    target="_blank"
-                    >TemplateMo website</a
-                  >.
+                  <a rel="nofollow" href="https://templatemo.com/page/1" target="_blank">TemplateMo website</a>.
                   This is a Bootstrap v5.1.3 layout. The video background is taken from
                   Pexels website, a group of young people by
-                  <a
-                    rel="nofollow"
-                    href="https://www.pexels.com/@pressmaster"
-                    target="_blank"
-                    >Pressmaster</a
-                  >.
+                  <a rel="nofollow" href="https://www.pexels.com/@pressmaster" target="_blank">Pressmaster</a>.
                 </p>
                 <div class="main-button-red">
                   <div class="scroll-to-section">
@@ -150,11 +140,8 @@
                     <div class="price">
                       <span>$22.00</span>
                     </div>
-                    <a href="meeting-details.html"
-                      ><img
-                        src="assets/images/meeting-01.jpg"
-                        alt="New Lecturer Meeting"
-                    /></a>
+                    <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg"
+                        alt="New Lecturer Meeting" /></a>
                   </div>
                   <div class="down-content">
                     <div class="date">
@@ -162,7 +149,9 @@
                         Nov <span>10</span>
                       </h6>
                     </div>
-                    <a href="meeting-details.html"><h4>New Lecturers Meeting</h4></a>
+                    <a href="meeting-details.html">
+                      <h4>New Lecturers Meeting</h4>
+                    </a>
                     <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
                   </div>
                 </div>
@@ -173,11 +162,7 @@
                     <div class="price">
                       <span>$36.00</span>
                     </div>
-                    <a href="meeting-details.html"
-                      ><img
-                        src="assets/images/meeting-02.jpg"
-                        alt="Online Teaching"
-                    /></a>
+                    <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt="Online Teaching" /></a>
                   </div>
                   <div class="down-content">
                     <div class="date">
@@ -185,7 +170,9 @@
                         Nov <span>24</span>
                       </h6>
                     </div>
-                    <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
+                    <a href="meeting-details.html">
+                      <h4>Online Teaching Techniques</h4>
+                    </a>
                     <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
                   </div>
                 </div>
@@ -196,11 +183,7 @@
                     <div class="price">
                       <span>$14.00</span>
                     </div>
-                    <a href="meeting-details.html"
-                      ><img
-                        src="assets/images/meeting-03.jpg"
-                        alt="Higher Education"
-                    /></a>
+                    <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt="Higher Education" /></a>
                   </div>
                   <div class="down-content">
                     <div class="date">
@@ -208,9 +191,9 @@
                         Nov <span>26</span>
                       </h6>
                     </div>
-                    <a href="meeting-details.html"
-                      ><h4>Higher Education Conference</h4></a
-                    >
+                    <a href="meeting-details.html">
+                      <h4>Higher Education Conference</h4>
+                    </a>
                     <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
                   </div>
                 </div>
@@ -221,11 +204,7 @@
                     <div class="price">
                       <span>$48.00</span>
                     </div>
-                    <a href="meeting-details.html"
-                      ><img
-                        src="assets/images/meeting-04.jpg"
-                        alt="Student Training"
-                    /></a>
+                    <a href="meeting-details.html"><img src="assets/images/meeting-04.jpg" alt="Student Training" /></a>
                   </div>
                   <div class="down-content">
                     <div class="date">
@@ -233,7 +212,9 @@
                         Nov <span>30</span>
                       </h6>
                     </div>
-                    <a href="meeting-details.html"><h4>Student Training Meetup</h4></a>
+                    <a href="meeting-details.html">
+                      <h4>Student Training Meetup</h4>
+                    </a>
                     <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
                   </div>
                 </div>
@@ -293,18 +274,9 @@
                     <p>
                       If you want to get the latest collection of HTML CSS templates for
                       your websites, you may visit
-                      <a
-                        rel="nofollow"
-                        href="https://www.toocss.com/"
-                        target="_blank"
-                        >Too CSS website</a
-                      >.
+                      <a rel="nofollow" href="https://www.toocss.com/" target="_blank">Too CSS website</a>.
                       If you need a working contact form script, please visit
-                      <a
-                        href="https://templatemo.com/contact"
-                        target="_parent"
-                        >our contact page</a
-                      >
+                      <a href="https://templatemo.com/contact" target="_parent">our contact page</a>
                       for more info.
                     </p>
                   </div>
@@ -712,18 +684,15 @@
           </div>
           <div class="col-lg-6 align-self-center">
             <div class="video">
-              <a
-                href="https://www.youtube.com/watch?v=HndV87XpkWg"
-                target="_blank"
-                ><img src="assets/images/play-icon.png" alt=""
-              /></a>
+              <a href="https://www.youtube.com/watch?v=HndV87XpkWg" target="_blank"><img
+                  src="assets/images/play-icon.png" alt="" /></a>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="contact-us" id="contact">
+    <section class="section contact-us" id="contact" data-section="contact">
       <div class="container">
         <div class="row">
           <div class="col-lg-9 align-self-center">
@@ -736,48 +705,24 @@
                     </div>
                     <div class="col-lg-4">
                       <fieldset>
-                        <input
-                          name="name"
-                          type="text"
-                          id="name"
-                          placeholder="YOURNAME...*"
-                          required=""
-                        />
+                        <input name="name" type="text" id="name" placeholder="YOURNAME...*" required="" />
                       </fieldset>
                     </div>
                     <div class="col-lg-4">
                       <fieldset>
-                        <input
-                          name="email"
-                          type="text"
-                          id="email"
-                          pattern="[^ @]*@[^ @]*"
-                          placeholder="YOUR EMAIL..."
-                          required=""
-                        />
+                        <input name="email" type="text" id="email" pattern="[^ @]*@[^ @]*" placeholder="YOUR EMAIL..."
+                          required="" />
                       </fieldset>
                     </div>
                     <div class="col-lg-4">
                       <fieldset>
-                        <input
-                          name="subject"
-                          type="text"
-                          id="subject"
-                          placeholder="SUBJECT...*"
-                          required=""
-                        />
+                        <input name="subject" type="text" id="subject" placeholder="SUBJECT...*" required="" />
                       </fieldset>
                     </div>
                     <div class="col-lg-12">
                       <fieldset>
-                        <textarea
-                          name="message"
-                          type="text"
-                          class="form-control"
-                          id="message"
-                          placeholder="YOUR MESSAGE..."
-                          required=""
-                        ></textarea>
+                        <textarea name="message" type="text" class="form-control" id="message"
+                          placeholder="YOUR MESSAGE..." required=""></textarea>
                       </fieldset>
                     </div>
                     <div class="col-lg-12">
@@ -827,16 +772,16 @@ export default {
   name: "HomeView",
   setup() {
     onMounted(() => {
-      // Dynamically load your JS files
       const scripts = [
         "vendor/jquery/jquery.min.js",
         "assets/js/isotope.min.js",
+        "assets/js/isotope.js",
         "assets/js/owl-carousel.js",
         "assets/js/lightbox.js",
         "assets/js/tabs.js",
         "assets/js/video.js",
         "assets/js/slick-slider.js",
-        //"assets/js/custom.js",
+        "assets/js/custom.js",
       ];
 
       scripts.forEach((src) => {
@@ -846,40 +791,44 @@ export default {
         document.body.appendChild(script);
       });
 
-      // Optional: run original jQuery snippet
-      // Wait a bit to ensure jQuery has loaded
       setTimeout(() => {
         if (window.$) {
           window.$(".nav li:first").addClass("active");
 
-          var showSection = function (section, isAnimate) {
-            var direction = section.replace(/#/, "");
-            var reqSection = window
+          const showSection = function (section, isAnimate) {
+            const direction = section.replace(/#/, "");
+            const reqSection = window
               .$(".section")
               .filter('[data-section="' + direction + '"]');
-            var reqSectionPos = reqSection.offset().top - 0;
+
+            if (!reqSection.length) {
+              console.warn("Section not found for:", direction);
+              return;
+            }
+
+            const reqSectionPos = reqSection.offset().top - 0;
 
             if (isAnimate) {
-              window.$("body, html").animate(
+              window.$("html, body").animate(
                 {
                   scrollTop: reqSectionPos,
                 },
                 800
               );
             } else {
-              window.$("body, html").scrollTop(reqSectionPos);
+              window.$("html, body").scrollTop(reqSectionPos);
             }
           };
 
-          var checkSection = function () {
+          const checkSection = function () {
             window.$(".section").each(function () {
-              var $this = window.$(this);
-              var topEdge = $this.offset().top - 80;
-              var bottomEdge = topEdge + $this.height();
-              var wScroll = window.$(window).scrollTop();
+              const $this = window.$(this);
+              const topEdge = $this.offset().top - 80;
+              const bottomEdge = topEdge + $this.height();
+              const wScroll = window.$(window).scrollTop();
               if (topEdge < wScroll && bottomEdge > wScroll) {
-                var currentId = $this.data("section");
-                var reqLink = window
+                const currentId = $this.data("section");
+                const reqLink = window
                   .$("a")
                   .filter("[href*=\\#" + currentId + "]");
                 reqLink.closest("li").addClass("active").siblings().removeClass("active");
@@ -894,11 +843,11 @@ export default {
               showSection(window.$(this).attr("href"), true);
             });
 
-          window.$(window).scroll(function () {
+          window.$(window).scroll(() => {
             checkSection();
           });
         }
-      }, 500); // Adjust delay as needed
+      }, 500);
     });
 
     return {};
