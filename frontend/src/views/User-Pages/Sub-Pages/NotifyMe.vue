@@ -96,6 +96,11 @@ onMounted(fetchNotifyMeList);
 </script>
 
 <style scoped>
+.book-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .notify-list {
   padding-top: 40px;
   min-height: auto;
