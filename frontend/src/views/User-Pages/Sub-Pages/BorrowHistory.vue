@@ -27,7 +27,9 @@
                   />
                 </div>
                 <div class="down-content">
-                  <h4 class="book-title">{{ book.title }}</h4>
+                  <router-link :to="book.link">
+                    <h4 class="book-title">{{ book.title }}</h4>
+                  </router-link>
                   <p class="text-ellipsis">
                     <strong>Author:</strong>
                     {{ book.authors.join(", ") || "Unknown" }}
@@ -58,6 +60,7 @@ const fetchBorrowHistory = async () => {
     borrowHistory.value = res.data.books.map((book) => ({
       id: book.id,
       title: book.title || "No Title",
+      link: `/books/${book.id}`,
       image: book.cover_image || defaultCover,
       authors: book.authors || [],
       publisher: book.publisher || "Unknown",
