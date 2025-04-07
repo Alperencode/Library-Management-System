@@ -1,6 +1,8 @@
 import bcrypt
 import jwt
 import smtplib
+import socket
+import json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate, make_msgid, formataddr
@@ -91,7 +93,7 @@ def generate_html_email(book) -> str:
     cover_image = book.cover_image or "https://via.placeholder.com/100x150?text=No+Cover"
     authors = ", ".join(book.authors)
     description = book.description or "No description available."
-    borrow_link = ""
+    borrow_link = f"localhost:8085/books/{book.id}"
 
     return f"""
     <html>
@@ -118,3 +120,19 @@ def generate_html_email(book) -> str:
       </body>
     </html>
     """
+
+
+def get_local_ip():
+    # Future work
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    data = {"ip": ip}
+    with open('local-ip.json', 'w') as f:
+        json.dump(data, f)
+    return ip

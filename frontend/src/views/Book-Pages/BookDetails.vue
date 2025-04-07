@@ -23,6 +23,9 @@
             <span v-if="book.categories?.length">
               {{ book.categories[0]?.category }} / {{ book.categories[0]?.subcategory }}
             </span>
+            <span v-else>
+              Not specified
+            </span>
           </p>
           <p><strong>Language:</strong> {{ book.language }}</p>
           <p><strong>Page Count:</strong> {{ book.page_count }}</p>
@@ -30,11 +33,11 @@
           <div class="info-box status-box" :class="book.borrowed ? 'bg-red' : 'bg-green'">
             <strong>Status:</strong> {{ book.borrowed ? 'Taken' : 'Available' }}
           </div>
-          <div class="info-box info-small-box bg-gray">
+          <div class="info-box info-small-box bg-redish">
             <strong>Borrow Count:</strong> {{ book.borrow_count || 0 }}
           </div>
           <div v-if="book.borrowed && book.return_date" class="info-box info-small-box bg-blue">
-            <strong>Return Date:</strong> {{ book.return_date }}
+            <strong>Return Date:</strong> {{ formatDate(book.return_date) }}
           </div>
         </div>
       </div>
@@ -51,6 +54,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '@/api/axios'
 import defaultCover from '@/assets/images/default-cover.png'
+import { formatDate } from "@/utils/date";
+
 
 const route = useRoute()
 const book = ref(null)
@@ -66,7 +71,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-
 .content-wrapper {
   color: white;
   min-height: 100vh;
@@ -168,8 +172,8 @@ main {
 .left-box,
 .right-box,
 .desc-box,
-.left-box * ,
-.right-box * ,
+.left-box *,
+.right-box *,
 .desc-box * {
   color: #000000 !important;
 }
@@ -192,12 +196,13 @@ main {
 }
 
 .bg-blue {
-  background-color: #2563eb;
+  background-color: #189fd0;
 }
 
-.bg-gray {
-  background-color: #6b7280;
+.bg-redish {
+  background-color: #e35521;
 }
+
 .book-image {
   width: 180px;
   height: 270px;
@@ -229,17 +234,38 @@ main {
   opacity: 0.9;
 }
 
-.btn.blue { background-color: #d48d29; }
-.btn.blue:hover { background-color: #d48d29; }
+.btn.blue {
+  background-color: #d48d29;
+}
 
-.btn.yellow { background-color: #eab308; color: black; }
-.btn.yellow:hover { background-color: #ca8a04; }
+.btn.blue:hover {
+  background-color: #d48d29;
+}
 
-.btn.green { background-color: #d48d29; }
-.btn.green:hover { background-color: #d48d29; }
+.btn.yellow {
+  background-color: #eab308;
+  color: black;
+}
 
-.btn.gray { background-color: #6b7280; }
-.btn.gray:hover { background-color: #4b5563; }
+.btn.yellow:hover {
+  background-color: #ca8a04;
+}
+
+.btn.green {
+  background-color: #d48d29;
+}
+
+.btn.green:hover {
+  background-color: #d48d29;
+}
+
+.btn.gray {
+  background-color: #6b7280;
+}
+
+.btn.gray:hover {
+  background-color: #4b5563;
+}
 
 .status-box {
   display: inline-block;
@@ -262,5 +288,4 @@ main {
   text-align: center;
   margin-top: 0.25rem;
 }
-
 </style>
