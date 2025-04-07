@@ -90,7 +90,7 @@ async def send_email_to_subscribers(user, book, subject):
 
 
 def generate_html_email(book) -> str:
-    cover_image = book.cover_image or "https://via.placeholder.com/100x150?text=No+Cover"
+    cover_image = book.cover_image or "https://drive.google.com/uc?export=view&id=1ooKL3fZq8Py5tWi0eoruLTMsCsGl39Cj"
     authors = ", ".join(book.authors)
     description = book.description or "No description available."
     borrow_link = f"localhost:8085/books/{book.id}"
