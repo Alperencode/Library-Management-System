@@ -10,6 +10,7 @@ from config.config import get_config
 from internal.models.user import User
 from fastapi import HTTPException, Request
 from internal.database.users import get_user_by_id
+from config.config import LOCAL_IP
 from .logger import logger
 
 
@@ -93,7 +94,7 @@ def generate_html_email(book) -> str:
     cover_image = book.cover_image or "https://drive.google.com/uc?export=view&id=1ooKL3fZq8Py5tWi0eoruLTMsCsGl39Cj"
     authors = ", ".join(book.authors)
     description = book.description or "No description available."
-    borrow_link = f"localhost:8085/books/{book.id}"
+    borrow_link = f"http://{LOCAL_IP}:8085/books/{book.id}"
 
     return f"""
     <html>
@@ -123,7 +124,6 @@ def generate_html_email(book) -> str:
 
 
 def get_local_ip():
-    # Future work
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))

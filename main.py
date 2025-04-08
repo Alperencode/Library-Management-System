@@ -6,7 +6,7 @@ from internal.utils.logger import logger
 from internal.database.database import check_connection, client
 from internal.api.exception_handlers import generic_exception_handler, validation_exception_handler
 from internal.api import book, user, login, token, service_status, google_books, user_book_operations, request_book
-from config.config import get_config, set_config
+from config.config import get_config, set_config, LOCAL_IP
 import uvicorn
 import sys
 
@@ -34,7 +34,7 @@ app = FastAPI(lifespan=lifespan)
 # Middlewares
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8085"],
+    allow_origins=["http://localhost:8085", f"http://{LOCAL_IP}:8085"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,4 +58,4 @@ if __name__ == "__main__":
     set_config("health", True)
     set_config("ready", True)
 
-    uvicorn.run(app, host="0.0.0.0", port=get_config("api_port"))
+    uvicorn.run(app, host=LOCAL_IP, port=get_config("api_port"))
