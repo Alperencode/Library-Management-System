@@ -1,5 +1,6 @@
 from dotenv import load_dotenv, find_dotenv
 from internal.utils.logger import logger
+from internal.utils.utils import get_local_ip
 import os
 import sys
 
@@ -15,6 +16,7 @@ load_dotenv(override=True)
 VERSION = "v0.1.0"
 Health = False
 Ready = False
+LOCAL_IP = get_local_ip()
 
 conf = {}
 

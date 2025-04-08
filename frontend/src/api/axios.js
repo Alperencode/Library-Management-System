@@ -1,13 +1,18 @@
 import axios from 'axios'
 import store from '@/store'
 
+const protocol = window.location.protocol;
+const hostname = process.env.VUE_APP_API_HOST || window.location.hostname;
+const port = process.env.VUE_APP_API_PORT || 8000;
+const baseUrl = `${protocol}//${hostname}:${port}/api/v1`;
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: baseUrl,
   withCredentials: true,
 })
 
 const plainAxios = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: baseUrl,
   withCredentials: true,
 })
 
