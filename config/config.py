@@ -1,6 +1,6 @@
 from dotenv import load_dotenv, find_dotenv
 from internal.utils.logger import logger
-from internal.utils.utils import get_local_ip
+from internal.utils.ip import get_local_ip
 import os
 import sys
 
