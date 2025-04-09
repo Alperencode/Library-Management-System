@@ -18,7 +18,7 @@ const plainAxios = axios.create({
 
 let isRefreshing = false
 let failedQueue = []
-let hasRedirected = false
+let hasRedirected = false;
 
 const processQueue = (error) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -32,15 +32,18 @@ api.interceptors.response.use(
   async (err) => {
     const originalRequest = err.config
 
-    const ignoredPaths = ['/refresh-token', '/login', '/books', '/scan-book', '/'];
-    const ignoreCall = ignoredPaths.includes(originalRequest.url);    if (err.response?.status === 401 && !originalRequest._retry && !ignoreCall) {
+    const ignoredPaths = ['/me','/refresh-token', '/login', '/register', '/books', '/books/', '/scan-book', '/'];
+    const ignoreCall = ignoredPaths.some(path => {
+      if (path === '/') return originalRequest.url === '/';
+      if (path.endsWith('/')) return originalRequest.url.startsWith(path);
+      return originalRequest.url === path || originalRequest.url.startsWith(path + '/');
+    });
+    if (err.response?.status === 401 && !originalRequest._retry && !ignoreCall) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
         }).then(() => {
-          if (!hasRedirected) {
-            return api(originalRequest)
-          }
+          return api(originalRequest)
         })
       }
 
@@ -54,18 +57,14 @@ api.interceptors.response.use(
           userId ? { id: userId } : {},
           { withCredentials: true }
         )
-        processQueue(null)
-        if (!hasRedirected) {
-          return api(originalRequest)
-        }
+        hasRedirected = false;
+        return api(originalRequest)
       } catch (error) {
         processQueue(error)
-        if (!hasRedirected) {
-          hasRedirected = true
-          const router = require('@/router').default;
-          if (router.currentRoute.value.path !== '/login') {
-            router.push('/login');
-          }
+        const router = require('@/router').default;
+        if (!hasRedirected && router.currentRoute.value.path !== '/login') {
+          hasRedirected = true;
+          router.push('/login');
         }
         return Promise.reject(error)
       } finally {
