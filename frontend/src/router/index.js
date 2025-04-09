@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import store from '@/store';
 
 // Homeview
 import HomeView from "@/views/HomeView.vue";
@@ -64,6 +65,19 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = store.state.user !== null;
+
+  const protectedPaths = ['/user-page', '/request-book', '/scan-book'];
+  const requiresAuth = protectedPaths.some(path => to.path.startsWith(path));
+
+  if (requiresAuth && !isAuthenticated) {
+    return next('/login');
+  }
+
+  return next();
 });
 
 export default router;
