@@ -5,15 +5,20 @@
         <div class="left-box">
           <img :src="book.cover_image || defaultCover" alt="Cover Image" class="book-image" />
           <div class="book-title">{{ book.title }}</div>
-          <div class="button-row">
-            <template v-if="!book.borrowed">
-              <button class="btn blue">Borrow</button>
-              <button class="btn gray">Return</button>
-            </template>
-            <template v-else>
-              <button class="btn yellow">Extend</button>
-              <button class="btn green">Notify Me</button>
-            </template>
+          <div class="book-buttons">
+            <button v-if="showReturnButton" @click="goToScanBook" class="btn">Return</button>
+            <button v-if="showExtendButton" @click="extendReturn" class="btn">Extend</button>
+
+            <button
+              v-else-if="showNotifyButton"
+              @click="notifyMe"
+              class="btn"
+              :disabled="isAlreadyInNotifyList"
+            >
+              {{ isAlreadyInNotifyList ? 'Already in Notify List' : 'Notify Me' }}
+            </button>
+
+            <button v-else-if="showBorrowButton" @click="goToScanBook" class="btn">Borrow</button>
           </div>
         </div>
         <div class="right-box">
@@ -50,24 +55,97 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/axios'
 import defaultCover from '@/assets/images/default-cover.png'
-import { formatDate } from "@/utils/date";
-
+import { formatDate } from "@/utils/date"
+import { useStore } from 'vuex'
+import { useToast } from 'vue-toastification'
 
 const route = useRoute()
+const router = useRouter()
+const toast = useToast()
+const store = useStore()
+
 const book = ref(null)
+const notifyList = ref([])
+
+if (!store.state.user) {
+  const savedUser = localStorage.getItem('user')
+  if (savedUser) {
+    store.commit('setUser', JSON.parse(savedUser))
+  }
+}
+
+const user = computed(() => store.state.user)
+
+const isMine = computed(() => book.value?.currently_borrowed_by === user.value?.id)
+const isBorrowedByAnother = computed(() => {
+  return (
+    book.value &&
+    book.value.borrowed &&
+    book.value.currently_borrowed_by &&
+    book.value.currently_borrowed_by !== user.value?.id
+  )
+})
+
+const isAlreadyInNotifyList = computed(() => {
+  return notifyList.value.some(item => item.id === book.value?.id || item._id === book.value?._id)
+})
+
+const showReturnButton = computed(() => isMine.value)
+const showExtendButton = computed(() => isMine.value)
+const showNotifyButton = computed(() => isBorrowedByAnother.value)
+const showBorrowButton = computed(() => book.value && !book.value.borrowed)
 
 onMounted(async () => {
   try {
-    const response = await api.get(`/books/${route.params.id}`)
-    book.value = response.data.book
-  } catch (error) {
-    console.error('Book details could not be obtained:', error)
+    const res = await api.get(`/books/${route.params.id}`)
+    book.value = res.data.book
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to fetch book details')
+  }
+
+  try {
+    const notifyRes = await api.get(`/notify-me`)
+    notifyList.value = (notifyRes.data.books || []).map(book => ({
+      ...book,
+      _id: book._id || book.id
+    }))
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to fetch notify list')
   }
 })
+
+
+function goToScanBook() {
+  router.push('/scan-book')
+}
+
+async function extendReturn() {
+  try {
+    const res = await api.post(`/extend-return/${book.value._id}`)
+    toast.success(res.data.message)
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Extension failed')
+  }
+}
+
+async function notifyMe() {
+  if (!book.value?._id) {
+    toast.error('Book ID is not available')
+    return
+  }
+
+  try {
+    const res = await api.post(`/notify-me/${book.value._id}`)
+    toast.success(res.data.message)
+    notifyList.value.push(book.value)
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Notification failed')
+  }
+}
 </script>
 
 <style scoped>
@@ -274,8 +352,9 @@ main {
   border-radius: 6px;
   margin-top: 0.5rem;
   width: fit-content;
-  min-width: 160px;
-  text-align: center;
+  min-width: 140px;
+  text-align: left;
+  margin-top: 0.25rem;
 }
 
 .info-small-box {
@@ -287,5 +366,32 @@ main {
   min-width: 140px;
   text-align: center;
   margin-top: 0.25rem;
+}
+
+.book-details {
+  padding: 1rem;
+  max-width: 600px;
+  margin: auto;
+  text-align: center;
+}
+.book-cover {
+  width: 200px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+.book-buttons {
+  margin-top: 1.5rem;
+}
+.btn {
+  margin: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #f5a425;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn:hover {
+  background-color: #e48c12;
 }
 </style>
