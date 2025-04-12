@@ -352,286 +352,38 @@
       </div>
     </section>
 
-    <section class="our-courses" id="courses">
+    <section class="popular-courses">
       <div class="container">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="section-heading">
-              <h2>Our Popular Courses</h2>
-            </div>
-          </div>
-          <div class="col-lg-12">
-            <div class="owl-courses-item owl-carousel">
-              <div class="item">
-                <img src="assets/images/course-01.jpg" alt="Course One" />
-                <div class="down-content">
-                  <h4>Morbi tincidunt elit vitae justo rhoncus</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$160</span>
-                      </div>
-                    </div>
-                  </div>
+        <h2 class="section-heading text-white text-center mb-5">Most Borrowed Books</h2>
+        <div class="slick-carousel">
+          <div
+            class="course-card"
+            v-for="book in books"
+            :key="book.id"
+          >
+            <div class="card text-center text-dark">
+              <router-link
+                :to="`/books/${book.id}`"
+                class="text-decoration-none"
+              >
+                <img
+                  :src="book.cover_image || defaultCover"
+                  :alt="book.title"
+                  class="card-img-top"
+                />
+              </router-link>
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <h5 class="card-title">{{ book.title }}</h5>
+                  <p class="card-text text-muted">{{ book.authors?.join(', ') }}</p>
                 </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-02.jpg" alt="Course Two" />
-                <div class="down-content">
-                  <h4>Curabitur molestie dignissim purus vel</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$180</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-03.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Nulla at ipsum a mauris egestas tempor</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$140</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-04.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Aenean molestie quis libero gravida</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$120</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-01.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Lorem ipsum dolor sit amet adipiscing elit</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$250</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-02.jpg" alt="" />
-                <div class="down-content">
-                  <h4>TemplateMo is the best website for Free CSS</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$270</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-03.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Web Design Templates at your finger tips</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$340</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-04.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Please visit our website again</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$360</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-01.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Responsive HTML Templates for you</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$400</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-02.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Download Free CSS Layouts for your business</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$430</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-03.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Morbi in libero blandit lectus cursus</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$480</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-04.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Curabitur molestie dignissim purus</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$560</span>
-                      </div>
-                    </div>
-                  </div>
+                <div class="mt-3">
+                  <router-link
+                    :to="`/books/${book.id}`"
+                    class="view-details-btn"
+                  >
+                    View Details →
+                  </router-link>
                 </div>
               </div>
             </div>
@@ -766,17 +518,19 @@
 </template>
 
 <script>
-import { onMounted } from "vue";
+import { onMounted, ref, nextTick } from "vue";
+import api from "../api/axios";
+import defaultCover from "@/assets/images/default-cover.png";
 
 export default {
   name: "HomeView",
   setup() {
-    onMounted(() => {
+    const books = ref([]);
+    onMounted(async () => {
       const scripts = [
         "vendor/jquery/jquery.min.js",
         "assets/js/isotope.min.js",
         "assets/js/isotope.js",
-        "assets/js/owl-carousel.js",
         "assets/js/lightbox.js",
         "assets/js/tabs.js",
         "assets/js/video.js",
@@ -791,66 +545,48 @@ export default {
         document.body.appendChild(script);
       });
 
-      setTimeout(() => {
-        if (window.$) {
-          window.$(".nav li:first").addClass("active");
+      const res = await api.get("/books?most_borrowed=true&limit=10");
+      books.value = res.data.books;
+      await nextTick();
 
-          const showSection = function (section, isAnimate) {
-            const direction = section.replace(/#/, "");
-            const reqSection = window
-              .$(".section")
-              .filter('[data-section="' + direction + '"]');
-
-            if (!reqSection.length) {
-              console.warn("Section not found for:", direction);
-              return;
-            }
-
-            const reqSectionPos = reqSection.offset().top - 0;
-
-            if (isAnimate) {
-              window.$("html, body").animate(
-                {
-                  scrollTop: reqSectionPos,
-                },
-                800
-              );
-            } else {
-              window.$("html, body").scrollTop(reqSectionPos);
-            }
-          };
-
-          const checkSection = function () {
-            window.$(".section").each(function () {
-              const $this = window.$(this);
-              const topEdge = $this.offset().top - 80;
-              const bottomEdge = topEdge + $this.height();
-              const wScroll = window.$(window).scrollTop();
-              if (topEdge < wScroll && bottomEdge > wScroll) {
-                const currentId = $this.data("section");
-                const reqLink = window
-                  .$("a")
-                  .filter("[href*=\\#" + currentId + "]");
-                reqLink.closest("li").addClass("active").siblings().removeClass("active");
-              }
-            });
-          };
-
-          window
-            .$(".main-menu, .responsive-menu, .scroll-to-section")
-            .on("click", "a", function (e) {
-              e.preventDefault();
-              showSection(window.$(this).attr("href"), true);
-            });
-
-          window.$(window).scroll(() => {
-            checkSection();
-          });
-        }
-      }, 500);
+      if (window.$ && window.$(".slick-carousel").slick) {
+        window.$(".slick-carousel").slick({
+          slidesToShow: 4,
+          slidesToScroll: 1,
+          autoplay: true,
+          autoplaySpeed: 3000,
+          arrows: true,
+          dots: true,
+          responsive: [
+            {
+              breakpoint: 1024,
+              settings: {
+                slidesToShow: 3,
+              },
+            },
+            {
+              breakpoint: 768,
+              settings: {
+                slidesToShow: 2,
+              },
+            },
+            {
+              breakpoint: 480,
+              settings: {
+                slidesToShow: 1,
+              },
+            },
+          ],
+        });
+      } else {
+        console.error("Slick failed to load!");
+      }
     });
 
-    return {};
+    return {
+      books,
+      defaultCover,
+    };
   },
 };
 </script>
@@ -861,4 +597,50 @@ export default {
 @import "@/assets/css/templatemo-edu-meeting.css";
 @import "@/assets/css/owl.css";
 @import "@/assets/css/lightbox.css";
+
+.popular-courses {
+  background-color: #1f2a36;
+  padding: 50px 0;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+.course-card {
+  padding: 15px;
+}
+
+.section-heading {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.view-details-btn {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: #d4881a;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.view-details-btn:hover {
+  text-decoration: none;
+  color: #d4881a;
+  transform: translateX(4px);
+}
 </style>
