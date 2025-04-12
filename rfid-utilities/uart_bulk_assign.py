@@ -3,13 +3,26 @@ import ndef
 import time
 import argparse
 import sys
+from gpiozero import Buzzer
+from gpiozero import LED
+
+buzzer = Buzzer(18)
+led = LED(23)
+
+
+def buzz(duration=0.1):
+    buzzer.on()
+    led.on()
+    time.sleep(duration)
+    buzzer.off()
+    led.off()
 
 
 def wait_for_tag_removal(clf):
     print("Please remove the tag...")
     while True:
         tag_present = clf.sense(
-            nfc.clf.RemoteTarget("106A"),  # Type A tag
+            nfc.clf.RemoteTarget("106A"),
             iterations=1,
             interval=0.2
         )
@@ -44,6 +57,7 @@ def assign_isbns(file_path):
                         try:
                             tag.ndef.records = [ndef.TextRecord(isbn)]
                             print(f"ISBN '{isbn}' written successfully.")
+                            buzz()
                             tag_written = True
                             return True
                         except Exception as e:

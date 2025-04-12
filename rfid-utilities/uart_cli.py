@@ -2,6 +2,20 @@ import argparse
 import nfc
 import ndef
 import sys
+import time
+from gpiozero import Buzzer
+from gpiozero import LED
+
+buzzer = Buzzer(18)
+led = LED(23)
+
+
+def buzz(duration=0.1):
+    buzzer.on()
+    led.on()
+    time.sleep(duration)
+    buzzer.off()
+    led.off()
 
 
 def read_tag():
@@ -11,6 +25,7 @@ def read_tag():
             for record in records:
                 if isinstance(record, ndef.TextRecord):
                     print(record.text)
+                    buzz()
                 else:
                     print("Unsupported record type.")
         else:
@@ -28,6 +43,7 @@ def write_tag(text):
         if tag.ndef:
             tag.ndef.records = message
             print("Write successful.")
+            buzz()
         else:
             print("Tag is not NDEF-formatted or not writable.")
         return True
