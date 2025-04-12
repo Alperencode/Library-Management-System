@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.types.types import WriteRequest, FAIL, SUCCESS
 from internal.types.responses import FailResponse, RFIDResponse
-
+from internal.gpio.buzz import buzz
 
 router = APIRouter()
 
@@ -18,6 +18,7 @@ def read_rfid():
         if tag.ndef and tag.ndef.length > 0:
             for record in tag.ndef.records:
                 if isinstance(record, ndef.TextRecord):
+                    buzz()
                     return RFIDResponse(
                         code=SUCCESS,
                         message="Successfully retrieved RFID data",
@@ -59,6 +60,7 @@ def write_rfid(data: WriteRequest):
     def on_connect(tag):
         if tag.ndef:
             tag.ndef.records = [ndef.TextRecord(data.text)]
+            buzz()
             return RFIDResponse(
                 code=SUCCESS,
                 message="Successfully write the data to RFID tag.",
