@@ -4,8 +4,14 @@
       <div class="container">
         <div class="main-content">
           <div class="search-bar">
-            <input class="input-line full-width" type="text" :value="searchQuery" @input="updateSearchQuery"
-              @keyup.enter="performSearch" placeholder="Search by Author, Title, Publisher, ISBN..." />
+            <input
+              class="input-line full-width"
+              type="text"
+              :value="searchQuery"
+              @input="updateSearchQuery"
+              @keyup.enter="performSearch"
+              placeholder="Search by Author, Title, Publisher, ISBN..."
+            />
           </div>
           <div v-if="books.length === 0 && searchPerformed" class="no-results">
             <p class="no-results-text">
@@ -14,23 +20,40 @@
           </div>
           <div v-else>
             <div class="row grid">
-              <div v-for="(book, index) in books" :key="index" class="meeting-item">
+              <div
+                v-for="(book, index) in books"
+                :key="index"
+                class="meeting-item"
+              >
                 <div class="meeting-box">
                   <div class="thumb">
-                    <img :src="book.cover_image" :alt="book.title" class="book-thumbnail" />
+                    <img
+                      :src="book.cover_image"
+                      :alt="book.title"
+                      class="book-thumbnail"
+                    />
                   </div>
                   <div class="down-content">
                     <h4 class="book-title">{{ book.title }}</h4>
                     <p class="text-ellipsis" :title="book.authors.join(', ')">
-                      <strong>Author:</strong> {{ book.authors.join(', ') || 'Unknown' }}
+                      <strong>Author:</strong>
+                      {{ book.authors.join(", ") || "Unknown" }}
                     </p>
                     <p class="text-ellipsis" :title="book.publisher">
                       <strong>Publisher:</strong> {{ book.publisher }}
                     </p>
-                    <p v-if="book.categories" class="text-ellipsis" :title="book.categories">
+                    <p
+                      v-if="book.categories"
+                      class="text-ellipsis"
+                      :title="book.categories"
+                    >
                       <strong>Categories:</strong> {{ book.categories }}
                     </p>
-                    <button class="request-button" @click="requestBook(book)" :disabled="requestedBookIds.has(book.id)">
+                    <button
+                      class="request-button"
+                      @click="requestBook(book)"
+                      :disabled="requestedBookIds.has(book.id)"
+                    >
                       Request
                     </button>
                   </div>
@@ -45,21 +68,21 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue"
-import api from "@/api/axios"
-import defaultCover from "@/assets/images/default-cover.png"
+import { ref, watch, onMounted } from "vue";
+import api from "@/api/axios";
+import defaultCover from "@/assets/images/default-cover.png";
 
-const books = ref([])
-const searchQuery = ref("")
-const searchPerformed = ref(false)
-const currentPage = ref(1)
-const limit = ref(24)
+const books = ref([]);
+const searchQuery = ref("");
+const searchPerformed = ref(false);
+const currentPage = ref(1);
+const limit = ref(24);
 
 const fetchBooks = async () => {
   if (!searchQuery.value.trim()) {
-    books.value = []
-    searchPerformed.value = false
-    return
+    books.value = [];
+    searchPerformed.value = false;
+    return;
   }
   try {
     const res = await api.get("/google-books/search", {
@@ -68,19 +91,19 @@ const fetchBooks = async () => {
         page: currentPage.value,
         limit: limit.value,
       },
-    })
+    });
     books.value = res.data.books.map((book) => {
-      let categoriesString = ""
+      let categoriesString = "";
       if (Array.isArray(book.categories) && book.categories.length > 0) {
         categoriesString = book.categories
           .map((cat) => {
-            let main = cat.category || "Unknown Category"
+            let main = cat.category || "Unknown Category";
             if (cat.subcategory) {
-              main += ` - ${cat.subcategory}`
+              main += ` - ${cat.subcategory}`;
             }
-            return main
+            return main;
           })
-          .join(", ")
+          .join(", ");
       }
       return {
         id: book.id,
@@ -89,43 +112,43 @@ const fetchBooks = async () => {
         isbn: book.isbn || null,
         authors: book.authors || [],
         publisher: book.publisher || "Unknown",
-        categories: categoriesString
-      }
-    })
-    searchPerformed.value = true
+        categories: categoriesString,
+      };
+    });
+    searchPerformed.value = true;
   } catch (err) {
-    books.value = []
-    searchPerformed.value = true
+    books.value = [];
+    searchPerformed.value = true;
   }
-}
+};
 
 watch(searchQuery, () => {
-  books.value = []
-  searchPerformed.value = false
-})
+  books.value = [];
+  searchPerformed.value = false;
+});
 
 const performSearch = () => {
-  currentPage.value = 1
-  fetchBooks()
-}
+  currentPage.value = 1;
+  fetchBooks();
+};
 
 const updateSearchQuery = (event) => {
-  searchQuery.value = event.target.value
-}
+  searchQuery.value = event.target.value;
+};
 
-const requestedBookIds = ref(new Set())
+const requestedBookIds = ref(new Set());
 
 const fetchRequestedBooks = async () => {
   try {
-    const res = await api.get("/request-book")
-    const ids = res.data.books.map((book) => book.id)
-    requestedBookIds.value = new Set(ids)
+    const res = await api.get("/request-book");
+    const ids = res.data.books.map((book) => book.id);
+    requestedBookIds.value = new Set(ids);
   } catch (err) {
-    console.warn("Could not fetch requested books")
+    console.warn("Could not fetch requested books");
   }
-}
+};
 
-onMounted(fetchRequestedBooks)
+onMounted(fetchRequestedBooks);
 
 const requestBook = async (book) => {
   try {
@@ -136,15 +159,16 @@ const requestBook = async (book) => {
       isbn: book.isbn,
       publisher: book.publisher,
       cover_image: book.cover_image,
-    }
+    };
 
-    const res = await api.post("/request-book", payload)
-    alert(res.data.message || "Book request submitted successfully.")
+    const res = await api.post("/request-book", payload);
+    alert(res.data.message || "Book request submitted successfully.");
   } catch (err) {
-    const message = err?.response?.data?.message || "Failed to request the book."
-    alert(message)
+    const message =
+      err?.response?.data?.message || "Failed to request the book.";
+    alert(message);
   }
-}
+};
 </script>
 
 <style scoped>
@@ -266,7 +290,6 @@ const requestBook = async (book) => {
   width: 100%;
   max-width: 100%;
 }
-
 
 .status-badge.taken {
   background-color: #e74c3c;

@@ -1,6 +1,5 @@
 <template>
   <div id="home">
-
     <!-- ***** Main Banner Area Start ***** -->
     <section class="section main-banner" id="top" data-section="section1">
       <video autoplay muted loop id="bg-video">
@@ -16,10 +15,19 @@
                 <h2>Welcome to Education</h2>
                 <p>
                   This is an edu meeting HTML CSS template provided by
-                  <a rel="nofollow" href="https://templatemo.com/page/1" target="_blank">TemplateMo website</a>.
-                  This is a Bootstrap v5.1.3 layout. The video background is taken from
-                  Pexels website, a group of young people by
-                  <a rel="nofollow" href="https://www.pexels.com/@pressmaster" target="_blank">Pressmaster</a>.
+                  <a
+                    rel="nofollow"
+                    href="https://templatemo.com/page/1"
+                    target="_blank"
+                    >TemplateMo website</a
+                  >. This is a Bootstrap v5.1.3 layout. The video background is
+                  taken from Pexels website, a group of young people by
+                  <a
+                    rel="nofollow"
+                    href="https://www.pexels.com/@pressmaster"
+                    target="_blank"
+                    >Pressmaster</a
+                  >.
                 </p>
                 <div class="main-button-red">
                   <div class="scroll-to-section">
@@ -46,8 +54,8 @@
                 <div class="down-content">
                   <h4>Best Education</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -59,8 +67,8 @@
                 <div class="down-content">
                   <h4>Best Teachers</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -72,8 +80,8 @@
                 <div class="down-content">
                   <h4>Best Students</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -85,8 +93,8 @@
                 <div class="down-content">
                   <h4>Online Meeting</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -98,8 +106,8 @@
                 <div class="down-content">
                   <h4>Best Networking</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -114,238 +122,49 @@
         <div class="row">
           <div class="col-lg-12">
             <div class="section-heading">
-              <h2>Upcoming Meetings</h2>
+              <h2 style="padding-top: 100px">Recently Added Books</h2>
             </div>
           </div>
-          <div class="col-lg-4">
-            <div class="categories">
-              <h4>Meeting Catgories</h4>
-              <ul>
-                <li><a href="#">Sed tempus enim leo</a></li>
-                <li><a href="#">Aenean molestie quis</a></li>
-                <li><a href="#">Cras et metus vestibulum</a></li>
-                <li><a href="#">Nam et condimentum</a></li>
-                <li><a href="#">Phasellus nec sapien</a></li>
-              </ul>
-              <div class="main-button-red">
-                <a href="meetings.html">All Upcoming Meetings</a>
+          <div
+            class="col-lg-3"
+            v-for="book in recentlyAddedBooks.slice(0, 4)"
+            :key="book.id"
+          >
+            <div class="meeting-item">
+              <div class="thumb">
+                <router-link :to="`/books/${book.id}`">
+                  <img :src="book.cover_url" :alt="book.title" />
+                </router-link>
+              </div>
+              <div class="down-content">
+                <router-link :to="`/books/${book.id}`">
+                  <h4>{{ book.title }}</h4>
+                </router-link>
+                <p>{{ book.authors.join(", ") || "Unknown Author" }}</p>
               </div>
             </div>
           </div>
-          <div class="col-lg-8">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="meeting-item">
-                  <div class="thumb">
-                    <div class="price">
-                      <span>$22.00</span>
-                    </div>
-                    <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg"
-                        alt="New Lecturer Meeting" /></a>
-                  </div>
-                  <div class="down-content">
-                    <div class="date">
-                      <h6>
-                        Nov <span>10</span>
-                      </h6>
-                    </div>
-                    <a href="meeting-details.html">
-                      <h4>New Lecturers Meeting</h4>
-                    </a>
-                    <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="meeting-item">
-                  <div class="thumb">
-                    <div class="price">
-                      <span>$36.00</span>
-                    </div>
-                    <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt="Online Teaching" /></a>
-                  </div>
-                  <div class="down-content">
-                    <div class="date">
-                      <h6>
-                        Nov <span>24</span>
-                      </h6>
-                    </div>
-                    <a href="meeting-details.html">
-                      <h4>Online Teaching Techniques</h4>
-                    </a>
-                    <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="meeting-item">
-                  <div class="thumb">
-                    <div class="price">
-                      <span>$14.00</span>
-                    </div>
-                    <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt="Higher Education" /></a>
-                  </div>
-                  <div class="down-content">
-                    <div class="date">
-                      <h6>
-                        Nov <span>26</span>
-                      </h6>
-                    </div>
-                    <a href="meeting-details.html">
-                      <h4>Higher Education Conference</h4>
-                    </a>
-                    <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="meeting-item">
-                  <div class="thumb">
-                    <div class="price">
-                      <span>$48.00</span>
-                    </div>
-                    <a href="meeting-details.html"><img src="assets/images/meeting-04.jpg" alt="Student Training" /></a>
-                  </div>
-                  <div class="down-content">
-                    <div class="date">
-                      <h6>
-                        Nov <span>30</span>
-                      </h6>
-                    </div>
-                    <a href="meeting-details.html">
-                      <h4>Student Training Meetup</h4>
-                    </a>
-                    <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div v-if="recentlyAddedBooks.length === 0" class="no-results">
+            <p>No recently added books available.</p>
           </div>
         </div>
       </div>
     </section>
+
     <section class="apply-now" id="apply">
       <div class="container">
         <div class="row">
           <div class="col-lg-6 align-self-center">
             <div class="row">
+              <div class="col-lg-12"></div>
+              <div class="col-lg-12"></div>
+
               <div class="col-lg-12">
                 <div class="item">
-                  <h3>APPLY FOR BACHELOR DEGREE</h3>
-                  <p>
-                    You are allowed to use this edu meeting CSS template for your school
-                    or university or business. You can feel free to modify or edit this
-                    layout.
-                  </p>
-                  <div class="main-button-red">
-                    <div class="scroll-to-section">
-                      <a href="#contact">Join Us Now!</a>
-                    </div>
-                  </div>
+                  <h3>Request a Book from Google Books</h3>
+                  <RequestBook />
                 </div>
               </div>
-              <div class="col-lg-12">
-                <div class="item">
-                  <h3>APPLY FOR BACHELOR DEGREE</h3>
-                  <p>
-                    You are not allowed to redistribute the template ZIP file on any other
-                    template website. Please contact us for more information.
-                  </p>
-                  <div class="main-button-yellow">
-                    <div class="scroll-to-section">
-                      <a href="#contact">Join Us Now!</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="accordions is-first-expanded">
-              <article class="accordion">
-                <div class="accordion-head">
-                  <span>About Edu Meeting HTML Template</span>
-                  <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                  </span>
-                </div>
-                <div class="accordion-body">
-                  <div class="content">
-                    <p>
-                      If you want to get the latest collection of HTML CSS templates for
-                      your websites, you may visit
-                      <a rel="nofollow" href="https://www.toocss.com/" target="_blank">Too CSS website</a>.
-                      If you need a working contact form script, please visit
-                      <a href="https://templatemo.com/contact" target="_parent">our contact page</a>
-                      for more info.
-                    </p>
-                  </div>
-                </div>
-              </article>
-              <article class="accordion">
-                <div class="accordion-head">
-                  <span>HTML CSS Bootstrap Layout</span>
-                  <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                  </span>
-                </div>
-                <div class="accordion-body">
-                  <div class="content">
-                    <p>
-                      Etiam posuere metus orci, vel consectetur elit imperdiet eu. Cras
-                      ipsum magna, maximus at semper sit amet, eleifend eget neque. Nunc
-                      facilisis quam purus, sed vulputate augue interdum vitae. Aliquam a
-                      elit massa.
-                      <br /><br />
-                      Nulla malesuada elit lacus, ac ultricies massa varius sed. Etiam eu
-                      metus eget nibh consequat aliquet. Proin fringilla, quam at euismod
-                      porttitor, odio odio tempus ligula, ut feugiat ex erat nec mauris.
-                      Donec viverra velit eget lectus sollicitudin tincidunt.
-                    </p>
-                  </div>
-                </div>
-              </article>
-              <article class="accordion">
-                <div class="accordion-head">
-                  <span>Please tell your friends</span>
-                  <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                  </span>
-                </div>
-                <div class="accordion-body">
-                  <div class="content">
-                    <p>
-                      Ut vehicula mauris est, sed sodales justo rhoncus eu. Morbi porttitor
-                      quam velit, at ullamcorper justo suscipit sit amet. Quisque at
-                      suscipit mi, non efficitur velit.
-                      <br /><br />
-                      Cras et tortor semper, placerat eros sit amet, porta est. Mauris
-                      porttitor sapien et quam volutpat luctus. Nullam sodales ipsum ac
-                      neque ultricies varius.
-                    </p>
-                  </div>
-                </div>
-              </article>
-              <article class="accordion last-accordion">
-                <div class="accordion-head">
-                  <span>Share this to your colleagues</span>
-                  <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                  </span>
-                </div>
-                <div class="accordion-body">
-                  <div class="content">
-                    <p>
-                      Maecenas suscipit enim libero, vel lobortis justo condimentum id.
-                      Interdum et malesuada fames ac ante ipsum primis in faucibus.
-                      <br /><br />
-                      Sed eleifend metus sit amet magna tristique, posuere laoreet arcu
-                      semper. Nulla pellentesque ut tortor sit amet maximus. In eu libero
-                      ullamcorper, semper nisi quis, convallis nisi.
-                    </p>
-                  </div>
-                </div>
-              </article>
             </div>
           </div>
         </div>
@@ -354,13 +173,11 @@
 
     <section class="popular-courses">
       <div class="container">
-        <h2 class="section-heading text-white text-center mb-5">Most Borrowed Books</h2>
+        <h2 class="section-heading text-white text-center mb-5">
+          Most Borrowed Books
+        </h2>
         <div class="slick-carousel">
-          <div
-            class="course-card"
-            v-for="book in books"
-            :key="book.id"
-          >
+          <div class="course-card" v-for="book in books" :key="book.id">
             <div class="card text-center text-dark">
               <router-link
                 :to="`/books/${book.id}`"
@@ -375,7 +192,9 @@
               <div class="card-body d-flex flex-column justify-content-between">
                 <div>
                   <h5 class="card-title">{{ book.title }}</h5>
-                  <p class="card-text text-muted">{{ book.authors?.join(', ') }}</p>
+                  <p class="card-text text-muted">
+                    {{ book.authors?.join(", ") }}
+                  </p>
                 </div>
                 <div class="mt-3">
                   <router-link
@@ -436,8 +255,11 @@
           </div>
           <div class="col-lg-6 align-self-center">
             <div class="video">
-              <a href="https://www.youtube.com/watch?v=HndV87XpkWg" target="_blank"><img
-                  src="assets/images/play-icon.png" alt="" /></a>
+              <a
+                href="https://www.youtube.com/watch?v=HndV87XpkWg"
+                target="_blank"
+                ><img src="assets/images/play-icon.png" alt=""
+              /></a>
             </div>
           </div>
         </div>
@@ -457,24 +279,48 @@
                     </div>
                     <div class="col-lg-4">
                       <fieldset>
-                        <input name="name" type="text" id="name" placeholder="YOURNAME...*" required="" />
+                        <input
+                          name="name"
+                          type="text"
+                          id="name"
+                          placeholder="YOURNAME...*"
+                          required=""
+                        />
                       </fieldset>
                     </div>
                     <div class="col-lg-4">
                       <fieldset>
-                        <input name="email" type="text" id="email" pattern="[^ @]*@[^ @]*" placeholder="YOUR EMAIL..."
-                          required="" />
+                        <input
+                          name="email"
+                          type="text"
+                          id="email"
+                          pattern="[^ @]*@[^ @]*"
+                          placeholder="YOUR EMAIL..."
+                          required=""
+                        />
                       </fieldset>
                     </div>
                     <div class="col-lg-4">
                       <fieldset>
-                        <input name="subject" type="text" id="subject" placeholder="SUBJECT...*" required="" />
+                        <input
+                          name="subject"
+                          type="text"
+                          id="subject"
+                          placeholder="SUBJECT...*"
+                          required=""
+                        />
                       </fieldset>
                     </div>
                     <div class="col-lg-12">
                       <fieldset>
-                        <textarea name="message" type="text" class="form-control" id="message"
-                          placeholder="YOUR MESSAGE..." required=""></textarea>
+                        <textarea
+                          name="message"
+                          type="text"
+                          class="form-control"
+                          id="message"
+                          placeholder="YOUR MESSAGE..."
+                          required=""
+                        ></textarea>
                       </fieldset>
                     </div>
                     <div class="col-lg-12">
@@ -521,11 +367,17 @@
 import { onMounted, ref, nextTick } from "vue";
 import api from "../api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
+import RequestBook from "@/views/Book-Pages/RequestBook.vue";
 
 export default {
   name: "HomeView",
+  components: {
+    RequestBook,
+  },
   setup() {
     const books = ref([]);
+    const recentlyAddedBooks = ref([]);
+
     onMounted(async () => {
       const scripts = [
         "vendor/jquery/jquery.min.js",
@@ -581,11 +433,49 @@ export default {
       } else {
         console.error("Slick failed to load!");
       }
+
+      try {
+        const { data } = await api.get("/books", {
+          params: {
+            page: 1,
+            limit: 10,
+            recently_added: true,
+          },
+        });
+
+        if (data.code === "Success" && data.books) {
+          recentlyAddedBooks.value = data.books.map((book) => ({
+            id: book.id,
+            title: book.title || "No Title",
+            authors: book.authors || ["Unknown Author"],
+            cover_url: book.cover_image || defaultCover,
+            created_at: book.borrowed_at || new Date().toISOString(),
+            borrow_count: book.borrowed ? 1 : 0,
+          }));
+        } else {
+          console.error("No books found or error in response:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching recently added books:", error);
+      }
+      setTimeout(() => {
+        const items = document.querySelectorAll(".meeting-item");
+        let maxHeight = 0;
+
+        items.forEach((item) => {
+          maxHeight = Math.max(maxHeight, item.offsetHeight);
+        });
+
+        items.forEach((item) => {
+          item.style.height = `${maxHeight}px`;
+        });
+      }, 500);
     });
 
     return {
       books,
       defaultCover,
+      recentlyAddedBooks,
     };
   },
 };
@@ -642,5 +532,145 @@ export default {
   text-decoration: none;
   color: #d4881a;
   transform: translateX(4px);
+}
+
+.upcoming-meetings {
+  padding: 60px 0;
+  background-color: #f8f9fa;
+}
+
+.no-results p {
+  text-align: center;
+  font-size: 16px;
+  color: #888;
+}
+
+.meeting-item {
+  width: 200px;
+  height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.meeting-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.thumb {
+  position: relative;
+}
+
+.thumb img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-bottom: 2px solid #ddd;
+}
+
+.down-content {
+  padding: 10px;
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.down-content h4,
+.down-content p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 4px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.card-title,
+.card-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2em;
+  max-height: 2.4em;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  height: 100%;
+  min-height: 420px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-img-top {
+  height: 220px;
+  object-fit: cover;
+}
+
+.course-card {
+  padding: 15px;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.card-text {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.view-details-btn {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: #d4881a;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.view-details-btn:hover {
+  text-decoration: none;
+  color: #d4881a;
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .section-heading h2 {
+    font-size: 28px;
+  }
+
+  .meeting-item {
+    width: 100%;
+    max-width: 300px;
+    margin: auto;
+  }
 }
 </style>
