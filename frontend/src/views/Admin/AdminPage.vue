@@ -1,63 +1,42 @@
 <template>
-  <div class="admin-layout d-flex">
-    <aside class="admin-sidebar p-3 text-white">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
       <h4 class="text-center mb-4">Admin Panel</h4>
       <ul class="nav flex-column">
-        <li class="nav-item mb-2">
-        <router-link to="/admin/dashboard" class="nav-link" active-class="active-link">
-            Dashboard
-        </router-link>
-        </li>
-
-        <li class="nav-item mb-2">
-        <router-link to="/admin/books" class="nav-link" active-class="active-link">
-            Book List
-        </router-link>
-        </li>
-
-        <li class="nav-item mb-2">
-        <router-link to="/admin/users" class="nav-link" active-class="active-link">
-            User List
-        </router-link>
-        </li>
-
-        <li class="nav-item mb-2">
-        <router-link to="/admin/requests" class="nav-link" active-class="active-link">
-            Request List
-        </router-link>
-        </li>
-
-        <li class="nav-item mb-2">
-        <router-link to="/admin/borrow" class="nav-link" active-class="active-link">
-            Borrow Management
-        </router-link>
-        </li>
-
-        <li class="nav-item mb-2">
-        <router-link to="/admin/penalty" class="nav-link" active-class="active-link">
-            Penalty Management
-        </router-link>
-        </li>
-
-        <li class="nav-item mb-2">
-        <router-link to="/admin/banned-users" class="nav-link" active-class="active-link">
-            Banned User Management
-        </router-link>
-        </li>
-
-        <li class="nav-item mb-2">
-        <router-link to="/admin/add-book" class="nav-link" active-class="active-link">
-            Add New Book
-        </router-link>
+        <li
+          v-for="(item, index) in adminMenuItems"
+          :key="index"
+          class="nav-item mb-2"
+        >
+          <router-link
+            :to="item.path"
+            class="nav-link"
+            active-class="active-link"
+            exact-active-class="active-link"
+          >
+            {{ item.label }}
+          </router-link>
         </li>
       </ul>
     </aside>
-
-    <main class="admin-main flex-grow-1 p-4">
+    <main class="admin-main">
       <router-view />
     </main>
   </div>
 </template>
+
+<script setup>
+const adminMenuItems = [
+  { label: "Dashboard", path: "/admin/dashboard" },
+  { label: "Book List", path: "/admin/books" },
+  { label: "User List", path: "/admin/users" },
+  { label: "Request List", path: "/admin/requests" },
+  { label: "Borrow Management", path: "/admin/borrow" },
+  { label: "Penalty Management", path: "/admin/penalty" },
+  { label: "Banned User Management", path: "/admin/banned-users" },
+  { label: "Add New Book", path: "/admin/add-book" },
+];
+</script>
 
 <style scoped>
 
@@ -68,11 +47,22 @@
   --active-bg: var(--admin-orange);
 }
 
-.admin-sidebar {
-  width: 240px;
+.admin-layout {
   min-height: 100vh;
+}
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
   background-color: var(--sidebar-bg);
   color: white;
+  padding: 24px 16px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 30px;
 }
 
 .nav-link {
@@ -82,6 +72,8 @@
   border-radius: 6px;
   transition: all 0.2s ease;
   cursor: pointer;
+  display: block;
+  text-decoration: none;
 }
 
 .nav-link:hover {
@@ -92,35 +84,16 @@
 .active-link {
   background-color: var(--active-bg);
   color: white !important;
-}
-
-.submenu {
-  list-style: none;
-  padding-left: 0;
-  margin-top: 5px;
+  font-weight: bold;
 }
 
 .admin-main {
-    background-color: #f8f9fa;
-  }
-
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.3s ease;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-5px);
-}
-
-.fade-slide-enter-to,
-.fade-slide-leave-from {
-  max-height: 300px;
-  opacity: 1;
-  transform: translateY(0);
+  margin-left: 240px;
+  background-color: #f8f9fa;
+  padding: 32px 24px 30px 24px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  margin-top: -85px;
 }
 
 </style>
