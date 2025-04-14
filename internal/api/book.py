@@ -38,30 +38,54 @@ async def list_books(
     threshold = 60
     filtered_books = []
 
+    q_lower = q.lower() if q else None
+
     for book in all_books:
-        # If search query is present, apply fuzzy matching
-        if q:
-            title_match = fuzz.partial_ratio(q.lower(), book.title.lower())
+        # Early return if exact ISBN match
+        if q and book.isbn == q:
+            preview = BookPreview(
+                id=book.id,
+                title=book.title,
+                authors=book.authors,
+                categories=book.categories,
+                publisher=book.publisher,
+                cover_image=book.cover_image,
+                borrowed=book.borrowed,
+                isbn=book.isbn
+            )
+            return PaginatedBookPreviewListResponse(
+                code=SUCCESS,
+                message="Book found by exact ISBN match",
+                books=[preview],
+                total=1,
+                page=1,
+                has_next=False,
+                last_page=1
+            )
+
+        # Fuzzy matching
+        if q_lower:
+            title_match = fuzz.partial_ratio(q_lower, book.title.lower())
 
             author_match = (
-                max(fuzz.partial_ratio(q.lower(), author.lower()) for author in book.authors)
+                max(fuzz.partial_ratio(q_lower, author.lower()) for author in book.authors)
                 if book.authors else 0
             )
 
             cat_scores = []
             for cat in book.categories or []:
                 if cat.category:
-                    cat_scores.append(fuzz.partial_ratio(q.lower(), cat.category.lower()))
+                    cat_scores.append(fuzz.partial_ratio(q_lower, cat.category.lower()))
                 if cat.subcategory:
-                    cat_scores.append(fuzz.partial_ratio(q.lower(), cat.subcategory.lower()))
+                    cat_scores.append(fuzz.partial_ratio(q_lower, cat.subcategory.lower()))
             category_match = max(cat_scores) if cat_scores else 0
 
-            publisher_match = fuzz.partial_ratio(q.lower(), book.publisher.lower()) if book.publisher else 0
+            publisher_match = fuzz.partial_ratio(q_lower, book.publisher.lower()) if book.publisher else 0
 
             if not any(score >= threshold for score in [title_match, author_match, category_match, publisher_match]):
                 continue
 
-        # Apply filters (after search filtering, if applicable)
+        # Filters
         if available_only and book.borrowed:
             continue
         if max_page_count and book.page_count and book.page_count > max_page_count:
@@ -85,7 +109,6 @@ async def list_books(
 
     total_books = len(filtered_books)
     last_page = (total_books + limit - 1) // limit
-
     page = min(page, last_page) if last_page > 0 else 1
     start = (page - 1) * limit
     end = start + limit
@@ -139,8 +162,17 @@ async def search_books(q: str = Query(..., min_length=1)):
     all_books = await get_all_books()
     threshold = 60
     matched = []
+    isbn_match_found = False
+    matched_book = None
 
     for book in all_books:
+        # Check for exact ISBN match first
+        if book.isbn and book.isbn == q:
+            matched_book = book
+            isbn_match_found = True
+            break
+
+        # Fuzzy search
         title_match = fuzz.partial_ratio(q.lower(), book.title.lower())
 
         author_match = (
@@ -161,7 +193,26 @@ async def search_books(q: str = Query(..., min_length=1)):
         if any(score >= threshold for score in [title_match, author_match, category_match, publisher_match]):
             matched.append(book)
 
-    if not matched:
+    # If ISBN match found, return it explicitly
+    if isbn_match_found:
+        preview = BookPreview(
+            id=matched_book.id,
+            title=matched_book.title,
+            authors=matched_book.authors,
+            categories=matched_book.categories,
+            publisher=matched_book.publisher,
+            cover_image=matched_book.cover_image,
+            borrowed=matched_book.borrowed,
+            isbn=matched_book.isbn
+        )
+        return BookPreviewListResponse(
+            code=SUCCESS,
+            message="Book found by exact ISBN match",
+            books=[preview]
+        )
+
+    # If no matches found, return a 404
+    if not matched and not isbn_match_found:
         return JSONResponse(
             status_code=404,
             content=jsonable_encoder(
