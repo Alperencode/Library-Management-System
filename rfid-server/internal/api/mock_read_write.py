@@ -1,9 +1,10 @@
 import random
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from internal.types.types import WriteRequest, FAIL, SUCCESS
 from internal.types.responses import FailResponse, RFIDResponse
+from internal.tokens.tokens import create_scanned_book_token
 
 router = APIRouter()
 
@@ -11,8 +12,9 @@ MOCK_STORAGE = "9786053609902"
 
 
 @router.get("/read", response_model=RFIDResponse)
-def mock_read():
+def mock_read(response: Response):
     if random.random() < 0.75:
+        create_scanned_book_token(MOCK_STORAGE, response)
         return RFIDResponse(
             code=SUCCESS,
             message="Successfully retrieved mock RFID data",

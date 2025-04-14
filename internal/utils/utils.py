@@ -8,6 +8,7 @@ from config.config import get_config
 from internal.models.user import User
 from fastapi import HTTPException, Request
 from internal.database.users import get_user_by_id
+from internal.database.books import get_book_by_isbn
 from config.config import LOCAL_IP
 from .logger import logger
 
@@ -50,6 +51,31 @@ async def get_current_user(request: Request):
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+async def get_scanned_book(request: Request):
+    token = request.cookies.get("scanned_book")
+    if not token:
+        raise HTTPException(status_code=401, detail="Scanned book token is required")
+
+    try:
+        payload = jwt.decode(token, get_config("secret_key"), algorithms=[get_config("algorithm")])
+        isbn = payload.get("book_isbn")
+        scanned = payload.get("scanned")
+
+        if not isbn or not scanned:
+            raise HTTPException(status_code=401, detail="Invalid scanned book token")
+
+        book = await get_book_by_isbn(isbn)
+        if not book:
+            raise HTTPException(status_code=404, detail="Book not found in library catolog")
+
+        return book
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Scanned book token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid scanned book token")
 
 
 async def send_email_to_subscribers(user, book, subject):

@@ -2,10 +2,10 @@ import logging
 import sys
 from pathlib import Path
 
-LOG_FILE = Path("logs/library_management_system.log")
+LOG_FILE = Path("logs/rfid_server.log")
 LOG_FILE.parent.mkdir(exist_ok=True)
 
-logger = logging.getLogger("library_management_api")
+logger = logging.getLogger("rfid_server_api")
 
 
 def initialize_logger():

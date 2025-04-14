@@ -1,10 +1,11 @@
 import pycountry
 from rapidfuzz import fuzz
 from typing import Optional
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.models.book import BookPreview
+from internal.utils.utils import get_scanned_book
 from internal.database.books import get_all_books, get_book_by_id
 from internal.types.types import SUCCESS, FAIL, LanguageItem
 from internal.types.responses import (
@@ -360,4 +361,21 @@ async def list_languages():
         code=SUCCESS,
         message="Languages retrieved successfully",
         languages=languages
+    )
+
+
+@router.get("/scan-book/{book_id}", response_model=BookResponse)
+async def scan_book(book_id: str, scanned_book=Depends(get_scanned_book)):
+    if scanned_book.id != book_id:
+        return JSONResponse(
+            status_code=403,
+            content=jsonable_encoder(
+                FailResponse(code=FAIL, message="Scanned book ID does not match")
+            )
+        )
+
+    return BookResponse(
+        code=SUCCESS,
+        message="Book scan verified successfully",
+        book=scanned_book
     )

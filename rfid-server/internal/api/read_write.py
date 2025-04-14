@@ -1,17 +1,18 @@
 import nfc
 import ndef
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.types.types import WriteRequest, FAIL, SUCCESS
 from internal.types.responses import FailResponse, RFIDResponse
 from internal.gpio.buzz import buzz
+from internal.tokens.tokens import create_scanned_book_token
 
 router = APIRouter()
 
 
 @router.get("/read", response_model=RFIDResponse)
-def read_rfid():
+def read_rfid(response: Response):
     read_result = None
 
     def on_connect(tag):
@@ -19,6 +20,7 @@ def read_rfid():
             for record in tag.ndef.records:
                 if isinstance(record, ndef.TextRecord):
                     buzz()
+                    create_scanned_book_token(record.text, response)
                     return RFIDResponse(
                         code=SUCCESS,
                         message="Successfully retrieved RFID data",
