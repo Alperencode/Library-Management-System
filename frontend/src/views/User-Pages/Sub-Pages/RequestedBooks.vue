@@ -3,7 +3,16 @@
     <section class="requested-books">
       <div class="container">
         <h2>Requested Books</h2>
-        <p>Here you can see the books you have requested to be added to the library.</p>
+        <p>
+          Here you can see the books you have requested to be added to the
+          library.
+        </p>
+
+        <div v-if="user">
+          <RouterLink to="/request-book" class="request-btn"
+            >Request a Book</RouterLink
+          >
+        </div>
 
         <div v-if="requestedBooks.length === 0" class="no-results">
           <p class="no-results-text">You have not requested any books yet.</p>
@@ -11,22 +20,36 @@
 
         <div v-else>
           <div class="row grid">
-            <div v-for="(book, index) in requestedBooks" :key="index" class="book-item">
+            <div
+              v-for="(book, index) in requestedBooks"
+              :key="index"
+              class="book-item"
+            >
               <div class="book-box">
                 <div class="thumb">
-                  <img :src="book.image" :alt="book.title" class="book-thumbnail" />
+                  <img
+                    :src="book.image"
+                    :alt="book.title"
+                    class="book-thumbnail"
+                  />
                 </div>
                 <div class="down-content">
                   <h4 class="book-title">{{ book.title }}</h4>
                   <p class="text-ellipsis">
-                    <strong>Author:</strong> {{ book.authors.join(", ") || "Unknown" }}
+                    <strong>Author:</strong>
+                    {{ book.authors.join(", ") || "Unknown" }}
                   </p>
                   <p class="text-ellipsis">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
                   <p class="text-ellipsis">
                     <strong>Status:</strong>
-                    <span :class="'status-badge ' + book.status.toLowerCase().replace(/\s+/g, '-')">
+                    <span
+                      :class="
+                        'status-badge ' +
+                        book.status.toLowerCase().replace(/\s+/g, '-')
+                      "
+                    >
                       {{ book.status }}
                     </span>
                   </p>
@@ -47,16 +70,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
-import api from "@/api/axios"
-import defaultCover from "@/assets/images/default-cover.png"
-import { formatDate } from "@/utils/date"
+import { ref, onMounted } from "vue";
+import { useAuth } from "@/composables/useAuth"; // Import useAuth for user info
+import api from "@/api/axios";
+import defaultCover from "@/assets/images/default-cover.png";
+import { formatDate } from "@/utils/date";
 
-const requestedBooks = ref([])
+const requestedBooks = ref([]);
+const { user } = useAuth(); // Get the user from useAuth
 
 const fetchRequestedBooks = async () => {
   try {
-    const res = await api.get("/request-book")
+    const res = await api.get("/request-book");
     requestedBooks.value = res.data.books.map((book) => ({
       id: book.id,
       title: book.title || "No Title",
@@ -65,25 +90,40 @@ const fetchRequestedBooks = async () => {
       publisher: book.publisher || "Unknown",
       status: book.status || "Request Sent",
       requested_at: formatDate(book.requested_at),
-    }))
+    }));
   } catch (error) {
-    console.error("Error retrieving requested books:", error)
+    console.error("Error retrieving requested books:", error);
   }
-}
+};
 
 const deleteRequest = async (id) => {
   try {
-    await api.delete(`/requests/${id}`)
-    requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id)
+    await api.delete(`/requests/${id}`);
+    requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id);
   } catch (error) {
-    console.error("Failed to delete book request:", error)
+    console.error("Failed to delete book request:", error);
   }
-}
+};
 
-onMounted(fetchRequestedBooks)
+onMounted(fetchRequestedBooks);
 </script>
 
 <style scoped>
+.request-btn {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.request-btn:hover {
+  background-color: #2980b9;
+}
+
 .requested-books {
   padding-top: 40px;
   min-height: auto;

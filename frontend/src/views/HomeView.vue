@@ -11,27 +11,16 @@
           <div class="row">
             <div class="col-lg-12">
               <div class="caption">
-                <h6>Hello Students</h6>
-                <h2>Welcome to Education</h2>
+                <h6>Hello Everyone</h6>
+                <h2>Welcome to Library Management System</h2>
                 <p>
-                  This is an edu meeting HTML CSS template provided by
-                  <a
-                    rel="nofollow"
-                    href="https://templatemo.com/page/1"
-                    target="_blank"
-                    >TemplateMo website</a
-                  >. This is a Bootstrap v5.1.3 layout. The video background is
-                  taken from Pexels website, a group of young people by
-                  <a
-                    rel="nofollow"
-                    href="https://www.pexels.com/@pressmaster"
-                    target="_blank"
-                    >Pressmaster</a
-                  >.
+                  Manage your library with ease – scan books using RFID or ISBN,
+                  explore titles via Google Books, and request your favorite
+                  books directly from the system.
                 </p>
                 <div class="main-button-red">
                   <div class="scroll-to-section">
-                    <a href="#contact">Join Us Now!</a>
+                    <a href="/books">Check Out For Books!</a>
                   </div>
                 </div>
               </div>
@@ -119,54 +108,58 @@
 
     <section class="upcoming-meetings" id="meetings">
       <div class="container">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="section-heading">
-              <h2 style="padding-top: 100px">Recently Added Books</h2>
-            </div>
-          </div>
+        <h2 class="section-heading text-white text-center mb-5">
+          Recently Added Books
+        </h2>
+        <div class="slick-carousel">
           <div
-            class="col-lg-3"
-            v-for="book in recentlyAddedBooks.slice(0, 4)"
+            class="course-card"
+            v-for="book in recentlyAddedBooks"
             :key="book.id"
           >
-            <div class="meeting-item">
-              <div class="thumb">
-                <router-link :to="`/books/${book.id}`">
-                  <img :src="book.cover_url" :alt="book.title" />
-                </router-link>
-              </div>
-              <div class="down-content">
-                <router-link :to="`/books/${book.id}`">
-                  <h4>{{ book.title }}</h4>
-                </router-link>
-                <p>{{ book.authors.join(", ") || "Unknown Author" }}</p>
+            <div class="card text-center text-dark">
+              <router-link
+                :to="`/books/${book.id}`"
+                class="text-decoration-none"
+              >
+                <img
+                  :src="book.cover_url || defaultCover"
+                  :alt="book.title"
+                  class="card-img-top"
+                />
+              </router-link>
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <h5 class="card-title">{{ book.title }}</h5>
+                  <p class="card-text text-muted">
+                    {{ book.authors?.join(", ") }}
+                  </p>
+                </div>
+                <div class="mt-3">
+                  <router-link
+                    :to="`/books/${book.id}`"
+                    class="view-details-btn"
+                  >
+                    View Details →
+                  </router-link>
+                </div>
               </div>
             </div>
           </div>
-          <div v-if="recentlyAddedBooks.length === 0" class="no-results">
-            <p>No recently added books available.</p>
-          </div>
+        </div>
+
+        <!-- Eğer hiç kitap yoksa -->
+        <div v-if="recentlyAddedBooks.length === 0" class="no-results mt-4">
+          <p>No recently added books available.</p>
         </div>
       </div>
     </section>
 
     <section class="apply-now" id="apply">
       <div class="container">
-        <div class="row">
-          <div class="col-lg-6 align-self-center">
-            <div class="row">
-              <div class="col-lg-12"></div>
-              <div class="col-lg-12"></div>
-
-              <div class="col-lg-12">
-                <div class="item">
-                  <h3>Request a Book from Google Books</h3>
-                  <RequestBook />
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="item">
+          <h3>Request a Book from Google Books</h3>
+          <RequestBook />
         </div>
       </div>
     </section>
@@ -217,14 +210,14 @@
           <div class="col-lg-6">
             <div class="row">
               <div class="col-lg-12">
-                <h2>A Few Facts About Our University</h2>
+                <h2>A Few Facts About Our Library Management System</h2>
               </div>
               <div class="col-lg-6">
                 <div class="row">
                   <div class="col-12">
-                    <div class="count-area-content percentage">
-                      <div class="count-digit">94</div>
-                      <div class="count-title">Succesed Students</div>
+                    <div class="count-area-content">
+                      <div class="count-digit">{{ totalBooks }}</div>
+                      <div class="count-title">Total Books</div>
                     </div>
                   </div>
                   <div class="col-12">
@@ -253,110 +246,7 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-6 align-self-center">
-            <div class="video">
-              <a
-                href="https://www.youtube.com/watch?v=HndV87XpkWg"
-                target="_blank"
-                ><img src="assets/images/play-icon.png" alt=""
-              /></a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section contact-us" id="contact" data-section="contact">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-9 align-self-center">
-            <div class="row">
-              <div class="col-lg-12">
-                <form id="contact" action="" method="post">
-                  <div class="row">
-                    <div class="col-lg-12">
-                      <h2>Let's get in touch</h2>
-                    </div>
-                    <div class="col-lg-4">
-                      <fieldset>
-                        <input
-                          name="name"
-                          type="text"
-                          id="name"
-                          placeholder="YOURNAME...*"
-                          required=""
-                        />
-                      </fieldset>
-                    </div>
-                    <div class="col-lg-4">
-                      <fieldset>
-                        <input
-                          name="email"
-                          type="text"
-                          id="email"
-                          pattern="[^ @]*@[^ @]*"
-                          placeholder="YOUR EMAIL..."
-                          required=""
-                        />
-                      </fieldset>
-                    </div>
-                    <div class="col-lg-4">
-                      <fieldset>
-                        <input
-                          name="subject"
-                          type="text"
-                          id="subject"
-                          placeholder="SUBJECT...*"
-                          required=""
-                        />
-                      </fieldset>
-                    </div>
-                    <div class="col-lg-12">
-                      <fieldset>
-                        <textarea
-                          name="message"
-                          type="text"
-                          class="form-control"
-                          id="message"
-                          placeholder="YOUR MESSAGE..."
-                          required=""
-                        ></textarea>
-                      </fieldset>
-                    </div>
-                    <div class="col-lg-12">
-                      <fieldset>
-                        <button type="submit" id="form-submit" class="button">
-                          SEND MESSAGE NOW
-                        </button>
-                      </fieldset>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3">
-            <div class="right-info">
-              <ul>
-                <li>
-                  <h6>Phone Number</h6>
-                  <span>010-020-0340</span>
-                </li>
-                <li>
-                  <h6>Email Address</h6>
-                  <span>info@meeting.edu</span>
-                </li>
-                <li>
-                  <h6>Street Address</h6>
-                  <span>Rio de Janeiro - RJ, 22795-008, Brazil</span>
-                </li>
-                <li>
-                  <h6>Website URL</h6>
-                  <span>www.meeting.edu</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+          <div class="col-lg-6 align-self-center"></div>
         </div>
       </div>
     </section>
@@ -377,6 +267,7 @@ export default {
   setup() {
     const books = ref([]);
     const recentlyAddedBooks = ref([]);
+    const totalBooks = ref(0); // Toplam kitap sayısını tutacak değişken
 
     onMounted(async () => {
       const scripts = [
@@ -397,8 +288,42 @@ export default {
         document.body.appendChild(script);
       });
 
+      // Most Borrowed Books
       const res = await api.get("/books?most_borrowed=true&limit=10");
       books.value = res.data.books;
+      await nextTick();
+
+      // Recently Added Books
+      try {
+        const { data } = await api.get("/books", {
+          params: {
+            page: 1,
+            limit: 10,
+            recently_added: true,
+          },
+        });
+
+        if (data.code === "Success" && data.books) {
+          recentlyAddedBooks.value = data.books.map((book) => ({
+            id: book.id,
+            title: book.title || "No Title",
+            authors: book.authors || ["Unknown Author"],
+            cover_url: book.cover_image || defaultCover,
+            created_at: book.borrowed_at || new Date().toISOString(),
+            borrow_count: book.borrowed ? 1 : 0,
+          }));
+        } else {
+          console.error("No books found or error in response:", data.message);
+        }
+
+        // Toplam kitap sayısını çekme
+        const totalBooksRes = await api.get("/books");
+        totalBooks.value = totalBooksRes.data.total;
+      } catch (error) {
+        console.error("Error fetching recently added books:", error);
+      }
+
+      // Sliderlar için init
       await nextTick();
 
       if (window.$ && window.$(".slick-carousel").slick) {
@@ -434,30 +359,7 @@ export default {
         console.error("Slick failed to load!");
       }
 
-      try {
-        const { data } = await api.get("/books", {
-          params: {
-            page: 1,
-            limit: 10,
-            recently_added: true,
-          },
-        });
-
-        if (data.code === "Success" && data.books) {
-          recentlyAddedBooks.value = data.books.map((book) => ({
-            id: book.id,
-            title: book.title || "No Title",
-            authors: book.authors || ["Unknown Author"],
-            cover_url: book.cover_image || defaultCover,
-            created_at: book.borrowed_at || new Date().toISOString(),
-            borrow_count: book.borrowed ? 1 : 0,
-          }));
-        } else {
-          console.error("No books found or error in response:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching recently added books:", error);
-      }
+      // Sabit yükseklik ayarı (isteğe bağlı)
       setTimeout(() => {
         const items = document.querySelectorAll(".meeting-item");
         let maxHeight = 0;
@@ -476,6 +378,7 @@ export default {
       books,
       defaultCover,
       recentlyAddedBooks,
+      totalBooks,
     };
   },
 };
@@ -490,9 +393,12 @@ export default {
 
 .popular-courses {
   background-color: #1f2a36;
+  background-image: url("@/assets/images/meetings-bg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   padding: 50px 0;
 }
-
 .card {
   border: none;
   border-radius: 12px;
@@ -507,8 +413,9 @@ export default {
 }
 
 .card-img-top {
-  height: 200px;
-  object-fit: cover;
+  height: 250px;
+  object-fit: contain;
+  padding-top: 10px;
 }
 
 .course-card {
@@ -619,11 +526,6 @@ export default {
   transform: translateY(-5px);
 }
 
-.card-img-top {
-  height: 220px;
-  object-fit: cover;
-}
-
 .course-card {
   padding: 15px;
 }
@@ -660,6 +562,19 @@ export default {
   text-decoration: none;
   color: #d4881a;
   transform: translateX(4px);
+}
+
+.apply-now .container {
+  max-width: 15000px; /* Daha geniş bir container */
+  padding: 0 24px; /* Yanlarda biraz daha boşluk */
+  margin: 0 auto; /* Ortalamak için */
+}
+
+.apply-now .item {
+  padding: 40px;
+  max-height: 700px; /* Maksimum yüksekliği sınırla */
+  overflow-y: auto; /* İçerik taşarsa scroll çıksın */
+  border-radius: 12px;
 }
 
 @media (max-width: 768px) {
