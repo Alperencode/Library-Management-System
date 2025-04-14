@@ -17,29 +17,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-
-const popularBooks = ref([]);
-
-const fetchPopularBooks = async () => {
-  try {
-    const response = await fetch("/api/v1/books/search/popular");
-    const data = await response.json();
-    console.log(data);
-    if (data.code === "Success") {
-      popularBooks.value = data.books;
-    }
-  } catch (error) {
-    console.error("Failed to fetch popular books", error);
-  }
-};
-
-onMounted(() => {
-  fetchPopularBooks();
-});
 
 const goToRfidScan = () => {
   router.push("/rfid-scan");

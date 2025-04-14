@@ -46,6 +46,8 @@ import BookRequests from "@/views/Admin/Sub-Pages/Dashboard/BookRequests.vue";
 import PenaltyUserCount from "@/views/Admin/Sub-Pages/Dashboard/PenaltyUserCount.vue";
 import CurrentBookCount from "@/views/Admin/Sub-Pages/Dashboard/CurrentBookCount.vue";
 
+import BookScanResult from "@/views/Scan-Pages/BookScanResult.vue";
+
 const routes = [
   // Homeview
   { path: "/", component: HomeView },
@@ -78,6 +80,7 @@ const routes = [
   { path: "/rfid-scan", component: RfidScan },
   { path: "/barcode-scan", component: BarcodeScan },
   { path: "/isbn-search", component: IsbnSearch },
+  { path: "/scan-book/:id", component: BookScanResult},
 
   // Admin-Page
   {
