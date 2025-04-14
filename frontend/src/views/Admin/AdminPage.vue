@@ -73,7 +73,6 @@
   min-height: 100vh;
   background-color: var(--sidebar-bg);
   color: white;
-  margin-top: 135px;
 }
 
 .nav-link {
@@ -103,7 +102,6 @@
 
 .admin-main {
     background-color: #f8f9fa;
-    margin-top: 135px;
   }
 
 .fade-slide-enter-active,
