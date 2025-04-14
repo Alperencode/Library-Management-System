@@ -1,88 +1,52 @@
-import nfc
-import ndef
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+import random
+from fastapi import APIRouter, Response
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from internal.types.types import WriteRequest, FAIL, SUCCESS
 from internal.types.responses import FailResponse, RFIDResponse
-from internal.gpio.buzz import buzz
+from internal.tokens.tokens import create_scanned_book_token
 
 router = APIRouter()
 
+MOCK_STORAGE = "9786053609902"
+
 
 @router.get("/read", response_model=RFIDResponse)
-def read_rfid():
-    read_result = None
-
-    def on_connect(tag):
-        if tag.ndef and tag.ndef.length > 0:
-            for record in tag.ndef.records:
-                if isinstance(record, ndef.TextRecord):
-                    buzz()
-                    return RFIDResponse(
-                        code=SUCCESS,
-                        message="Successfully retrieved RFID data",
-                        data=record.text
-                    )
-            return JSONResponse(
-                status_code=400,
-                content=jsonable_encoder(
-                    FailResponse(
-                        code=FAIL,
-                        message="Unsupported RFID record type."
-                    )
-                )
-            )
-        return JSONResponse(
-            status_code=404,
-            content=jsonable_encoder(
-                FailResponse(
-                    code=FAIL,
-                    message="No NDEF data found or tag not writable."
-                )
+def mock_read(response: Response):
+    if random.random() < 0.75:
+        create_scanned_book_token(MOCK_STORAGE, response)
+        return RFIDResponse(
+            code=SUCCESS,
+            message="Successfully retrieved mock RFID data",
+            data=MOCK_STORAGE
+        )
+    return JSONResponse(
+        status_code=400,
+        content=jsonable_encoder(
+            FailResponse(
+                code=FAIL,
+                message="Mock failure to read data from RFID tag."
             )
         )
-
-    with nfc.ContactlessFrontend('tty:AMA0') as clf:
-        def connected(tag):
-            nonlocal read_result
-            read_result = on_connect(tag)
-            return True
-        clf.connect(rdwr={'on-connect': connected})
-
-    return read_result
+    )
 
 
 @router.post("/write", response_model=RFIDResponse)
-def write_rfid(data: WriteRequest):
-    write_result = None
-
-    def on_connect(tag):
-        if tag.ndef:
-            tag.ndef.records = [ndef.TextRecord(data.text)]
-            buzz()
-            return RFIDResponse(
-                code=SUCCESS,
-                message="Successfully write the data to RFID tag.",
-                data=data.text
-            )
-        return JSONResponse(
-            status_code=400,
-            content=jsonable_encoder(
-                FailResponse(
-                    code=FAIL,
-                    message="Tag is not NDEF-formatted or not writable."
-                )
+def mock_write(data: WriteRequest):
+    global MOCK_STORAGE
+    if random.random() < 0.75:
+        MOCK_STORAGE = data.text
+        return RFIDResponse(
+            code=SUCCESS,
+            message="Successfully wrote mock data to RFID tag.",
+            data=data.text
+        )
+    return JSONResponse(
+        status_code=400,
+        content=jsonable_encoder(
+            FailResponse(
+                code=FAIL,
+                message="Mock failure to write data to RFID tag."
             )
         )
-
-    with nfc.ContactlessFrontend('tty:AMA0') as clf:
-        def connected(tag):
-            nonlocal write_result
-            write_result = on_connect(tag)
-            return True
-        clf.connect(rdwr={'on-connect': connected})
-
-    if isinstance(write_result, RFIDResponse):
-        return write_result
-    return write_result
+    )
