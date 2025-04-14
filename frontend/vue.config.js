@@ -4,6 +4,7 @@ const localIp = require('../local-ip.json').ip;
 
 
 module.exports = defineConfig({
+  productionSourceMap: false,
   devServer: {
     port: 8085,
     client: {

@@ -1,10 +1,10 @@
 <template>
   <div id="app" class="layout">
-    <MainHeader v-if="!hideLayout" />
+    <MainHeader v-if="!hideLayout && !isAdminRoute" />
     <main class="content">
       <router-view />
     </main>
-    <MainFooter v-if="!hideLayout" />
+    <MainFooter v-if="!hideLayout && !isAdminRoute" />
   </div>
 </template>
 
@@ -25,6 +25,7 @@ export default {
   setup() {
     const route = useRoute();
     const { fetchUser } = useAuth();
+    const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 
     onMounted(async () => {
       try {
@@ -38,7 +39,7 @@ export default {
 
     const hideLayout = computed(() => route.meta.hideLayout);
 
-    return { hideLayout };
+    return { hideLayout, isAdminRoute };
   },
 };
 </script>

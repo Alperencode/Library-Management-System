@@ -28,6 +28,24 @@ import RfidScan from "@/views/Scan-Pages/RfidScan.vue";
 import BarcodeScan from "@/views/Scan-Pages/BarcodeScan.vue";
 import IsbnSearch from "@/views/Scan-Pages/IsbnSearch.vue";
 
+// Admin-Page
+import AdminPage from "@/views/Admin/AdminPage.vue";
+import BookList from "@/views/Admin/Sub-Pages/BookList.vue";
+import UserList from "@/views/Admin/Sub-Pages/UserList.vue";
+import RequestList from "@/views/Admin/Sub-Pages/RequestList.vue";
+import BorrowManagement from "@/views/Admin/Sub-Pages/BorrowManagement.vue"
+import PenaltyManagement from "@/views/Admin/Sub-Pages/PenaltyManagement.vue";
+import BannedUserManagement from "@/views/Admin/Sub-Pages/BannedUserManagement.vue";
+import AdminAddBook from "@/views/Admin/Sub-Pages/AdminAddBook.vue"
+
+//  Admin Dashboard Sub-Pages
+import AdminDashboard from "@/views/Admin/Sub-Pages/AdminDashboard.vue"
+import BorrowCount from "@/views/Admin/Sub-Pages/Dashboard/BorrowCount.vue";
+import PenaltyBookCount from "@/views/Admin/Sub-Pages/Dashboard/PenaltyBookCount.vue";
+import BookRequests from "@/views/Admin/Sub-Pages/Dashboard/BookRequests.vue";
+import PenaltyUserCount from "@/views/Admin/Sub-Pages/Dashboard/PenaltyUserCount.vue";
+import CurrentBookCount from "@/views/Admin/Sub-Pages/Dashboard/CurrentBookCount.vue";
+
 const routes = [
   // Homeview
   { path: "/", component: HomeView },
@@ -60,6 +78,30 @@ const routes = [
   { path: "/rfid-scan", component: RfidScan },
   { path: "/barcode-scan", component: BarcodeScan },
   { path: "/isbn-search", component: IsbnSearch },
+
+  // Admin-Page
+  {
+    path: "/admin",
+    component: AdminPage,
+    children: [
+      { path: "", redirect: "/admin/dashboard" },
+      { path: "books", component: BookList },
+      { path: "users", component: UserList },
+      { path: "dashboard", component: AdminDashboard },
+      { path: "requests", component: RequestList },
+      { path: "borrow", component: BorrowManagement },
+      { path: "penalty", component: PenaltyManagement },
+      { path: "banned-users", component: BannedUserManagement },
+      { path: "add-book", component: AdminAddBook },
+      
+      // Dashboard Sub-Routes
+      { path: "dashboard/borrow-count", component: BorrowCount },
+      { path: "dashboard/penalty-book", component: PenaltyBookCount },
+      { path: "dashboard/requests", component: BookRequests },
+      { path: "dashboard/penalty-users", component: PenaltyUserCount },
+      { path: "dashboard/current-books", component: CurrentBookCount },
+    ]
+  }
 ];
 
 const router = createRouter({
