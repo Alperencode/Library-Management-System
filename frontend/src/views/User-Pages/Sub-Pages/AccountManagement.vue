@@ -4,42 +4,22 @@
     <form @submit.prevent="updateAccount">
       <div class="form-group">
         <label for="username">New Username:</label>
-        <input
-          type="text"
-          id="username"
-          v-model="username"
-          placeholder="New Username"
-        />
+        <input type="text" id="username" v-model="username" placeholder="New Username" />
       </div>
 
       <div class="form-group">
         <label for="email">New Email:</label>
-        <input
-          type="email"
-          id="email"
-          v-model="email"
-          placeholder="New Email"
-        />
+        <input type="email" id="email" v-model="email" placeholder="New Email" />
       </div>
 
       <div class="form-group">
         <label for="new-password">New Password:</label>
-        <input
-          type="password"
-          id="new-password"
-          v-model="newPassword"
-          placeholder="New Password"
-        />
+        <input type="password" id="new-password" v-model="newPassword" placeholder="New Password" />
       </div>
 
       <div class="form-group">
         <label for="confirm-password">Confirm Password:</label>
-        <input
-          type="password"
-          id="confirm-password"
-          v-model="confirmPassword"
-          placeholder="Confirm Password"
-        />
+        <input type="password" id="confirm-password" v-model="confirmPassword" placeholder="Confirm Password" />
       </div>
 
       <button class="ghost-round full-width" type="submit">Update</button>
@@ -51,6 +31,9 @@
 <script>
 import api from "@/api/axios";
 import { useStore } from "vuex";
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 export default {
   name: "AccountManagement",
@@ -78,8 +61,7 @@ export default {
   methods: {
     async updateAccount() {
       if (this.newPassword && this.newPassword !== this.confirmPassword) {
-        this.message = "Passwords do not match!";
-        this.messageType = "error";
+        toast.error("Passwords do not match!");
         return;
       }
 
@@ -89,23 +71,19 @@ export default {
       if (this.newPassword) payload.password = this.newPassword;
 
       if (Object.keys(payload).length === 0) {
-        this.message = "Please fill at least one field to update.";
-        this.messageType = "error";
+        toast.error("Please fill at least one field to update.");
         return;
       }
 
       try {
         const response = await api.patch("/me", payload);
-
-        this.message = response.data.message || "Account updated successfully!";
-        this.messageType = "success";
-
+        toast.success(response.data.message || "Account updated successfully!");
         await this.fetchUser();
       } catch (error) {
-        this.message = error.response?.data?.message || "Update failed";
-        this.messageType = "error";
+        console.error("Update failed:", error);
       }
     },
+
 
     async fetchUser() {
       try {

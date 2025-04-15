@@ -104,7 +104,7 @@ onMounted(async () => {
     const res = await api.get(`/books/${route.params.id}`)
     book.value = res.data.book
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to fetch book details')
+    console.error('Failed to fetch book details:', err)
   }
 
   try {
@@ -114,7 +114,7 @@ onMounted(async () => {
       _id: book._id || book.id
     }))
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to fetch notify list')
+    console.error('Failed to fetch book details:', err)
   }
 })
 
@@ -128,13 +128,13 @@ async function extendReturn() {
     const res = await api.post(`/extend-return/${book.value._id}`)
     toast.success(res.data.message)
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Extension failed')
+    console.error("Extension error:", err)
   }
 }
 
 async function notifyMe() {
   if (!book.value?._id) {
-    toast.error('Book ID is not available')
+    console.error('Book ID is not available')
     return
   }
 
@@ -143,7 +143,7 @@ async function notifyMe() {
     toast.success(res.data.message)
     notifyList.value.push(book.value)
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Notification failed')
+    console.error("Notify error:", err)
   }
 }
 </script>

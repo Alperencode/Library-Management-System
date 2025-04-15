@@ -7,12 +7,8 @@
     </p>
 
     <button class="scan-btn" @click="startRfidScan" :disabled="loading">
-      {{ loading ? "Scanning..." : "Start RFID Scan" }}
+      {{ loading ? "Scanning..." : scanButtonText }}
     </button>
-
-    <div v-if="rfidFailed" class="error-message">
-      RFID scan failed. Please try again.
-    </div>
   </div>
 </template>
 
@@ -27,12 +23,14 @@ const router = useRouter();
 const rfidFailed = ref(false);
 const loading = ref(false);
 const toast = useToast()
+const scanButtonText = ref("Start RFID Scan");
 
 const rfidUrl = `${window.location.protocol}//${process.env.VUE_APP_API_HOST}:${process.env.VUE_APP_RFID_PORT}`;
 
 const startRfidScan = async () => {
   loading.value = true;
   rfidFailed.value = false;
+  scanButtonText.value = "Start RFID Scan";
 
   try {
     const response = await fetch(`${rfidUrl}/api/v1/read`, {
@@ -48,31 +46,30 @@ const startRfidScan = async () => {
     const result = await response.json();
 
     if (result.code === "Success") {
-      if (result.message) {
-        toast.success(result.message)
-      }
-      await handleIsbn(result.data);
+      await handleIsbn(result.data, result.message);
     } else {
       throw new Error("RFID scan unsuccessful");
     }
   } catch (err) {
     console.error("RFID Scan error:", err);
+    rfidFailed.value = true;
+    scanButtonText.value = "Retry RFID Scan"
   } finally {
     loading.value = false;
   }
 };
 
-const handleIsbn = async (isbn) => {
+const handleIsbn = async (isbn, rfidMessage = null) => {
   try {
     const searchResponse = await api.get("/books/search/", {
       params: { q: isbn }
     });
 
-    console.log("Search API Response:", searchResponse.data);
-
     const books = searchResponse.data.books;
 
     if (Array.isArray(books) && books.length > 0 && books[0]?.id) {
+      const message = rfidMessage || searchResponse.data.message || "Kitap başarıyla tarandı.";
+      toast.success(message);
       router.push(`/scan-book/${books[0].id}`);
     } else {
       throw new Error("Book not found.");
@@ -80,9 +77,16 @@ const handleIsbn = async (isbn) => {
   } catch (error) {
     console.error("Book fetch error:", error);
     rfidFailed.value = true;
+    scanButtonText.value = "Retry RFID Scan";
+
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.detail ||
+      error.message || "Kitap bulunamadı."
+
+    toast.error(errorMessage);
   }
 };
-
 
 </script>
 

@@ -10,7 +10,6 @@
         </div>
         <div class="spacer"></div>
         <button class="ghost-round full-width" @click="register">Register</button>
-        <p v-if="message" :class="alertClass">{{ message }}</p>
       </div>
     </div>
   </div>
@@ -20,6 +19,9 @@
 import api from "@/api/axios";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
 
 export default {
   name: "AuthRegister",
@@ -29,15 +31,9 @@ export default {
       username: "",
       email: "",
       password: "",
-      message: "",
-      messageType: "",
     };
   },
-  computed: {
-    alertClass() {
-      return this.messageType === "success" ? "success-message" : "error-message";
-    },
-  },
+
   setup() {
     const router = useRouter();
     const store = useStore();
@@ -52,14 +48,12 @@ export default {
           password: this.password,
         });
 
-        this.message = response.data.message;
-        this.messageType = "success";
+        toast.success(response.data.message);
 
         await this.fetchUser();
         this.router.push("/");
       } catch (error) {
-        this.message = error.response?.data?.message || "Registration failed";
-        this.messageType = "error";
+        console.log("Registration failed");
       }
     },
 

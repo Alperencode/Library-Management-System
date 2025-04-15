@@ -25,7 +25,7 @@
           <div class="right-box">
             <p><strong>Author:</strong> {{ book.authors?.join(', ') }}</p>
             <p><strong>Publisher:</strong> {{ book.publisher }}</p>
-            <p><strong>Category:</strong>
+            <p><strong>Category: </strong>
               <span v-if="book.categories?.length">
                 {{ book.categories[0]?.category }} / {{ book.categories[0]?.subcategory }}
               </span>
@@ -109,7 +109,7 @@ onMounted(async () => {
     const res = await api.get(`/scan-book/${route.params.id}`)
     book.value = res.data.book
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to fetch book details')
+    console.error("Failed to fetch book details:", err)
   }
 
   try {
@@ -119,7 +119,7 @@ onMounted(async () => {
       _id: book._id || book.id
     }))
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Failed to fetch notify list')
+    console.error("Failed to fetch book details:", err)
   }
 })
 
@@ -134,7 +134,7 @@ async function borrowBook() {
     toast.success(res.data.message || "Book borrowed successfully")
     setTimeout(() => router.push("/"), 1000)
   } catch (err) {
-    toast.error(err.response?.data?.message || "Borrow failed")
+    console.error("Borrow failed:", err)
   }
 }
 
@@ -144,7 +144,7 @@ async function extendReturn() {
     toast.success(res.data.message)
     setTimeout(() => router.push("/"), 1000)
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Extension failed')
+    console.error("Extension failed:", err)
   }
 }
 
@@ -154,7 +154,7 @@ async function returnBook() {
     toast.success(res.data.message)
     setTimeout(() => router.push("/"), 1000)
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Return failed')
+    console.error("Return failed:", err)
   }
 }
 
@@ -169,7 +169,7 @@ async function notifyMe() {
     toast.success(res.data.message)
     notifyList.value.push(book.value)
   } catch (err) {
-    toast.error(err.response?.data?.message || 'Notification failed')
+    console.error("Notification failed:", err)
   }
 }
 </script>
