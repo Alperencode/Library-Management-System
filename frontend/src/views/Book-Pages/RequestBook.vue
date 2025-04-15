@@ -143,8 +143,7 @@ const requestBook = async (book) => {
     const res = await api.post("/request-book", payload)
     toast.success(res.data.message)
   } catch (err) {
-    const message = err?.response?.data?.message || "Failed to request the book."
-    toast.error(message);
+    console.error("Failed to request the book:", err)
   }
 }
 </script>

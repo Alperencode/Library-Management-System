@@ -93,8 +93,7 @@ const extendReturn = async (bookId) => {
     toast.success(res.data.message)
     await fetchBorrowedBooks();
   } catch (err) {
-    const message = err?.response?.data?.message || "Failed to extend return date.";
-    toast.error(message);
+    console.error("Extend return error:", err);
   }
 };
 

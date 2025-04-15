@@ -4,15 +4,11 @@
       <div class="container">
         <h2>Notify Me List</h2>
         <p>Here you can see the books you've requested to be notified about.</p>
-
-        <!-- Eğer bildirim listesi boşsa mesaj göster -->
         <div v-if="notifyMeBooks.length === 0" class="no-results">
           <p class="no-results-text">
             You have not added any books to the notify me list yet.
           </p>
         </div>
-
-        <!-- Bildirim listesine eklenen kitapları göster -->
         <div v-else>
           <div class="row grid">
             <div
@@ -61,8 +57,10 @@
 import { ref, onMounted } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
+import { useToast } from "vue-toastification"
 
 const notifyMeBooks = ref([]);
+const toast = useToast()
 
 const fetchNotifyMeList = async () => {
   try {
@@ -83,7 +81,8 @@ const fetchNotifyMeList = async () => {
 
 const removeFromNotifyList = async (bookId) => {
   try {
-    await api.delete(`/notify-me/${bookId}`);
+    const res = await api.delete(`/notify-me/${bookId}`);
+    toast.success(res.data.message);
     notifyMeBooks.value = notifyMeBooks.value.filter(
       (book) => book.id !== bookId
     );
