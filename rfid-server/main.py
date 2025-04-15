@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config.config import LOCAL_IP
-from internal.api import read_write
+from internal.api import read_write, camera
 
 
 app = FastAPI()
@@ -15,6 +15,7 @@ app.add_middleware(
 )
 
 app.include_router(read_write.router, prefix="/api/v1")
+app.include_router(camera.router, prefix="/api/v1")
 
 if __name__ == "__main__":
     uvicorn.run(app, host=LOCAL_IP, port=8001)
