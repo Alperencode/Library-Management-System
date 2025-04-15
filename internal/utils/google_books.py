@@ -95,7 +95,10 @@ def fetch_google_book(volume_id: str) -> Optional[Book]:
 
 def _extract_isbn(identifiers: List[Dict[str, str]]) -> Optional[str]:
     for ident in identifiers:
-        if ident.get("type") in ("ISBN_13", "ISBN_10"):
+        if ident.get("type") == "ISBN_13":
+            return ident.get("identifier")
+    for ident in identifiers:
+        if ident.get("type") == "ISBN_10":
             return ident.get("identifier")
     return None
 
