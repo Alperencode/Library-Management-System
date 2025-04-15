@@ -48,12 +48,14 @@
 import { ref, watch, onMounted } from "vue"
 import api from "@/api/axios"
 import defaultCover from "@/assets/images/default-cover.png"
+import { useToast } from 'vue-toastification'
 
 const books = ref([])
 const searchQuery = ref("")
 const searchPerformed = ref(false)
 const currentPage = ref(1)
 const limit = ref(24)
+const toast = useToast()
 
 const fetchBooks = async () => {
   if (!searchQuery.value.trim()) {
@@ -139,10 +141,10 @@ const requestBook = async (book) => {
     }
 
     const res = await api.post("/request-book", payload)
-    alert(res.data.message || "Book request submitted successfully.")
+    toast.success(res.data.message)
   } catch (err) {
     const message = err?.response?.data?.message || "Failed to request the book."
-    alert(message)
+    toast.error(message);
   }
 }
 </script>

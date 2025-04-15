@@ -20,11 +20,13 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import api from "@/api/axios";
+import { useToast } from 'vue-toastification'
 
 const router = useRouter();
 
 const rfidFailed = ref(false);
 const loading = ref(false);
+const toast = useToast()
 
 const rfidUrl = `${window.location.protocol}//${process.env.VUE_APP_API_HOST}:${process.env.VUE_APP_RFID_PORT}`;
 
@@ -46,15 +48,15 @@ const startRfidScan = async () => {
     const result = await response.json();
 
     if (result.code === "Success") {
+      if (result.message) {
+        toast.success(result.message)
+      }
       await handleIsbn(result.data);
     } else {
       throw new Error("RFID scan unsuccessful");
     }
   } catch (err) {
     console.error("RFID Scan error:", err);
-
-    const fallbackIsbn = "6054715968";
-    await handleIsbn(fallbackIsbn);
   } finally {
     loading.value = false;
   }

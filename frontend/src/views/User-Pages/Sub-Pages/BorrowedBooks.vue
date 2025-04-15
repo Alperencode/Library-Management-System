@@ -57,8 +57,10 @@ import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { formatDate } from "@/utils/date";
 import { useRouter } from "vue-router";
+import { useToast } from 'vue-toastification'
 
 const router = useRouter();
+const toast = useToast()
 
 const returnBook = () => {
   router.push("/scan-book");
@@ -88,11 +90,11 @@ const fetchBorrowedBooks = async () => {
 const extendReturn = async (bookId) => {
   try {
     const res = await api.post(`/extend-return/${bookId}`);
-    alert(res.data.message);
+    toast.success(res.data.message)
     await fetchBorrowedBooks();
   } catch (err) {
     const message = err?.response?.data?.message || "Failed to extend return date.";
-    alert(message);
+    toast.error(message);
   }
 };
 
