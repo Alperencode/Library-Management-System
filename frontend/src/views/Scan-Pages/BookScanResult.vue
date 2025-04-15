@@ -66,7 +66,9 @@ import defaultCover from '@/assets/images/default-cover.png'
 import { formatDate } from "@/utils/date"
 import { useStore } from 'vuex'
 import { useToast } from 'vue-toastification'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const route = useRoute()
 const toast = useToast()
 const store = useStore()
@@ -130,7 +132,7 @@ async function borrowBook() {
   try {
     const res = await api.post(`/borrow/${book.value._id}`)
     toast.success(res.data.message || "Book borrowed successfully")
-    setTimeout(() => window.location.reload(), 1000)
+    setTimeout(() => router.push("/"), 1000)
   } catch (err) {
     toast.error(err.response?.data?.message || "Borrow failed")
   }
@@ -140,7 +142,7 @@ async function extendReturn() {
   try {
     const res = await api.post(`/extend-return/${book.value._id}`)
     toast.success(res.data.message)
-    setTimeout(() => window.location.reload(), 1000)
+    setTimeout(() => router.push("/"), 1000)
   } catch (err) {
     toast.error(err.response?.data?.message || 'Extension failed')
   }
@@ -150,7 +152,7 @@ async function returnBook() {
   try {
     const res = await api.post(`/return/${book.value._id}`)
     toast.success(res.data.message)
-    setTimeout(() => window.location.reload(), 1000)
+    setTimeout(() => router.push("/"), 1000)
   } catch (err) {
     toast.error(err.response?.data?.message || 'Return failed')
   }
