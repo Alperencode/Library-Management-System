@@ -104,7 +104,7 @@ const showBorrowButton = computed(() => book.value && !book.value.borrowed)
 
 onMounted(async () => {
   try {
-    const res = await api.get(`/books/${route.params.id}`)
+    const res = await api.get(`/scan-book/${route.params.id}`)
     book.value = res.data.book
   } catch (err) {
     toast.error(err.response?.data?.message || 'Failed to fetch book details')

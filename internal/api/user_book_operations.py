@@ -119,7 +119,7 @@ async def get_notify_me_list(user: User = Depends(get_current_user)):
 
     return BookPreviewListResponse(
         code=SUCCESS,
-        message="Overdue books retrieved successfully",
+        message="Notify me list retrieved successfully",
         books=previews
     )
 
