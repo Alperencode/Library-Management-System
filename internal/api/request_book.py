@@ -17,11 +17,11 @@ router = APIRouter()
 
 @router.post("/request-book", response_model=SuccessResponse)
 async def request_book(data: BookRequest = Body(...), user: User = Depends(get_current_user)):
+    user = await get_user_by_id(user.id)
     if not user.requested_books:
         user.requested_books = []
 
     data.requested_at = datetime.now()
-    user = await get_user_by_id(user.id)
     for existing in user.requested_books:
         if existing.id and existing.id == data.id:
             return JSONResponse(
