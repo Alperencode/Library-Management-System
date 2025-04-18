@@ -38,22 +38,22 @@ const startRfidScan = async () => {
       credentials: 'include'
     });
 
-    if (!response.ok) {
-      console.warn("RFID failed, using fallback ISBN");
-      throw new Error("Simulated fallback trigger");
-    }
-
     const result = await response.json();
 
-    if (result.code === "Success") {
-      await handleIsbn(result.data, result.message);
+    if (response.ok) {
+      if (result.code === "Success") {
+        if (result.message) toast.success(result.message);
+        await handleIsbn(result.data);
+      } else {
+        toast.error(result.message || "RFID scan failed");
+      }
     } else {
-      throw new Error("RFID scan unsuccessful");
+      toast.error(result.message || "RFID scan failed due to server error");
     }
+
   } catch (err) {
     console.error("RFID Scan error:", err);
-    rfidFailed.value = true;
-    scanButtonText.value = "Retry RFID Scan"
+    toast.error("RFID scanner is not responding or unreachable.");
   } finally {
     loading.value = false;
   }

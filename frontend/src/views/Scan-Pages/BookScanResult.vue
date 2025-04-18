@@ -109,7 +109,8 @@ onMounted(async () => {
     const res = await api.get(`/scan-book/${route.params.id}`)
     book.value = res.data.book
   } catch (err) {
-    console.error("Failed to fetch book details:", err)
+    router.push("/")
+    // toast.error(err.response?.data?.message || 'Failed to fetch book details')
   }
 
   try {
@@ -125,7 +126,7 @@ onMounted(async () => {
 
 async function borrowBook() {
   if (!book.value?._id) {
-    toast.error("Book ID is not available")
+    // toast.error("Book ID is not available")
     return
   }
 

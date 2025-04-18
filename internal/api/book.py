@@ -1,12 +1,13 @@
 import pycountry
 from rapidfuzz import fuzz
 from typing import Optional
+from isbnlib import is_isbn10, is_isbn13
 from fastapi import APIRouter, Query, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.models.book import BookPreview
 from internal.utils.utils import get_scanned_book
-from internal.database.books import get_all_books, get_book_by_id
+from internal.database.books import get_all_books, get_book_by_id, get_book_by_isbn
 from internal.types.types import SUCCESS, FAIL, LanguageItem
 from internal.types.responses import (
     FailResponse,
@@ -35,6 +36,36 @@ async def list_books(
     recently_added: bool = Query(False),
     max_page_count: Optional[int] = Query(None, ge=1)
 ):
+    if q and (is_isbn10(q) or is_isbn13(q)):
+        book = await get_book_by_isbn(q)
+        if not book:
+            return JSONResponse(
+                status_code=404,
+                content=jsonable_encoder(
+                    FailResponse(code=FAIL, message="No book found associated with this ISBN")
+                )
+            )
+
+        preview = BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn
+        )
+        return PaginatedBookPreviewListResponse(
+            code=SUCCESS,
+            message="Book found by ISBN",
+            books=[preview],
+            total=1,
+            page=1,
+            has_next=False,
+            last_page=1
+        )
+
     all_books = await get_all_books()
     threshold = 60
     filtered_books = []
@@ -42,28 +73,6 @@ async def list_books(
     q_lower = q.lower() if q else None
 
     for book in all_books:
-        # Early return if exact ISBN match
-        if q and book.isbn == q:
-            preview = BookPreview(
-                id=book.id,
-                title=book.title,
-                authors=book.authors,
-                categories=book.categories,
-                publisher=book.publisher,
-                cover_image=book.cover_image,
-                borrowed=book.borrowed,
-                isbn=book.isbn
-            )
-            return PaginatedBookPreviewListResponse(
-                code=SUCCESS,
-                message="Book found by exact ISBN match",
-                books=[preview],
-                total=1,
-                page=1,
-                has_next=False,
-                last_page=1
-            )
-
         # Fuzzy matching
         if q_lower:
             title_match = fuzz.partial_ratio(q_lower, book.title.lower())
@@ -159,21 +168,49 @@ async def get_book(book_id: str):
 
 
 @router.get("/books/search/", response_model=BookPreviewListResponse)
-async def search_books(q: str = Query(..., min_length=1)):
+async def search_books(q: str = Query(...)):
+    if not q.strip():
+        return JSONResponse(
+            status_code=400,
+            content=jsonable_encoder(
+                FailResponse(code=FAIL, message="Search query must not be empty")
+            )
+        )
+
+    # Check if the query is a valid ISBN
+    is_isbn = is_isbn10(q) or is_isbn13(q)
+    if is_isbn:
+        book = await get_book_by_isbn(q)
+        if not book:
+            return JSONResponse(
+                status_code=404,
+                content=jsonable_encoder(
+                    FailResponse(code=FAIL, message="No book found associated with this ISBN")
+                )
+            )
+
+        preview = BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn
+        )
+        return BookPreviewListResponse(
+            code=SUCCESS,
+            message="Book found by ISBN",
+            books=[preview]
+        )
+
+    # Proceed with fuzzy search if not an ISBN
     all_books = await get_all_books()
     threshold = 60
     matched = []
-    isbn_match_found = False
-    matched_book = None
 
     for book in all_books:
-        # Check for exact ISBN match first
-        if book.isbn and book.isbn == q:
-            matched_book = book
-            isbn_match_found = True
-            break
-
-        # Fuzzy search
         title_match = fuzz.partial_ratio(q.lower(), book.title.lower())
 
         author_match = (
@@ -194,30 +231,11 @@ async def search_books(q: str = Query(..., min_length=1)):
         if any(score >= threshold for score in [title_match, author_match, category_match, publisher_match]):
             matched.append(book)
 
-    # If ISBN match found, return it explicitly
-    if isbn_match_found:
-        preview = BookPreview(
-            id=matched_book.id,
-            title=matched_book.title,
-            authors=matched_book.authors,
-            categories=matched_book.categories,
-            publisher=matched_book.publisher,
-            cover_image=matched_book.cover_image,
-            borrowed=matched_book.borrowed,
-            isbn=matched_book.isbn
-        )
-        return BookPreviewListResponse(
-            code=SUCCESS,
-            message="Book found by exact ISBN match",
-            books=[preview]
-        )
-
-    # If no matches found, return a 404
-    if not matched and not isbn_match_found:
+    if not matched:
         return JSONResponse(
             status_code=404,
             content=jsonable_encoder(
-                FailResponse(code=FAIL, message="No books found for the query")
+                FailResponse(code=FAIL, message="No books found matching the query")
             )
         )
 
@@ -237,7 +255,7 @@ async def search_books(q: str = Query(..., min_length=1)):
 
     return BookPreviewListResponse(
         code=SUCCESS,
-        message="Books found successfully",
+        message="Books found by query",
         books=previews
     )
 

@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import store from '@/store';
+import api from '@/api/axios'
+
 
 // Homeview
 import HomeView from "@/views/HomeView.vue";
@@ -112,17 +114,32 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = store.state.user !== null;
+import { useAuth } from "@/composables/useAuth";
 
+router.beforeEach(async (to, from, next) => {
   const protectedPaths = ['/user-page', '/request-book', '/scan-book'];
   const requiresAuth = protectedPaths.some(path => to.path.startsWith(path));
+
+  const { fetchUser } = useAuth();
+  await fetchUser();
+
+  const isAuthenticated = store.state.user !== null;
 
   if (requiresAuth && !isAuthenticated) {
     return next('/login');
   }
 
   return next();
+});
+
+router.afterEach((to, from) => {
+  const leftScanBookRoute = from.path.startsWith('/scan-book/') && !to.path.startsWith('/scan-book/');
+
+  if (leftScanBookRoute) {
+    api.post('/remove-scanned').catch(err => {
+      console.warn("Failed to remove scanned_book cookie:", err?.response?.data?.message || err.message);
+    });
+  }
 });
 
 export default router;
