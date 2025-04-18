@@ -22,9 +22,22 @@ let isRefreshing = false
 let failedQueue = []
 let hasRedirected = false;
 
+const extractApiPath = (url) => {
+  try {
+    const parsed = new URL(url, baseUrl);
+    return parsed.pathname.replace('/api/v1', '');
+  } catch {
+    return url.startsWith('/api/v1') ? url.replace('/api/v1', '') : url;
+  }
+};
+
+const ignoredApiToastPaths = [
+  '/refresh-token',
+  '/me'
+];
+
 api.interceptors.response.use(
   (res) => {
-    // Handle API responses that return { success: false }
     if (res?.data?.success === false) {
       const msg = res.data.message || res.data.detail;
       if (msg) toast.error(msg);
@@ -32,35 +45,19 @@ api.interceptors.response.use(
     return res;
   },
   async (err) => {
-    const extractPath = (url) => {
-      try {
-        const parsed = new URL(url, baseUrl);
-        return parsed.pathname.replace('/api/v1', '');
-      } catch {
-        return url.startsWith('/api/v1') ? url.replace('/api/v1', '') : url;
-      }
-    };
-    
-    const originalPath = extractPath(originalPath.url);
-    
-    const ignoredPaths = [
-      '/', '/login', '/register', '/books', '/books/', '/scan-book'
-    ];
-    
-    const ignoreCall = ignoredPaths.some(path => {
-      if (path === '/') return originalPath === '/';
-      if (path.endsWith('/')) return originalPath.startsWith(path);
-      return originalPath === path || originalPath.startsWith(path + '/');
-    });
+    const originalRequest = err.config;
+    const originalPath = extractApiPath(originalRequest.url);
 
-    if (err.response?.status === 401 && !originalPath._retry && !ignoreCall) {
+    const isIgnoredForToast = ignoredApiToastPaths.includes(originalPath);
+
+    if (err.response?.status === 401 && !originalRequest._retry && !isIgnoredForToast) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then(() => api(originalPath));
+        }).then(() => api(originalRequest));
       }
 
-      originalPath._retry = true;
+      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
@@ -73,7 +70,7 @@ api.interceptors.response.use(
         );
 
         hasRedirected = false;
-        return api(originalPath);
+        return api(originalRequest);
       } catch (error) {
         const router = require('@/router').default;
         if (!hasRedirected && router.currentRoute.value.path !== '/login') {
@@ -87,13 +84,13 @@ api.interceptors.response.use(
       }
     }
 
-    if (!ignoreCall) {
+    if (!isIgnoredForToast) {
+      toast.dismiss();
       const generalMessage =
         err.response?.data?.message ||
         err.response?.data?.detail?.message ||
+        err.response?.data?.detail ||
         "An unexpected error occurred";
-
-      toast.dismiss();
       if (generalMessage) toast.error(generalMessage);
     }
 
