@@ -40,10 +40,6 @@ const startRfidScan = async () => {
 
     const result = await response.json();
 
-<<<<<<< HEAD
-    if (result.code === "Success") {
-      await handleIsbn(result.data, result.message);
-=======
     if (response.ok) {
       if (result.code === "Success") {
         if (result.message) toast.success(result.message);
@@ -51,19 +47,13 @@ const startRfidScan = async () => {
       } else {
         toast.error(result.message || "RFID scan failed");
       }
->>>>>>> dcd1b55 (fix: many frontend bug)
     } else {
       toast.error(result.message || "RFID scan failed due to server error");
     }
 
   } catch (err) {
     console.error("RFID Scan error:", err);
-<<<<<<< HEAD
-    rfidFailed.value = true;
-    scanButtonText.value = "Retry RFID Scan"
-=======
     toast.error("RFID scanner is not responding or unreachable.");
->>>>>>> dcd1b55 (fix: many frontend bug)
   } finally {
     loading.value = false;
   }
