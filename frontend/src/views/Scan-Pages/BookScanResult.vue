@@ -109,7 +109,12 @@ onMounted(async () => {
     const res = await api.get(`/scan-book/${route.params.id}`)
     book.value = res.data.book
   } catch (err) {
+<<<<<<< HEAD
     console.error("Failed to fetch book details:", err)
+=======
+    router.push("/")
+    // toast.error(err.response?.data?.message || 'Failed to fetch book details')
+>>>>>>> dcd1b55 (fix: many frontend bug)
   }
 
   try {
@@ -119,13 +124,17 @@ onMounted(async () => {
       _id: book._id || book.id
     }))
   } catch (err) {
+<<<<<<< HEAD
     console.error("Failed to fetch book details:", err)
+=======
+    // toast.error(err.response?.data?.message || 'Failed to fetch notify list')
+>>>>>>> dcd1b55 (fix: many frontend bug)
   }
 })
 
 async function borrowBook() {
   if (!book.value?._id) {
-    toast.error("Book ID is not available")
+    // toast.error("Book ID is not available")
     return
   }
 
@@ -134,7 +143,11 @@ async function borrowBook() {
     toast.success(res.data.message || "Book borrowed successfully")
     setTimeout(() => router.push("/"), 1000)
   } catch (err) {
+<<<<<<< HEAD
     console.error("Borrow failed:", err)
+=======
+    // toast.error(err.response?.data?.message || "Borrow failed")
+>>>>>>> dcd1b55 (fix: many frontend bug)
   }
 }
 
@@ -144,7 +157,11 @@ async function extendReturn() {
     toast.success(res.data.message)
     setTimeout(() => router.push("/"), 1000)
   } catch (err) {
+<<<<<<< HEAD
     console.error("Extension failed:", err)
+=======
+    // toast.error(err.response?.data?.message || 'Extension failed')
+>>>>>>> dcd1b55 (fix: many frontend bug)
   }
 }
 
@@ -154,7 +171,11 @@ async function returnBook() {
     toast.success(res.data.message)
     setTimeout(() => router.push("/"), 1000)
   } catch (err) {
+<<<<<<< HEAD
     console.error("Return failed:", err)
+=======
+    // toast.error(err.response?.data?.message || 'Return failed')
+>>>>>>> dcd1b55 (fix: many frontend bug)
   }
 }
 
@@ -169,7 +190,11 @@ async function notifyMe() {
     toast.success(res.data.message)
     notifyList.value.push(book.value)
   } catch (err) {
+<<<<<<< HEAD
     console.error("Notification failed:", err)
+=======
+    // toast.error(err.response?.data?.message || 'Notification failed')
+>>>>>>> dcd1b55 (fix: many frontend bug)
   }
 }
 </script>

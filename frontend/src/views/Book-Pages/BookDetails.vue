@@ -104,17 +104,19 @@ onMounted(async () => {
     const res = await api.get(`/books/${route.params.id}`)
     book.value = res.data.book
   } catch (err) {
-    console.error('Failed to fetch book details:', err)
+    // toast.error(err.response?.data?.message || 'Failed to fetch book details')
   }
 
-  try {
-    const notifyRes = await api.get(`/notify-me`)
-    notifyList.value = (notifyRes.data.books || []).map(book => ({
-      ...book,
-      _id: book._id || book.id
-    }))
-  } catch (err) {
-    console.error('Failed to fetch book details:', err)
+  if (user.value) {
+    try {
+      const notifyRes = await api.get(`/notify-me`)
+      notifyList.value = (notifyRes.data.books || []).map(book => ({
+        ...book,
+        _id: book._id || book.id
+      }))
+    } catch (err) {
+      // toast.error(err.response?.data?.message || 'Failed to fetch notify list')
+    }
   }
 })
 
