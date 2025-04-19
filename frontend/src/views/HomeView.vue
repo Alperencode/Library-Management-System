@@ -1,6 +1,5 @@
 <template>
   <div id="home">
-
     <!-- ***** Main Banner Area Start ***** -->
     <section class="section main-banner" id="top" data-section="section1">
       <video autoplay muted loop id="bg-video">
@@ -12,18 +11,16 @@
           <div class="row">
             <div class="col-lg-12">
               <div class="caption">
-                <h6>Hello Students</h6>
-                <h2>Welcome to Education</h2>
+                <h6>Hello Everyone</h6>
+                <h2>Welcome to Library Management System</h2>
                 <p>
-                  This is an edu meeting HTML CSS template provided by
-                  <a rel="nofollow" href="https://templatemo.com/page/1" target="_blank">TemplateMo website</a>.
-                  This is a Bootstrap v5.1.3 layout. The video background is taken from
-                  Pexels website, a group of young people by
-                  <a rel="nofollow" href="https://www.pexels.com/@pressmaster" target="_blank">Pressmaster</a>.
+                  Manage your library with ease – scan books using RFID or ISBN,
+                  explore titles via Google Books, and request your favorite
+                  books directly from the system.
                 </p>
                 <div class="main-button-red">
                   <div class="scroll-to-section">
-                    <a href="#contact">Join Us Now!</a>
+                    <a href="/books">Check Out For Books!</a>
                   </div>
                 </div>
               </div>
@@ -46,8 +43,8 @@
                 <div class="down-content">
                   <h4>Best Education</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -59,8 +56,8 @@
                 <div class="down-content">
                   <h4>Best Teachers</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -72,8 +69,8 @@
                 <div class="down-content">
                   <h4>Best Students</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -85,8 +82,8 @@
                 <div class="down-content">
                   <h4>Online Meeting</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -98,8 +95,8 @@
                 <div class="down-content">
                   <h4>Best Networking</h4>
                   <p>
-                    Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis
-                    massa non vestibulum.
+                    Suspendisse tempor mauris a sem elementum bibendum. Praesent
+                    facilisis massa non vestibulum.
                   </p>
                 </div>
               </div>
@@ -111,527 +108,187 @@
 
     <section class="upcoming-meetings" id="meetings">
       <div class="container">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="section-heading">
-              <h2>Upcoming Meetings</h2>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <div class="categories">
-              <h4>Meeting Catgories</h4>
-              <ul>
-                <li><a href="#">Sed tempus enim leo</a></li>
-                <li><a href="#">Aenean molestie quis</a></li>
-                <li><a href="#">Cras et metus vestibulum</a></li>
-                <li><a href="#">Nam et condimentum</a></li>
-                <li><a href="#">Phasellus nec sapien</a></li>
-              </ul>
-              <div class="main-button-red">
-                <a href="meetings.html">All Upcoming Meetings</a>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-8">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="meeting-item">
-                  <div class="thumb">
-                    <div class="price">
-                      <span>$22.00</span>
-                    </div>
-                    <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg"
-                        alt="New Lecturer Meeting" /></a>
-                  </div>
-                  <div class="down-content">
-                    <div class="date">
-                      <h6>
-                        Nov <span>10</span>
-                      </h6>
-                    </div>
-                    <a href="meeting-details.html">
-                      <h4>New Lecturers Meeting</h4>
-                    </a>
-                    <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
-                  </div>
+        <h2 class="section-heading text-white text-center mb-5">
+          Recently Added Books
+        </h2>
+        <div class="slick-carousel">
+          <div
+            class="course-card"
+            v-for="book in recentlyAddedBooks"
+            :key="book.id"
+          >
+            <div class="card text-center text-dark">
+              <router-link
+                :to="`/books/${book.id}`"
+                class="text-decoration-none"
+              >
+                <img
+                  :src="book.cover_url || defaultCover"
+                  :alt="book.title"
+                  class="card-img-top"
+                />
+              </router-link>
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <h5 class="card-title">{{ book.title }}</h5>
+                  <p class="card-text text-muted">
+                    {{ book.authors?.join(", ") }}
+                  </p>
                 </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="meeting-item">
-                  <div class="thumb">
-                    <div class="price">
-                      <span>$36.00</span>
-                    </div>
-                    <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt="Online Teaching" /></a>
-                  </div>
-                  <div class="down-content">
-                    <div class="date">
-                      <h6>
-                        Nov <span>24</span>
-                      </h6>
-                    </div>
-                    <a href="meeting-details.html">
-                      <h4>Online Teaching Techniques</h4>
-                    </a>
-                    <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="meeting-item">
-                  <div class="thumb">
-                    <div class="price">
-                      <span>$14.00</span>
-                    </div>
-                    <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt="Higher Education" /></a>
-                  </div>
-                  <div class="down-content">
-                    <div class="date">
-                      <h6>
-                        Nov <span>26</span>
-                      </h6>
-                    </div>
-                    <a href="meeting-details.html">
-                      <h4>Higher Education Conference</h4>
-                    </a>
-                    <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="meeting-item">
-                  <div class="thumb">
-                    <div class="price">
-                      <span>$48.00</span>
-                    </div>
-                    <a href="meeting-details.html"><img src="assets/images/meeting-04.jpg" alt="Student Training" /></a>
-                  </div>
-                  <div class="down-content">
-                    <div class="date">
-                      <h6>
-                        Nov <span>30</span>
-                      </h6>
-                    </div>
-                    <a href="meeting-details.html">
-                      <h4>Student Training Meetup</h4>
-                    </a>
-                    <p>Morbi in libero blandit lectus<br />cursus ullamcorper.</p>
-                  </div>
+                <div class="mt-3">
+                  <router-link
+                    :to="`/books/${book.id}`"
+                    class="view-details-btn"
+                  >
+                    View Details →
+                  </router-link>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Eğer hiç kitap yoksa -->
+        <div v-if="recentlyAddedBooks.length === 0" class="no-results mt-4">
+          <p>No recently added books available.</p>
+        </div>
       </div>
     </section>
+
     <section class="apply-now" id="apply">
       <div class="container">
-        <div class="row">
-          <div class="col-lg-6 align-self-center">
-            <div class="row">
-              <div class="col-lg-12">
-                <div class="item">
-                  <h3>APPLY FOR BACHELOR DEGREE</h3>
-                  <p>
-                    You are allowed to use this edu meeting CSS template for your school
-                    or university or business. You can feel free to modify or edit this
-                    layout.
-                  </p>
-                  <div class="main-button-red">
-                    <div class="scroll-to-section">
-                      <a href="#contact">Join Us Now!</a>
-                    </div>
-                  </div>
-                </div>
+        <div class="item">
+          <h3 style="text-align: center">Request a Book from Google Books</h3>
+
+          <!-- Başlangıç: RequestBook içeriği -->
+          <div class="meetings-page">
+            <div class="main-content">
+              <!-- Arama Çubuğu -->
+              <div class="search-bar">
+                <input
+                  class="input-line full-width"
+                  type="text"
+                  :value="searchQuery"
+                  @input="updateSearchQuery"
+                  @keyup.enter="performSearch"
+                  placeholder="Search by Author, Title, Publisher, ISBN..."
+                />
               </div>
-              <div class="col-lg-12">
-                <div class="item">
-                  <h3>APPLY FOR BACHELOR DEGREE</h3>
-                  <p>
-                    You are not allowed to redistribute the template ZIP file on any other
-                    template website. Please contact us for more information.
-                  </p>
-                  <div class="main-button-yellow">
-                    <div class="scroll-to-section">
-                      <a href="#contact">Join Us Now!</a>
+
+              <!-- Sonuç Yoksa -->
+              <div
+                v-if="requestBooks.length === 0 && searchPerformed"
+                class="no-results"
+              >
+                <p class="no-results-text">
+                  No books found for "{{ searchQuery }}"
+                </p>
+              </div>
+
+              <!-- Kitap Kartları -->
+              <div v-else>
+                <div class="row grid">
+                  <div
+                    v-for="(book, index) in requestBooks.slice(0, 8)"
+                    :key="index"
+                    class="meeting-item"
+                  >
+                    <div class="meeting-box">
+                      <!-- Kapak Görseli -->
+                      <div class="thumb">
+                        <img
+                          :src="book.cover_image"
+                          :alt="book.title"
+                          class="book-thumbnail"
+                        />
+                      </div>
+
+                      <!-- Kitap Bilgileri -->
+                      <div class="down-content">
+                        <h4 class="book-title">{{ book.title }}</h4>
+
+                        <p
+                          style="color: black"
+                          class="text-ellipsis"
+                          :title="book.authors.join(', ')"
+                        >
+                          <strong>Author:</strong> {{ book.authors.join(", ") }}
+                        </p>
+
+                        <p
+                          style="color: black"
+                          class="text-ellipsis"
+                          :title="book.publisher"
+                        >
+                          <strong>Publisher:</strong> {{ book.publisher }}
+                        </p>
+
+                        <p
+                          style="color: black"
+                          v-if="book.categories"
+                          class="text-ellipsis"
+                          :title="book.categories"
+                        >
+                          <strong>Categories:</strong> {{ book.categories }}
+                        </p>
+
+                        <!-- Request Butonu -->
+                        <button
+                          v-if="user"
+                          class="request-button"
+                          @click="requestBook(book)"
+                          :disabled="requestedBookIds.has(book.id)"
+                        >
+                          {{
+                            requestedBookIds.has(book.id)
+                              ? "Requested"
+                              : "Request"
+                          }}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-lg-6">
-            <div class="accordions is-first-expanded">
-              <article class="accordion">
-                <div class="accordion-head">
-                  <span>About Edu Meeting HTML Template</span>
-                  <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                  </span>
-                </div>
-                <div class="accordion-body">
-                  <div class="content">
-                    <p>
-                      If you want to get the latest collection of HTML CSS templates for
-                      your websites, you may visit
-                      <a rel="nofollow" href="https://www.toocss.com/" target="_blank">Too CSS website</a>.
-                      If you need a working contact form script, please visit
-                      <a href="https://templatemo.com/contact" target="_parent">our contact page</a>
-                      for more info.
-                    </p>
-                  </div>
-                </div>
-              </article>
-              <article class="accordion">
-                <div class="accordion-head">
-                  <span>HTML CSS Bootstrap Layout</span>
-                  <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                  </span>
-                </div>
-                <div class="accordion-body">
-                  <div class="content">
-                    <p>
-                      Etiam posuere metus orci, vel consectetur elit imperdiet eu. Cras
-                      ipsum magna, maximus at semper sit amet, eleifend eget neque. Nunc
-                      facilisis quam purus, sed vulputate augue interdum vitae. Aliquam a
-                      elit massa.
-                      <br /><br />
-                      Nulla malesuada elit lacus, ac ultricies massa varius sed. Etiam eu
-                      metus eget nibh consequat aliquet. Proin fringilla, quam at euismod
-                      porttitor, odio odio tempus ligula, ut feugiat ex erat nec mauris.
-                      Donec viverra velit eget lectus sollicitudin tincidunt.
-                    </p>
-                  </div>
-                </div>
-              </article>
-              <article class="accordion">
-                <div class="accordion-head">
-                  <span>Please tell your friends</span>
-                  <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                  </span>
-                </div>
-                <div class="accordion-body">
-                  <div class="content">
-                    <p>
-                      Ut vehicula mauris est, sed sodales justo rhoncus eu. Morbi porttitor
-                      quam velit, at ullamcorper justo suscipit sit amet. Quisque at
-                      suscipit mi, non efficitur velit.
-                      <br /><br />
-                      Cras et tortor semper, placerat eros sit amet, porta est. Mauris
-                      porttitor sapien et quam volutpat luctus. Nullam sodales ipsum ac
-                      neque ultricies varius.
-                    </p>
-                  </div>
-                </div>
-              </article>
-              <article class="accordion last-accordion">
-                <div class="accordion-head">
-                  <span>Share this to your colleagues</span>
-                  <span class="icon">
-                    <i class="icon fa fa-chevron-right"></i>
-                  </span>
-                </div>
-                <div class="accordion-body">
-                  <div class="content">
-                    <p>
-                      Maecenas suscipit enim libero, vel lobortis justo condimentum id.
-                      Interdum et malesuada fames ac ante ipsum primis in faucibus.
-                      <br /><br />
-                      Sed eleifend metus sit amet magna tristique, posuere laoreet arcu
-                      semper. Nulla pellentesque ut tortor sit amet maximus. In eu libero
-                      ullamcorper, semper nisi quis, convallis nisi.
-                    </p>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
+          <!-- Bitiş: RequestBook içeriği -->
         </div>
       </div>
     </section>
 
-    <section class="our-courses" id="courses">
+    <section class="popular-courses">
       <div class="container">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="section-heading">
-              <h2>Our Popular Courses</h2>
-            </div>
-          </div>
-          <div class="col-lg-12">
-            <div class="owl-courses-item owl-carousel">
-              <div class="item">
-                <img src="assets/images/course-01.jpg" alt="Course One" />
-                <div class="down-content">
-                  <h4>Morbi tincidunt elit vitae justo rhoncus</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$160</span>
-                      </div>
-                    </div>
-                  </div>
+        <h2 class="section-heading text-white text-center mb-5">
+          Most Borrowed Books
+        </h2>
+        <div class="slick-carousel">
+          <div class="course-card" v-for="book in books" :key="book.id">
+            <div class="card text-center text-dark">
+              <router-link
+                :to="`/books/${book.id}`"
+                class="text-decoration-none"
+              >
+                <img
+                  :src="book.cover_image || defaultCover"
+                  :alt="book.title"
+                  class="card-img-top"
+                />
+              </router-link>
+              <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                  <h5 class="card-title">{{ book.title }}</h5>
+                  <p class="card-text text-muted">
+                    {{ book.authors?.join(", ") }}
+                  </p>
                 </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-02.jpg" alt="Course Two" />
-                <div class="down-content">
-                  <h4>Curabitur molestie dignissim purus vel</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$180</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-03.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Nulla at ipsum a mauris egestas tempor</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$140</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-04.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Aenean molestie quis libero gravida</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$120</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-01.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Lorem ipsum dolor sit amet adipiscing elit</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$250</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-02.jpg" alt="" />
-                <div class="down-content">
-                  <h4>TemplateMo is the best website for Free CSS</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$270</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-03.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Web Design Templates at your finger tips</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$340</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-04.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Please visit our website again</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$360</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-01.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Responsive HTML Templates for you</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$400</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-02.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Download Free CSS Layouts for your business</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$430</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-03.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Morbi in libero blandit lectus cursus</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$480</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="item">
-                <img src="assets/images/course-04.jpg" alt="" />
-                <div class="down-content">
-                  <h4>Curabitur molestie dignissim purus</h4>
-                  <div class="info">
-                    <div class="row">
-                      <div class="col-8">
-                        <ul>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                          <li><i class="fa fa-star"></i></li>
-                        </ul>
-                      </div>
-                      <div class="col-4">
-                        <span>$560</span>
-                      </div>
-                    </div>
-                  </div>
+                <div class="mt-3">
+                  <router-link
+                    :to="`/books/${book.id}`"
+                    class="view-details-btn"
+                  >
+                    View Details →
+                  </router-link>
                 </div>
               </div>
             </div>
@@ -646,14 +303,14 @@
           <div class="col-lg-6">
             <div class="row">
               <div class="col-lg-12">
-                <h2>A Few Facts About Our University</h2>
+                <h2>A Few Facts About Our Library Management System</h2>
               </div>
               <div class="col-lg-6">
                 <div class="row">
                   <div class="col-12">
-                    <div class="count-area-content percentage">
-                      <div class="count-digit">94</div>
-                      <div class="count-title">Succesed Students</div>
+                    <div class="count-area-content">
+                      <div class="count-digit">{{ totalBooks }}</div>
+                      <div class="count-title">Total Books</div>
                     </div>
                   </div>
                   <div class="col-12">
@@ -682,83 +339,7 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-6 align-self-center">
-            <div class="video">
-              <a href="https://www.youtube.com/watch?v=HndV87XpkWg" target="_blank"><img
-                  src="assets/images/play-icon.png" alt="" /></a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section contact-us" id="contact" data-section="contact">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-9 align-self-center">
-            <div class="row">
-              <div class="col-lg-12">
-                <form id="contact" action="" method="post">
-                  <div class="row">
-                    <div class="col-lg-12">
-                      <h2>Let's get in touch</h2>
-                    </div>
-                    <div class="col-lg-4">
-                      <fieldset>
-                        <input name="name" type="text" id="name" placeholder="YOURNAME...*" required="" />
-                      </fieldset>
-                    </div>
-                    <div class="col-lg-4">
-                      <fieldset>
-                        <input name="email" type="text" id="email" pattern="[^ @]*@[^ @]*" placeholder="YOUR EMAIL..."
-                          required="" />
-                      </fieldset>
-                    </div>
-                    <div class="col-lg-4">
-                      <fieldset>
-                        <input name="subject" type="text" id="subject" placeholder="SUBJECT...*" required="" />
-                      </fieldset>
-                    </div>
-                    <div class="col-lg-12">
-                      <fieldset>
-                        <textarea name="message" type="text" class="form-control" id="message"
-                          placeholder="YOUR MESSAGE..." required=""></textarea>
-                      </fieldset>
-                    </div>
-                    <div class="col-lg-12">
-                      <fieldset>
-                        <button type="submit" id="form-submit" class="button">
-                          SEND MESSAGE NOW
-                        </button>
-                      </fieldset>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3">
-            <div class="right-info">
-              <ul>
-                <li>
-                  <h6>Phone Number</h6>
-                  <span>010-020-0340</span>
-                </li>
-                <li>
-                  <h6>Email Address</h6>
-                  <span>info@meeting.edu</span>
-                </li>
-                <li>
-                  <h6>Street Address</h6>
-                  <span>Rio de Janeiro - RJ, 22795-008, Brazil</span>
-                </li>
-                <li>
-                  <h6>Website URL</h6>
-                  <span>www.meeting.edu</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+          <div class="col-lg-6 align-self-center"></div>
         </div>
       </div>
     </section>
@@ -766,17 +347,141 @@
 </template>
 
 <script>
-import { onMounted } from "vue";
+import { onMounted, ref, nextTick } from "vue";
+import api from "../api/axios";
+import defaultCover from "@/assets/images/default-cover.png";
 
 export default {
   name: "HomeView",
   setup() {
-    onMounted(() => {
+    const books = ref([]);
+    const recentlyAddedBooks = ref([]);
+    const totalBooks = ref(0);
+
+    const user = ref(null);
+    const requestedBookIds = ref(new Set());
+
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/me");
+        user.value = res.data.user;
+
+        // Eğer kullanıcıdan requested_books geldiyse, onları kullan
+        const requested = res.data.user.requested_books || [];
+        requestedBookIds.value = new Set(requested.map((b) => b.id));
+      } catch (err) {
+        console.warn("Kullanıcı bilgisi alınamadı:", err);
+        user.value = null;
+      }
+    };
+
+    const fetchRequestedBooks = async () => {
+      try {
+        const res = await api.get("/request-book");
+        const ids = res.data.books.map((book) => book.id);
+        ids.forEach((id) => requestedBookIds.value.add(id));
+      } catch (err) {
+        console.warn("İstek yapılan kitaplar alınamadı:", err);
+      }
+    };
+
+    const searchQuery = ref("");
+    const searchPerformed = ref(false);
+    const currentPage = ref(1);
+    const limit = ref(4);
+    const requestBooks = ref([]);
+
+    const fetchBooks = async () => {
+      if (!searchQuery.value.trim()) {
+        requestBooks.value = [];
+        searchPerformed.value = false;
+        return;
+      }
+      try {
+        const res = await api.get("/google-books/search", {
+          params: {
+            q: searchQuery.value,
+            page: currentPage.value,
+            limit: limit.value,
+          },
+        });
+
+        requestBooks.value = res.data.books.map((book) => {
+          const authors =
+            Array.isArray(book.authors) && book.authors.length
+              ? book.authors
+              : ["Unknown"];
+          const publisher = book.publisher || "Unknown";
+
+          const categoriesString =
+            Array.isArray(book.categories) && book.categories.length
+              ? book.categories
+                  .map((cat) => {
+                    let main = cat.category || "Unknown Category";
+                    if (cat.subcategory) {
+                      main += ` - ${cat.subcategory}`;
+                    }
+                    return main;
+                  })
+                  .join(", ")
+              : "Unknown";
+
+          return {
+            id: book.id,
+            title: book.title || "No Title",
+            cover_image: book.cover_image || defaultCover,
+            isbn: book.isbn || null,
+            authors,
+            publisher,
+            categories: categoriesString,
+          };
+        });
+
+        searchPerformed.value = true;
+      } catch (err) {
+        requestBooks.value = [];
+        searchPerformed.value = true;
+      }
+    };
+
+    const performSearch = () => {
+      currentPage.value = 1;
+      fetchBooks();
+    };
+
+    const updateSearchQuery = (event) => {
+      searchQuery.value = event.target.value;
+    };
+
+    const requestBook = async (book) => {
+      try {
+        const payload = {
+          id: book.id,
+          title: book.title,
+          authors: book.authors,
+          isbn: book.isbn,
+          publisher: book.publisher,
+          cover_image: book.cover_image,
+        };
+
+        const res = await api.post("/request-book", payload);
+        alert(res.data.message || "Book request submitted successfully.");
+        requestedBookIds.value.add(book.id);
+      } catch (err) {
+        const message =
+          err?.response?.data?.message || "Failed to request the book.";
+        alert(message);
+      }
+    };
+
+    onMounted(async () => {
+      await fetchUser();
+      await fetchRequestedBooks(); // Ek olarak çağrılıyor
+
       const scripts = [
         "vendor/jquery/jquery.min.js",
         "assets/js/isotope.min.js",
         "assets/js/isotope.js",
-        "assets/js/owl-carousel.js",
         "assets/js/lightbox.js",
         "assets/js/tabs.js",
         "assets/js/video.js",
@@ -791,66 +496,83 @@ export default {
         document.body.appendChild(script);
       });
 
-      setTimeout(() => {
-        if (window.$) {
-          window.$(".nav li:first").addClass("active");
+      const res = await api.get("/books?most_borrowed=true&limit=10");
+      books.value = res.data.books;
+      await nextTick();
 
-          const showSection = function (section, isAnimate) {
-            const direction = section.replace(/#/, "");
-            const reqSection = window
-              .$(".section")
-              .filter('[data-section="' + direction + '"]');
+      try {
+        const { data } = await api.get("/books", {
+          params: {
+            page: 1,
+            limit: 10,
+            recently_added: true,
+          },
+        });
 
-            if (!reqSection.length) {
-              console.warn("Section not found for:", direction);
-              return;
-            }
-
-            const reqSectionPos = reqSection.offset().top - 0;
-
-            if (isAnimate) {
-              window.$("html, body").animate(
-                {
-                  scrollTop: reqSectionPos,
-                },
-                800
-              );
-            } else {
-              window.$("html, body").scrollTop(reqSectionPos);
-            }
-          };
-
-          const checkSection = function () {
-            window.$(".section").each(function () {
-              const $this = window.$(this);
-              const topEdge = $this.offset().top - 80;
-              const bottomEdge = topEdge + $this.height();
-              const wScroll = window.$(window).scrollTop();
-              if (topEdge < wScroll && bottomEdge > wScroll) {
-                const currentId = $this.data("section");
-                const reqLink = window
-                  .$("a")
-                  .filter("[href*=\\#" + currentId + "]");
-                reqLink.closest("li").addClass("active").siblings().removeClass("active");
-              }
-            });
-          };
-
-          window
-            .$(".main-menu, .responsive-menu, .scroll-to-section")
-            .on("click", "a", function (e) {
-              e.preventDefault();
-              showSection(window.$(this).attr("href"), true);
-            });
-
-          window.$(window).scroll(() => {
-            checkSection();
-          });
+        if (data.code === "Success" && data.books) {
+          recentlyAddedBooks.value = data.books.map((book) => ({
+            id: book.id,
+            title: book.title || "No Title",
+            authors: book.authors || ["Unknown Author"],
+            cover_url: book.cover_image || defaultCover,
+            created_at: book.borrowed_at || new Date().toISOString(),
+            borrow_count: book.borrowed ? 1 : 0,
+          }));
+        } else {
+          console.error("No books found or error in response:", data.message);
         }
+
+        const totalBooksRes = await api.get("/books");
+        totalBooks.value = totalBooksRes.data.total;
+      } catch (error) {
+        console.error("Error fetching recently added books:", error);
+      }
+
+      await nextTick();
+      if (window.$ && window.$(".slick-carousel").slick) {
+        window.$(".slick-carousel").slick({
+          slidesToShow: 4,
+          slidesToScroll: 1,
+          autoplay: true,
+          autoplaySpeed: 3000,
+          arrows: true,
+          dots: true,
+          responsive: [
+            { breakpoint: 1024, settings: { slidesToShow: 3 } },
+            { breakpoint: 768, settings: { slidesToShow: 2 } },
+            { breakpoint: 480, settings: { slidesToShow: 1 } },
+          ],
+        });
+      } else {
+        console.error("Slick failed to load!");
+      }
+
+      setTimeout(() => {
+        const items = document.querySelectorAll(".meeting-item");
+        let maxHeight = 0;
+        items.forEach((item) => {
+          maxHeight = Math.max(maxHeight, item.offsetHeight);
+        });
+        items.forEach((item) => {
+          item.style.height = `${maxHeight}px`;
+        });
       }, 500);
     });
 
-    return {};
+    return {
+      books,
+      defaultCover,
+      recentlyAddedBooks,
+      totalBooks,
+      searchQuery,
+      searchPerformed,
+      requestBooks,
+      requestedBookIds,
+      performSearch,
+      updateSearchQuery,
+      requestBook,
+      user,
+    };
   },
 };
 </script>
@@ -861,4 +583,357 @@ export default {
 @import "@/assets/css/templatemo-edu-meeting.css";
 @import "@/assets/css/owl.css";
 @import "@/assets/css/lightbox.css";
+
+.meetings-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 24px;
+  background-color: transparent;
+}
+
+.search-bar {
+  margin: 50px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.input-line {
+  background: none;
+  margin-bottom: 0;
+  padding: 6px 10px;
+  line-height: 2.4em;
+  color: #fff;
+  font-family: roboto;
+  font-weight: 300;
+  font-size: 1.2rem;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.input-line:focus {
+  outline: none;
+}
+
+::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.no-results {
+  color: #ffffff !important;
+  padding: 20px;
+  font-size: 18px;
+  text-align: center;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.no-results-text {
+  color: rgb(226, 226, 226) !important;
+  font-size: 15px;
+  font-weight: bold;
+  text-shadow: 1px 1px 3px black;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.meeting-item {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .meeting-item {
+    width: calc(33.333% - 20px);
+  }
+}
+
+.meeting-box {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: white;
+  height: 100%;
+  min-height: 100px;
+}
+
+.thumb {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 180px;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.book-thumbnail {
+  height: 100%;
+  object-fit: contain;
+  padding-top: 10px;
+}
+
+.down-content {
+  text-align: left !important;
+}
+
+.book-title {
+  text-align: center;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.text-ellipsis {
+  margin: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  color: black;
+}
+
+.status-badge.taken {
+  background-color: #e74c3c;
+}
+
+.status-badge.available {
+  background-color: #27ae60;
+}
+
+.request-button {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+.request-button:hover {
+  background-color: #2980b9;
+}
+
+.request-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.popular-courses {
+  background-color: #1f2a36;
+  background-image: url("@/assets/images/meetings-bg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  padding: 50px 0;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-img-top {
+  height: 250px;
+  object-fit: contain;
+  padding-top: 10px;
+}
+
+.course-card {
+  padding: 15px;
+}
+
+.section-heading {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.view-details-btn {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: #d4881a;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.view-details-btn:hover {
+  text-decoration: none;
+  color: #d4881a;
+  transform: translateX(4px);
+}
+
+.upcoming-meetings {
+  padding: 60px 0;
+}
+
+.no-results p {
+  text-align: center;
+  font-size: 16px;
+  color: #888;
+}
+
+.meeting-item {
+  width: 200px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.meeting-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.thumb {
+  position: relative;
+}
+
+.thumb img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-bottom: 2px solid #ddd;
+}
+
+.down-content {
+  padding: 10px;
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.down-content h4,
+.down-content p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 4px 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.card-title,
+.card-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2em;
+  max-height: 2.4em;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+  height: 100%;
+  min-height: 420px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.course-card {
+  padding: 15px;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.card-text {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.view-details-btn {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: #d4881a;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.view-details-btn:hover {
+  text-decoration: none;
+  color: #d4881a;
+  transform: translateX(4px);
+}
+
+.apply-now .container {
+  max-width: 1100px;
+  padding: 0 24px;
+  margin: 0 auto;
+}
+
+.apply-now .item {
+  padding: 20px;
+  border-radius: 12px;
+  background: transparent;
+}
+
+.apply-now .main-content {
+  height: auto;
+  width: 100%;
+  padding: 24px;
+  background-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .section-heading h2 {
+    font-size: 28px;
+  }
+
+  .meeting-item {
+    width: 100%;
+    max-width: 300px;
+    margin: auto;
+  }
+}
 </style>

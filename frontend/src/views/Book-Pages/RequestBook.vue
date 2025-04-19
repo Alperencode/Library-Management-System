@@ -22,7 +22,8 @@
                   <div class="down-content">
                     <h4 class="book-title">{{ book.title }}</h4>
                     <p class="text-ellipsis" :title="book.authors.join(', ')">
-                      <strong>Author:</strong> {{ book.authors.join(', ') || 'Unknown' }}
+                      <strong>Author:</strong>
+                      {{ book.authors.join(", ") || "Unknown" }}
                     </p>
                     <p class="text-ellipsis" :title="book.publisher">
                       <strong>Publisher:</strong> {{ book.publisher }}
@@ -91,7 +92,7 @@ const fetchBooks = async () => {
         isbn: book.isbn || null,
         authors: book.authors || [],
         publisher: book.publisher || "Unknown",
-        categories: categoriesString
+        categories: categoriesString,
       }
     })
     searchPerformed.value = true
@@ -267,7 +268,6 @@ const requestBook = async (book) => {
   width: 100%;
   max-width: 100%;
 }
-
 
 .status-badge.taken {
   background-color: #e74c3c;
