@@ -81,7 +81,7 @@ const toast = useToast()
 
 const fetchRequestedBooks = async () => {
   try {
-    const res = await api.get("/request-book");
+    const res = await api.get("/request-book")
     requestedBooks.value = res.data.books.map((book) => ({
       id: book.id,
       title: book.title || "No Title",
@@ -90,11 +90,11 @@ const fetchRequestedBooks = async () => {
       publisher: book.publisher || "Unknown",
       status: book.status || "Request Sent",
       requested_at: formatDate(book.requested_at),
-    }));
+    }))
   } catch (error) {
-    console.error("Error retrieving requested books:", error);
+    console.error("Error retrieving requested books:", error)
   }
-};
+}
 
 const deleteRequest = async (id) => {
   try {
@@ -102,11 +102,11 @@ const deleteRequest = async (id) => {
     toast.success(res.data.message)
     requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id)
   } catch (error) {
-    console.error("Failed to delete book request:", error);
+    console.error("Failed to delete book request:", error)
   }
-};
+}
 
-onMounted(fetchRequestedBooks);
+onMounted(fetchRequestedBooks)
 </script>
 
 <style scoped>
