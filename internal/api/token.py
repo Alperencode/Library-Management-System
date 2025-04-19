@@ -17,43 +17,58 @@ async def refresh_token(request: Request, response: Response, request_body: IDRe
     decoded_access = verify_jwt_token(present_access_token) if present_access_token else None
 
     if decoded_access:
-        # If there is a valid access_token, do not refresh and return
         user_id = decoded_access.get("id")
         u = await get_user_by_id(user_id)
         if u:
-            return SuccessResponse(code=SUCCESS, message="There is already valid access_token exists")
+            return SuccessResponse(code=SUCCESS, message="You are already logged in.")
 
-    # 2) Try to get user from request's id
+    # 2) Try to refresh using ID in request body
     if request_body and request_body.id:
-        # If there is a valid user, refresh the access token
         u = await get_user_by_id(request_body.id)
         if u:
             err = create_access_token(u.id, response)
             if err:
-                logger.error(f"Failed to create access token in refresh-token endpoint: {err}")
-                return JSONResponse(status_code=500, content=jsonable_encoder(
-                    FailResponse(code=FAIL, message="Failed to create access token using request id"))
+                logger.error(f"Failed to create access token (from request body): {err}")
+                return JSONResponse(
+                    status_code=500,
+                    content=jsonable_encoder(
+                        FailResponse(
+                            code=FAIL,
+                            message="Something went wrong while refreshing your session. Please try again."
+                        )
+                    )
                 )
-            return SuccessResponse(code=SUCCESS, message="Token refreshed")
+            return SuccessResponse(code=SUCCESS, message="Session refreshed successfully.")
 
-    # 3) If no user is in the request body, check for refresh_token
+    # 3) Try to refresh using refresh_token
     refresh_token = request.cookies.get("refresh_token")
     decoded_refresh = verify_jwt_token(refresh_token) if refresh_token else None
 
     if decoded_refresh:
-        # If there is a valid refresh token, refresh the access token
         user_id = decoded_refresh.get("id")
         u = await get_user_by_id(user_id)
         if u:
             err = create_access_token(u.id, response)
             if err:
-                logger.error(f"Failed to create access token in refresh-token endpoint: {err}")
-                return JSONResponse(status_code=500, content=jsonable_encoder(
-                    FailResponse(code=FAIL, message="Failed to create access token using refresh token"))
+                logger.error(f"Failed to create access token (from refresh token): {err}")
+                return JSONResponse(
+                    status_code=500,
+                    content=jsonable_encoder(
+                        FailResponse(
+                            code=FAIL,
+                            message="Unable to restore your session. Please try again shortly."
+                        )
+                    )
                 )
-            return SuccessResponse(code=SUCCESS, message="Token refreshed")
+            return SuccessResponse(code=SUCCESS, message="Session refreshed successfully.")
 
-    # 4) Require authentication
-    return JSONResponse(status_code=401, content=jsonable_encoder(
-        FailResponse(code=FAIL, message="Authentication required"))
+    # 4) No valid token or user ID found
+    return JSONResponse(
+        status_code=401,
+        content=jsonable_encoder(
+            FailResponse(
+                code=FAIL,
+                message="Your session has expired or is invalid. Please log in again."
+            )
+        )
     )

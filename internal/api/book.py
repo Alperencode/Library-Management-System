@@ -1,11 +1,13 @@
 import pycountry
 from rapidfuzz import fuzz
 from typing import Optional
-from fastapi import APIRouter, Query
+from isbnlib import is_isbn10, is_isbn13
+from fastapi import APIRouter, Query, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.models.book import BookPreview
-from internal.database.books import get_all_books, get_book_by_id
+from internal.utils.utils import get_scanned_book
+from internal.database.books import get_all_books, get_book_by_id, get_book_by_isbn
 from internal.types.types import SUCCESS, FAIL, LanguageItem
 from internal.types.responses import (
     FailResponse,
@@ -34,34 +36,66 @@ async def list_books(
     recently_added: bool = Query(False),
     max_page_count: Optional[int] = Query(None, ge=1)
 ):
+    if q and (is_isbn10(q) or is_isbn13(q)):
+        book = await get_book_by_isbn(q)
+        if not book:
+            return JSONResponse(
+                status_code=404,
+                content=jsonable_encoder(
+                    FailResponse(code=FAIL, message="No book found associated with this ISBN")
+                )
+            )
+
+        preview = BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn
+        )
+        return PaginatedBookPreviewListResponse(
+            code=SUCCESS,
+            message="Book found by ISBN",
+            books=[preview],
+            total=1,
+            page=1,
+            has_next=False,
+            last_page=1
+        )
+
     all_books = await get_all_books()
     threshold = 60
     filtered_books = []
 
+    q_lower = q.lower() if q else None
+
     for book in all_books:
-        # If search query is present, apply fuzzy matching
-        if q:
-            title_match = fuzz.partial_ratio(q.lower(), book.title.lower())
+        # Fuzzy matching
+        if q_lower:
+            title_match = fuzz.partial_ratio(q_lower, book.title.lower())
 
             author_match = (
-                max(fuzz.partial_ratio(q.lower(), author.lower()) for author in book.authors)
+                max(fuzz.partial_ratio(q_lower, author.lower()) for author in book.authors)
                 if book.authors else 0
             )
 
             cat_scores = []
             for cat in book.categories or []:
                 if cat.category:
-                    cat_scores.append(fuzz.partial_ratio(q.lower(), cat.category.lower()))
+                    cat_scores.append(fuzz.partial_ratio(q_lower, cat.category.lower()))
                 if cat.subcategory:
-                    cat_scores.append(fuzz.partial_ratio(q.lower(), cat.subcategory.lower()))
+                    cat_scores.append(fuzz.partial_ratio(q_lower, cat.subcategory.lower()))
             category_match = max(cat_scores) if cat_scores else 0
 
-            publisher_match = fuzz.partial_ratio(q.lower(), book.publisher.lower()) if book.publisher else 0
+            publisher_match = fuzz.partial_ratio(q_lower, book.publisher.lower()) if book.publisher else 0
 
             if not any(score >= threshold for score in [title_match, author_match, category_match, publisher_match]):
                 continue
 
-        # Apply filters (after search filtering, if applicable)
+        # Filters
         if available_only and book.borrowed:
             continue
         if max_page_count and book.page_count and book.page_count > max_page_count:
@@ -85,7 +119,6 @@ async def list_books(
 
     total_books = len(filtered_books)
     last_page = (total_books + limit - 1) // limit
-
     page = min(page, last_page) if last_page > 0 else 1
     start = (page - 1) * limit
     end = start + limit
@@ -135,7 +168,44 @@ async def get_book(book_id: str):
 
 
 @router.get("/books/search/", response_model=BookPreviewListResponse)
-async def search_books(q: str = Query(..., min_length=1)):
+async def search_books(q: str = Query(...)):
+    if not q.strip():
+        return JSONResponse(
+            status_code=400,
+            content=jsonable_encoder(
+                FailResponse(code=FAIL, message="Search query must not be empty")
+            )
+        )
+
+    # Check if the query is a valid ISBN
+    is_isbn = is_isbn10(q) or is_isbn13(q)
+    if is_isbn:
+        book = await get_book_by_isbn(q)
+        if not book:
+            return JSONResponse(
+                status_code=404,
+                content=jsonable_encoder(
+                    FailResponse(code=FAIL, message="No book found associated with this ISBN")
+                )
+            )
+
+        preview = BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn
+        )
+        return BookPreviewListResponse(
+            code=SUCCESS,
+            message="Book found by ISBN",
+            books=[preview]
+        )
+
+    # Proceed with fuzzy search if not an ISBN
     all_books = await get_all_books()
     threshold = 60
     matched = []
@@ -165,7 +235,7 @@ async def search_books(q: str = Query(..., min_length=1)):
         return JSONResponse(
             status_code=404,
             content=jsonable_encoder(
-                FailResponse(code=FAIL, message="No books found for the query")
+                FailResponse(code=FAIL, message="No books found matching the query")
             )
         )
 
@@ -185,7 +255,7 @@ async def search_books(q: str = Query(..., min_length=1)):
 
     return BookPreviewListResponse(
         code=SUCCESS,
-        message="Books found successfully",
+        message="Books found by query",
         books=previews
     )
 
@@ -309,4 +379,21 @@ async def list_languages():
         code=SUCCESS,
         message="Languages retrieved successfully",
         languages=languages
+    )
+
+
+@router.get("/scan-book/{book_id}", response_model=BookResponse)
+async def scan_book(book_id: str, scanned_book=Depends(get_scanned_book)):
+    if scanned_book.id != book_id:
+        return JSONResponse(
+            status_code=403,
+            content=jsonable_encoder(
+                FailResponse(code=FAIL, message="Scanned book ID does not match")
+            )
+        )
+
+    return BookResponse(
+        code=SUCCESS,
+        message="Book scan verified successfully",
+        book=scanned_book
     )

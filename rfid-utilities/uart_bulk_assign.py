@@ -3,19 +3,45 @@ import ndef
 import time
 import argparse
 import sys
-from gpiozero import Buzzer
-from gpiozero import LED
+from gpiozero import Buzzer, LED
+from threading import Thread
 
 buzzer = Buzzer(18)
-led = LED(23)
+
+red_led = LED(22)
+green_led = LED(27)
+blue_led = LED(17)
 
 
-def buzz(duration=0.1):
-    buzzer.on()
-    led.on()
-    time.sleep(duration)
-    buzzer.off()
-    led.off()
+def rgb_on(r=False, g=False, b=False):
+    red_led.on() if r else red_led.off()
+    green_led.on() if g else green_led.off()
+    blue_led.on() if b else blue_led.off()
+
+
+def buzz_and_blink(r=False, g=False, b=False, buzz_times=1, blink_times=1, duration=0.1):
+    def _buzz():
+        for _ in range(buzz_times):
+            buzzer.on()
+            time.sleep(duration)
+            buzzer.off()
+            time.sleep(duration)
+
+    def _blink():
+        for _ in range(blink_times):
+            rgb_on(r, g, b)
+            time.sleep(duration)
+            rgb_on(False, False, False)
+            time.sleep(duration)
+
+    buzz_thread = Thread(target=_buzz)
+    blink_thread = Thread(target=_blink)
+
+    buzz_thread.start()
+    blink_thread.start()
+
+    buzz_thread.join()
+    blink_thread.join()
 
 
 def wait_for_tag_removal(clf):
@@ -38,6 +64,7 @@ def assign_isbns(file_path):
             isbns = [line.strip() for line in f if line.strip()]
     except Exception as e:
         print(f"Error reading file: {e}")
+        buzz_and_blink(r=True, buzz_times=2, blink_times=2)
         sys.exit(1)
 
     print(f"{len(isbns)} ISBNs loaded.")
@@ -57,14 +84,16 @@ def assign_isbns(file_path):
                         try:
                             tag.ndef.records = [ndef.TextRecord(isbn)]
                             print(f"ISBN '{isbn}' written successfully.")
-                            buzz()
+                            buzz_and_blink(g=True)
                             tag_written = True
                             return True
                         except Exception as e:
                             print(f"Write failed: {e}. Try again.")
+                            buzz_and_blink(r=True, buzz_times=2, blink_times=2)
                             return False
                     else:
                         print("Tag is not NDEF formatted or not writable.")
+                        buzz_and_blink(r=True, buzz_times=2, blink_times=2)
                         return False
 
                 clf.connect(rdwr={'on-connect': on_connect})

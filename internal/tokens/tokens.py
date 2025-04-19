@@ -59,6 +59,14 @@ def verify_jwt_token(token):
         return None
 
 
+def verify_scanned_book_token(token: str):
+    try:
+        payload = jwt.decode(token, get_config("secret_key"), algorithms=[get_config("algorithm")])
+        return payload.get("book_id"), payload.get("scanned")
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return None, None
+
+
 def _get_cookie_options():
     environment = get_config("environment")
     if environment == "dev":

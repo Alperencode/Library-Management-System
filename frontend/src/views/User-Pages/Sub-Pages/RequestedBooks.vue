@@ -70,14 +70,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useAuth } from "@/composables/useAuth"; // Import useAuth for user info
-import api from "@/api/axios";
-import defaultCover from "@/assets/images/default-cover.png";
-import { formatDate } from "@/utils/date";
+import { ref, onMounted } from "vue"
+import api from "@/api/axios"
+import defaultCover from "@/assets/images/default-cover.png"
+import { formatDate } from "@/utils/date"
+import { useToast } from "vue-toastification"
 
-const requestedBooks = ref([]);
-const { user } = useAuth(); // Get the user from useAuth
+const requestedBooks = ref([])
+const toast = useToast()
 
 const fetchRequestedBooks = async () => {
   try {
@@ -98,8 +98,9 @@ const fetchRequestedBooks = async () => {
 
 const deleteRequest = async (id) => {
   try {
-    await api.delete(`/requests/${id}`);
-    requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id);
+    const res = await api.delete(`/requests/${id}`)
+    toast.success(res.data.message)
+    requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id)
   } catch (error) {
     console.error("Failed to delete book request:", error);
   }

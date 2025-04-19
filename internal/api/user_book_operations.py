@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, time
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from internal.utils.utils import get_current_user, send_email_to_subscribers
+from internal.utils.utils import get_current_user, send_email_to_subscribers, get_scanned_book
 from internal.database.books import get_book_by_id, update_book
 from internal.database.users import update_user, get_user_by_id
 from internal.types.types import SUCCESS, FAIL
@@ -119,7 +119,7 @@ async def get_notify_me_list(user: User = Depends(get_current_user)):
 
     return BookPreviewListResponse(
         code=SUCCESS,
-        message="Overdue books retrieved successfully",
+        message="Notify me list retrieved successfully",
         books=previews
     )
 
@@ -160,15 +160,20 @@ async def get_overdue_books(user: User = Depends(get_current_user)):
 
 
 @router.post("/borrow/{book_id}", response_model=SuccessResponse)
-async def borrow_book(book_id: str, user: User = Depends(get_current_user)):
-    book = await get_book_by_id(book_id)
-    if not book:
+async def borrow_book(
+    book_id: str,
+    user: User = Depends(get_current_user),
+    scanned_book=Depends(get_scanned_book)
+):
+    if scanned_book.id != book_id:
         return JSONResponse(
-            status_code=404,
+            status_code=403,
             content=jsonable_encoder(
-                FailResponse(code=FAIL, message="Book not found")
+                FailResponse(code=FAIL, message="Scanned book ID does not match")
             )
         )
+
+    book = scanned_book
 
     if book.available_copies < 1:
         return JSONResponse(
@@ -257,15 +262,20 @@ async def notify_me(book_id: str, user: User = Depends(get_current_user)):
 
 
 @router.post("/return/{book_id}", response_model=SuccessResponse)
-async def return_book(book_id: str, user: User = Depends(get_current_user)):
-    book = await get_book_by_id(book_id)
-    if not book:
+async def return_book(
+    book_id: str,
+    user: User = Depends(get_current_user),
+    scanned_book=Depends(get_scanned_book)
+):
+    if scanned_book.id != book_id:
         return JSONResponse(
-            status_code=404,
+            status_code=403,
             content=jsonable_encoder(
-                FailResponse(code=FAIL, message="Book not found")
+                FailResponse(code=FAIL, message="Scanned book ID does not match")
             )
         )
+
+    book = scanned_book
 
     if book.currently_borrowed_by != user.id:
         return JSONResponse(
@@ -281,6 +291,7 @@ async def return_book(book_id: str, user: User = Depends(get_current_user)):
     book.currently_borrowed_by = None
     book.last_borrowed_by = user.id
     book.return_date = None
+
     if book.available_copies > 0 and book.notify_me_list:
         for user_id in book.notify_me_list:
             subject = f"Book '{book.title}' is now available"
@@ -408,3 +419,9 @@ async def remove_notify_me(book_id: str, user: User = Depends(get_current_user))
     return SuccessResponse(
         code=SUCCESS, message="You have unsubscribed from notifications for this book"
     )
+
+
+@router.post("/remove-scanned", response_model=SuccessResponse)
+async def logout_user(response: Response):
+    response.delete_cookie("scanned_book")
+    return SuccessResponse(code=SUCCESS, message="Successfully removed the scanned_book")

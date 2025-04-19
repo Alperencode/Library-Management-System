@@ -1,13 +1,15 @@
 import bcrypt
 import jwt
 import smtplib
+from fastapi import Request
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate, make_msgid, formataddr
 from config.config import get_config
-from internal.models.user import User
-from fastapi import HTTPException, Request
 from internal.database.users import get_user_by_id
+from internal.models.user import User
+from internal.database.books import get_book_by_isbn
+from internal.types.exceptions import FailResponseException
 from config.config import LOCAL_IP
 from .logger import logger
 
@@ -28,28 +30,59 @@ def verify_token_owner(request: Request, user: User, token_name: str) -> bool:
 
 
 async def get_current_user(request: Request):
-    # Check for access_token cookie
     access_token = request.cookies.get("access_token")
     if not access_token:
-        raise HTTPException(status_code=401, detail="Authentication required")
+        raise FailResponseException(401, "You must be logged in to continue.")
 
     try:
-        payload = jwt.decode(access_token, get_config("secret_key"), algorithms=[get_config("algorithm")])
+        payload = jwt.decode(
+            access_token,
+            get_config("secret_key"),
+            algorithms=[get_config("algorithm")]
+        )
         user_id = payload.get("id")
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise FailResponseException(401, "Authentication token is invalid or corrupted.")
 
-        # Fetch user from database
         user = await get_user_by_id(user_id)
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise FailResponseException(404, "User account not found. Please contact support.")
 
         return user
 
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
+        raise FailResponseException(401, "Your session has expired. Please log in again.")
+    except jwt.JWTError:
+        raise FailResponseException(401, "Authentication token could not be verified.")
+
+
+async def get_scanned_book(request: Request):
+    token = request.cookies.get("scanned_book")
+    if not token:
+        raise FailResponseException(401, "Please scan a book to proceed.")
+
+    try:
+        payload = jwt.decode(
+            token,
+            get_config("secret_key"),
+            algorithms=[get_config("algorithm")]
+        )
+        isbn = payload.get("book_isbn")
+        scanned = payload.get("scanned")
+
+        if not isbn or not scanned:
+            raise FailResponseException(401, "Scanned data is incomplete or invalid.")
+
+        book = await get_book_by_isbn(isbn)
+        if not book:
+            raise FailResponseException(404, "Scanned book was not found in the library catalog.")
+
+        return book
+
+    except jwt.ExpiredSignatureError:
+        raise FailResponseException(401, "Scan expired. Please scan the book again.")
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise FailResponseException(401, "The scanned book token is invalid or has been tampered with.")
 
 
 async def send_email_to_subscribers(user, book, subject):
