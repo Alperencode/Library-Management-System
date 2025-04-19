@@ -158,8 +158,101 @@
     <section class="apply-now" id="apply">
       <div class="container">
         <div class="item">
-          <h3>Request a Book from Google Books</h3>
-          <RequestBook />
+          <h3 style="text-align: center">Request a Book from Google Books</h3>
+
+          <!-- Başlangıç: RequestBook içeriği -->
+          <div class="meetings-page">
+            <div class="main-content">
+              <!-- Arama Çubuğu -->
+              <div class="search-bar">
+                <input
+                  class="input-line full-width"
+                  type="text"
+                  :value="searchQuery"
+                  @input="updateSearchQuery"
+                  @keyup.enter="performSearch"
+                  placeholder="Search by Author, Title, Publisher, ISBN..."
+                />
+              </div>
+
+              <!-- Sonuç Yoksa -->
+              <div
+                v-if="requestBooks.length === 0 && searchPerformed"
+                class="no-results"
+              >
+                <p class="no-results-text">
+                  No books found for "{{ searchQuery }}"
+                </p>
+              </div>
+
+              <!-- Kitap Kartları -->
+              <div v-else>
+                <div class="row grid">
+                  <div
+                    v-for="(book, index) in requestBooks.slice(0, 8)"
+                    :key="index"
+                    class="meeting-item"
+                  >
+                    <div class="meeting-box">
+                      <!-- Kapak Görseli -->
+                      <div class="thumb">
+                        <img
+                          :src="book.cover_image"
+                          :alt="book.title"
+                          class="book-thumbnail"
+                        />
+                      </div>
+
+                      <!-- Kitap Bilgileri -->
+                      <div class="down-content">
+                        <h4 class="book-title">{{ book.title }}</h4>
+
+                        <p
+                          style="color: black"
+                          class="text-ellipsis"
+                          :title="book.authors.join(', ')"
+                        >
+                          <strong>Author:</strong> {{ book.authors.join(", ") }}
+                        </p>
+
+                        <p
+                          style="color: black"
+                          class="text-ellipsis"
+                          :title="book.publisher"
+                        >
+                          <strong>Publisher:</strong> {{ book.publisher }}
+                        </p>
+
+                        <p
+                          style="color: black"
+                          v-if="book.categories"
+                          class="text-ellipsis"
+                          :title="book.categories"
+                        >
+                          <strong>Categories:</strong> {{ book.categories }}
+                        </p>
+
+                        <!-- Request Butonu -->
+                        <button
+                          v-if="user"
+                          class="request-button"
+                          @click="requestBook(book)"
+                          :disabled="requestedBookIds.has(book.id)"
+                        >
+                          {{
+                            requestedBookIds.has(book.id)
+                              ? "Requested"
+                              : "Request"
+                          }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Bitiş: RequestBook içeriği -->
         </div>
       </div>
     </section>
@@ -257,19 +350,134 @@
 import { onMounted, ref, nextTick } from "vue";
 import api from "../api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
-import RequestBook from "@/views/Book-Pages/RequestBook.vue";
 
 export default {
   name: "HomeView",
-  components: {
-    RequestBook,
-  },
   setup() {
     const books = ref([]);
     const recentlyAddedBooks = ref([]);
-    const totalBooks = ref(0); // Toplam kitap sayısını tutacak değişken
+    const totalBooks = ref(0);
+
+    const user = ref(null);
+    const requestedBookIds = ref(new Set());
+
+    const fetchUser = async () => {
+      try {
+        const res = await api.get("/me");
+        user.value = res.data.user;
+
+        // Eğer kullanıcıdan requested_books geldiyse, onları kullan
+        const requested = res.data.user.requested_books || [];
+        requestedBookIds.value = new Set(requested.map((b) => b.id));
+      } catch (err) {
+        console.warn("Kullanıcı bilgisi alınamadı:", err);
+        user.value = null;
+      }
+    };
+
+    const fetchRequestedBooks = async () => {
+      try {
+        const res = await api.get("/request-book");
+        const ids = res.data.books.map((book) => book.id);
+        ids.forEach((id) => requestedBookIds.value.add(id));
+      } catch (err) {
+        console.warn("İstek yapılan kitaplar alınamadı:", err);
+      }
+    };
+
+    const searchQuery = ref("");
+    const searchPerformed = ref(false);
+    const currentPage = ref(1);
+    const limit = ref(4);
+    const requestBooks = ref([]);
+
+    const fetchBooks = async () => {
+      if (!searchQuery.value.trim()) {
+        requestBooks.value = [];
+        searchPerformed.value = false;
+        return;
+      }
+      try {
+        const res = await api.get("/google-books/search", {
+          params: {
+            q: searchQuery.value,
+            page: currentPage.value,
+            limit: limit.value,
+          },
+        });
+
+        requestBooks.value = res.data.books.map((book) => {
+          const authors =
+            Array.isArray(book.authors) && book.authors.length
+              ? book.authors
+              : ["Unknown"];
+          const publisher = book.publisher || "Unknown";
+
+          const categoriesString =
+            Array.isArray(book.categories) && book.categories.length
+              ? book.categories
+                  .map((cat) => {
+                    let main = cat.category || "Unknown Category";
+                    if (cat.subcategory) {
+                      main += ` - ${cat.subcategory}`;
+                    }
+                    return main;
+                  })
+                  .join(", ")
+              : "Unknown";
+
+          return {
+            id: book.id,
+            title: book.title || "No Title",
+            cover_image: book.cover_image || defaultCover,
+            isbn: book.isbn || null,
+            authors,
+            publisher,
+            categories: categoriesString,
+          };
+        });
+
+        searchPerformed.value = true;
+      } catch (err) {
+        requestBooks.value = [];
+        searchPerformed.value = true;
+      }
+    };
+
+    const performSearch = () => {
+      currentPage.value = 1;
+      fetchBooks();
+    };
+
+    const updateSearchQuery = (event) => {
+      searchQuery.value = event.target.value;
+    };
+
+    const requestBook = async (book) => {
+      try {
+        const payload = {
+          id: book.id,
+          title: book.title,
+          authors: book.authors,
+          isbn: book.isbn,
+          publisher: book.publisher,
+          cover_image: book.cover_image,
+        };
+
+        const res = await api.post("/request-book", payload);
+        alert(res.data.message || "Book request submitted successfully.");
+        requestedBookIds.value.add(book.id);
+      } catch (err) {
+        const message =
+          err?.response?.data?.message || "Failed to request the book.";
+        alert(message);
+      }
+    };
 
     onMounted(async () => {
+      await fetchUser();
+      await fetchRequestedBooks(); // Ek olarak çağrılıyor
+
       const scripts = [
         "vendor/jquery/jquery.min.js",
         "assets/js/isotope.min.js",
@@ -288,12 +496,10 @@ export default {
         document.body.appendChild(script);
       });
 
-      // Most Borrowed Books
       const res = await api.get("/books?most_borrowed=true&limit=10");
       books.value = res.data.books;
       await nextTick();
 
-      // Recently Added Books
       try {
         const { data } = await api.get("/books", {
           params: {
@@ -316,16 +522,13 @@ export default {
           console.error("No books found or error in response:", data.message);
         }
 
-        // Toplam kitap sayısını çekme
         const totalBooksRes = await api.get("/books");
         totalBooks.value = totalBooksRes.data.total;
       } catch (error) {
         console.error("Error fetching recently added books:", error);
       }
 
-      // Sliderlar için init
       await nextTick();
-
       if (window.$ && window.$(".slick-carousel").slick) {
         window.$(".slick-carousel").slick({
           slidesToShow: 4,
@@ -335,39 +538,21 @@ export default {
           arrows: true,
           dots: true,
           responsive: [
-            {
-              breakpoint: 1024,
-              settings: {
-                slidesToShow: 3,
-              },
-            },
-            {
-              breakpoint: 768,
-              settings: {
-                slidesToShow: 2,
-              },
-            },
-            {
-              breakpoint: 480,
-              settings: {
-                slidesToShow: 1,
-              },
-            },
+            { breakpoint: 1024, settings: { slidesToShow: 3 } },
+            { breakpoint: 768, settings: { slidesToShow: 2 } },
+            { breakpoint: 480, settings: { slidesToShow: 1 } },
           ],
         });
       } else {
         console.error("Slick failed to load!");
       }
 
-      // Sabit yükseklik ayarı (isteğe bağlı)
       setTimeout(() => {
         const items = document.querySelectorAll(".meeting-item");
         let maxHeight = 0;
-
         items.forEach((item) => {
           maxHeight = Math.max(maxHeight, item.offsetHeight);
         });
-
         items.forEach((item) => {
           item.style.height = `${maxHeight}px`;
         });
@@ -379,6 +564,14 @@ export default {
       defaultCover,
       recentlyAddedBooks,
       totalBooks,
+      searchQuery,
+      searchPerformed,
+      requestBooks,
+      requestedBookIds,
+      performSearch,
+      updateSearchQuery,
+      requestBook,
+      user,
     };
   },
 };
@@ -391,6 +584,155 @@ export default {
 @import "@/assets/css/owl.css";
 @import "@/assets/css/lightbox.css";
 
+.meetings-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 24px;
+  background-color: transparent;
+}
+
+.search-bar {
+  margin: 50px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.input-line {
+  background: none;
+  margin-bottom: 0;
+  padding: 6px 10px;
+  line-height: 2.4em;
+  color: #fff;
+  font-family: roboto;
+  font-weight: 300;
+  font-size: 1.2rem;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.input-line:focus {
+  outline: none;
+}
+
+::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.no-results {
+  color: #ffffff !important;
+  padding: 20px;
+  font-size: 18px;
+  text-align: center;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.no-results-text {
+  color: rgb(226, 226, 226) !important;
+  font-size: 15px;
+  font-weight: bold;
+  text-shadow: 1px 1px 3px black;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.meeting-item {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .meeting-item {
+    width: calc(33.333% - 20px);
+  }
+}
+
+.meeting-box {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: white;
+  height: 100%;
+  min-height: 100px;
+}
+
+.thumb {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 180px;
+  padding: 8px;
+  overflow: hidden;
+}
+
+.book-thumbnail {
+  height: 100%;
+  object-fit: contain;
+  padding-top: 10px;
+}
+
+.down-content {
+  text-align: left !important;
+}
+
+.book-title {
+  text-align: center;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.text-ellipsis {
+  margin: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  color: black;
+}
+
+.status-badge.taken {
+  background-color: #e74c3c;
+}
+
+.status-badge.available {
+  background-color: #27ae60;
+}
+
+.request-button {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+.request-button:hover {
+  background-color: #2980b9;
+}
+
+.request-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
 .popular-courses {
   background-color: #1f2a36;
   background-image: url("@/assets/images/meetings-bg.jpg");
@@ -399,6 +741,7 @@ export default {
   background-position: center;
   padding: 50px 0;
 }
+
 .card {
   border: none;
   border-radius: 12px;
@@ -443,7 +786,6 @@ export default {
 
 .upcoming-meetings {
   padding: 60px 0;
-  background-color: #f8f9fa;
 }
 
 .no-results p {
@@ -454,7 +796,7 @@ export default {
 
 .meeting-item {
   width: 200px;
-  height: 380px;
+  height: auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -565,16 +907,22 @@ export default {
 }
 
 .apply-now .container {
-  max-width: 15000px; /* Daha geniş bir container */
-  padding: 0 24px; /* Yanlarda biraz daha boşluk */
-  margin: 0 auto; /* Ortalamak için */
+  max-width: 1100px;
+  padding: 0 24px;
+  margin: 0 auto;
 }
 
 .apply-now .item {
-  padding: 40px;
-  max-height: 700px; /* Maksimum yüksekliği sınırla */
-  overflow-y: auto; /* İçerik taşarsa scroll çıksın */
+  padding: 20px;
   border-radius: 12px;
+  background: transparent;
+}
+
+.apply-now .main-content {
+  height: auto;
+  width: 100%;
+  padding: 24px;
+  background-color: transparent;
 }
 
 @media (max-width: 768px) {
