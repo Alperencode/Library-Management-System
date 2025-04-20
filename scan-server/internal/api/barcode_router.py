@@ -37,6 +37,7 @@ def stop_camera_after_delay(delay: float, session_id: float):
     camera_active = False
     display_title = ""
     display_until = 0
+    time.sleep(0.3)
 
 
 @router.get("/barcode/video")
@@ -152,7 +153,8 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
             frame = shared_picam2.capture_array("main")
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-            for barcode in decode(gray):
+            decoded_barcodes = decode(gray)
+            for barcode in decoded_barcodes:
                 isbn = barcode.data.decode("utf-8").strip()
                 if is_valid_isbn(isbn):
                     try:
@@ -164,7 +166,7 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
                     display_title = title
                     display_until = time.time() + 3
 
-                    for b in decode(gray):
+                    for b in decoded_barcodes:
                         pts = np.array([b.polygon], np.int32)
                         cv2.polylines(frame, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
 
