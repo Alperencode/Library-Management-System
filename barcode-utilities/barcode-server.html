@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Barcode Scanner</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2rem; }
+    #video-feed { border: 1px solid #ccc; width: 640px; height: 480px; }
+    #isbn { margin-top: 1rem; color: green; }
+    button { padding: 0.5rem 1rem; font-size: 1rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Live Barcode Scanner</h1>
+  <div>
+    <img id="video-feed" src="" alt="Live Feed">
+  </div>
+  <button onclick="scanBarcode()">Scan Barcode</button>
+  <h2 id="isbn">Scanned ISBN will appear here</h2>
+
+  <script>
+    const baseUrl = "http://192.168.1.138:8001/api/v1";
+    const video = document.getElementById("video-feed");
+
+    function startVideoFeed() {
+      // Stop previous stream if running
+      video.src = "";
+      // Wait a moment to flush old connection
+      setTimeout(() => {
+        const timestamp = Date.now();
+        video.src = `${baseUrl}/barcode/video?ts=${timestamp}`;
+      }, 100);
+    }
+
+    async function scanBarcode() {
+      const isbnElement = document.getElementById("isbn");
+      isbnElement.textContent = "Scanning...";
+
+      // Start fresh stream for visual
+      startVideoFeed();
+
+      try {
+        const response = await fetch(`${baseUrl}/barcode/scan`);
+        const result = await response.json();
+        if (response.ok && result.code === "Success") {
+          isbnElement.textContent = `ISBN: ${result.data}`;
+        } else {
+          isbnElement.textContent = `Failed: ${result.message || "Unknown error"}`;
+        }
+      } catch (error) {
+        isbnElement.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Optionally preload stream
+    window.onload = () => {
+      // Comment out if you only want stream after scan starts
+      // startVideoFeed();
+    };
+  </script>
+</body>
+</html>
