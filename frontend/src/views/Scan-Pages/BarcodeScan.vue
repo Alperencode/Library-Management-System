@@ -82,7 +82,7 @@ const handleIsbn = async (isbn) => {
 
     const books = res.data.books;
     if (Array.isArray(books) && books.length > 0 && books[0]?.id) {
-      router.push("/scan-book")
+      router.push(`/scan-book/${books[0].id}`);
     } else {
       throw new Error("Book not found.");
     }
