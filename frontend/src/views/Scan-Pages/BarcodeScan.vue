@@ -5,16 +5,16 @@
       Follow the instructions below to scan using Barcode: <br />
       `This place will be replaced by instructions image`
     </p>
-
-    <button class="scan-btn" @click="startBarcodeScan" :disabled="loading">
-      {{ loading ? "Scanning..." : "Start Barcode Scan" }}
-    </button>
-
     <div v-if="showVideo" class="video-container">
       <div class="video-wrapper">
         <img :src="videoUrl" class="video-stream" alt="Barcode Camera Feed" />
       </div>
     </div>
+
+    <button class="scan-btn" @click="startBarcodeScan" :disabled="loading">
+      {{ loading ? "Scanning..." : "Start Barcode Scan" }}
+    </button>
+
   </div>
 </template>
 
@@ -35,8 +35,10 @@ const barcodeUrl = `${window.location.protocol}//${process.env.VUE_APP_API_HOST}
 
 const startBarcodeScan = async () => {
   loading.value = true;
-  showVideo.value = false;
   toast.clear();
+
+  showVideo.value = true;
+  videoUrl.value = `${barcodeUrl}/api/v1/barcode/video`;
 
   try {
     const response = await fetch(`${barcodeUrl}/api/v1/barcode/scan`, {
@@ -44,18 +46,25 @@ const startBarcodeScan = async () => {
       credentials: "include",
     });
 
+    await fetch(`${barcodeUrl}/api/v1/barcode/video`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+
     const result = await response.json();
 
     if (response.ok && result.code === "Success") {
       toast.success(result.message || "Barcode scanned!");
-      showVideo.value = true;
-      videoUrl.value = `${barcodeUrl}/api/v1/barcode/video`;
 
       setTimeout(async () => {
         await handleIsbn(result.data);
       }, 2500);
     } else {
-      toast.error(result.message || "Barcode scan failed");
+      toast.error(result.message || "Barcode scan failed.");
+      setTimeout(async () => {
+        router.push("/scan-book")
+      }, 2500);
     }
   } catch (err) {
     toast.error("Barcode scanner is not responding or unreachable.");
@@ -73,12 +82,14 @@ const handleIsbn = async (isbn) => {
 
     const books = res.data.books;
     if (Array.isArray(books) && books.length > 0 && books[0]?.id) {
-      router.push(`/scan-book/${books[0].id}`);
+      router.push("/scan-book")
     } else {
       throw new Error("Book not found.");
     }
   } catch (err) {
     toast.error(err.response?.data?.message || "Book fetch failed.");
+
+    router.push("/scan-book")
   }
 };
 </script>
