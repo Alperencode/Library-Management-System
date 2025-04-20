@@ -20,7 +20,7 @@
                 </p>
                 <div class="main-button-red">
                   <div class="scroll-to-section">
-                    <a href="/books">Check Out the Book Catolog</a>
+                    <a href="/books">Check Out the Book Catalog</a>
                   </div>
                 </div>
               </div>
