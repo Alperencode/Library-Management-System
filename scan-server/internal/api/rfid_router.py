@@ -5,14 +5,14 @@ from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.types.types import WriteRequest, FAIL, SUCCESS
-from internal.types.responses import FailResponse, RFIDResponse
+from internal.types.responses import FailResponse, ISBNResponse
 from internal.tokens.tokens import create_scanned_book_token
 from internal.gpio.buzz import buzz_and_blink
 
 router = APIRouter()
 
 
-@router.get("/read", response_model=RFIDResponse)
+@router.get("/read", response_model=ISBNResponse)
 def read_rfid(response: Response):
     read_result = None
     timeout_seconds = 10
@@ -24,7 +24,7 @@ def read_rfid(response: Response):
                 if isinstance(record, ndef.TextRecord):
                     buzz_and_blink(g=True)
                     create_scanned_book_token(record.text, response)
-                    return RFIDResponse(
+                    return ISBNResponse(
                         code=SUCCESS,
                         message="Successfully retrieved RFID data",
                         data=record.text
@@ -77,7 +77,7 @@ def read_rfid(response: Response):
     return read_result
 
 
-@router.post("/write", response_model=RFIDResponse)
+@router.post("/write", response_model=ISBNResponse)
 def write_rfid(data: WriteRequest):
     write_result = None
 
@@ -86,7 +86,7 @@ def write_rfid(data: WriteRequest):
             try:
                 tag.ndef.records = [ndef.TextRecord(data.text)]
                 buzz_and_blink(g=True)
-                return RFIDResponse(
+                return ISBNResponse(
                     code=SUCCESS,
                     message="Successfully write the data to RFID tag.",
                     data=data.text
