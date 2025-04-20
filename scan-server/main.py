@@ -8,7 +8,7 @@ from internal.api import rfid_router, barcode_router
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8085", f"http://{LOCAL_IP}:8085", "*"],
+    allow_origins=["http://localhost:8085", f"http://{LOCAL_IP}:8085"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

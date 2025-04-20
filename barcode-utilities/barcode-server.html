@@ -23,9 +23,7 @@
     const video = document.getElementById("video-feed");
 
     function startVideoFeed() {
-      // Stop previous stream if running
       video.src = "";
-      // Wait a moment to flush old connection
       setTimeout(() => {
         const timestamp = Date.now();
         video.src = `${baseUrl}/barcode/video?ts=${timestamp}`;
@@ -36,7 +34,6 @@
       const isbnElement = document.getElementById("isbn");
       isbnElement.textContent = "Scanning...";
 
-      // Start fresh stream for visual
       startVideoFeed();
 
       try {
@@ -52,11 +49,6 @@
       }
     }
 
-    // Optionally preload stream
-    window.onload = () => {
-      // Comment out if you only want stream after scan starts
-      // startVideoFeed();
-    };
   </script>
 </body>
 </html>

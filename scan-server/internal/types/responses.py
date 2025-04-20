@@ -11,5 +11,5 @@ class FailResponse(BaseModel):
     message: str = Field(None, examples=["message"])
 
 
-class RFIDResponse(SuccessResponse):
+class ISBNResponse(SuccessResponse):
     data: str = Field(None)
