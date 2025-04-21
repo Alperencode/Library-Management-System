@@ -4,7 +4,7 @@
       <h2 class="how-to-title">How to Use RFID Scan</h2>
       <p class="how-to-description">Follow the instructions below to scan using RFID:</p>
     </div>
-    <div class="rfid-scan-container">
+    <div class="rfid-scan-container" ref="instructions">
       <img src="@/assets/images/Horizontal-RFID-Scan-Instructions.png" alt="RFID Scan Instructions"
         class="rfid-image" />
     </div>
@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, nextTick, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "@/api/axios";
 import { useToast } from 'vue-toastification'
@@ -29,8 +29,24 @@ const rfidFailed = ref(false);
 const loading = ref(false);
 const toast = useToast()
 const scanButtonText = ref("Start RFID Scan");
+const instructions = ref(null);
 
 const rfidUrl = `${window.location.protocol}//${process.env.VUE_APP_API_HOST}:${process.env.VUE_APP_RFID_PORT}`;
+
+onMounted(() => {
+  nextTick(() => {
+    setTimeout(() => {
+      if (instructions.value) {
+        const elementTop = instructions.value.getBoundingClientRect().top + window.scrollY;
+        const elementHeight = instructions.value.offsetHeight;
+        const viewportHeight = window.innerHeight;
+
+        const scrollTo = elementTop - (viewportHeight / 2) + (elementHeight / 2);
+        window.scrollTo({ top: scrollTo, behavior: "smooth" });
+      }
+    }, 1000);
+  });
+});
 
 const startRfidScan = async () => {
   loading.value = true;
@@ -165,7 +181,7 @@ const handleIsbn = async (isbn, rfidMessage = null) => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   text-align: center;
   max-width: 800px;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .support-message {
@@ -174,5 +190,11 @@ const handleIsbn = async (isbn, rfidMessage = null) => {
   margin-top: 40px;
   text-align: center;
   font-style: italic;
+}
+
+.how-to-description {
+  font-size: 16px;
+  color: #fffae3;
+  margin-bottom: 0;
 }
 </style>

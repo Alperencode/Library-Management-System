@@ -80,7 +80,6 @@ const routes = [
   { path: "/scan-book", component: ScanBook },
   { path: "/rfid-scan", component: RfidScan },
   { path: "/barcode-scan", component: BarcodeScan },
-  { path: "/isbn-search", component: IsbnSearch },
   { path: "/scan-book/:id", component: BookScanResult},
 
   // Admin-Page
