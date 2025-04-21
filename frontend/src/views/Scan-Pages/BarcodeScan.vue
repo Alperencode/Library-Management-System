@@ -1,20 +1,27 @@
 <template>
   <div class="how-to-page">
-    <h2 class="how-to-title">How to Use Barcode Scan</h2>
-    <p class="how-to-description">
-      Follow the instructions below to scan using Barcode: <br />
-      `This place will be replaced by instructions image`
-    </p>
-    <div v-if="showVideo" class="video-container">
-      <div class="video-wrapper">
-        <img :src="videoUrl" class="video-stream" alt="Barcode Camera Feed" />
-      </div>
+    <div class="blur-header">
+      <h2 class="how-to-title">How to Use Barcode Scan</h2>
+      <p class="how-to-description">
+        Follow the instructions below to scan the book’s barcode:
+      </p>
+    </div>
+
+    <div class="barcode-scan-container">
+      <img
+        src="@/assets/images/Horizontal-Barcode-Scan-Instructions.png"
+        alt="Barcode Scan Instructions"
+        class="barcode-image"
+      />
     </div>
 
     <button class="scan-btn" @click="startBarcodeScan" :disabled="loading">
       {{ loading ? "Scanning..." : "Start Barcode Scan" }}
     </button>
 
+    <p class="support-message">
+      If you experience any issues during the scanning process, please contact the librarian or a staff member.
+    </p>
   </div>
 </template>
 
@@ -102,63 +109,75 @@ const handleIsbn = async (isbn) => {
   background-size: cover;
   display: flex;
   flex-direction: column;
-  justify-content: top;
-  padding: 40px 20px;
+  align-items: center;
+  padding: 150px 20px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.blur-header {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 30px 40px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 800px;
+  margin-bottom: 40px;
 }
 
 .how-to-title {
-  padding-top: 120px;
-  color: aliceblue;
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 20px;
+  font-size: 30px;
+  color: #fff;
+  margin-bottom: 10px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .how-to-description {
-  color: aliceblue;
-  font-size: 18px;
-  margin: 20px;
+  font-size: 16px;
+  color: #fffae3;
+}
+
+.barcode-scan-container {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  max-width: 1500px;
+  width: 100%;
+  margin-bottom: 60px;
+  text-align: center;
+}
+
+.barcode-image {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  border: 3px solid #f0a623;
+  box-shadow: 0 0 15px #f0a62366;
 }
 
 .scan-btn {
-  padding: 18px 28px;
-  font-size: 22px;
+  background: linear-gradient(135deg, #d4881a, #f0a623);
   border: none;
+  padding: 15px 25px;
   border-radius: 10px;
-  background-color: #007bff;
+  font-weight: bold;
+  font-size: 20px;
   color: white;
   cursor: pointer;
-  transition: 0.3s;
-  max-width: 300px;
-  width: 100%;
-  margin: 10px auto;
+  transition: all 0.3s ease;
 }
 
 .scan-btn:hover {
-  background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
-.video-container {
+.support-message {
+  font-size: 14px;
+  color: #ffffffcc;
   margin-top: 40px;
-  display: flex;
-  justify-content: center;
-  padding: 20px;
-}
-
-.video-wrapper {
-  border: 4px solid white;
-  border-radius: 16px;
-  padding: 10px;
-  background-color: #000;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-  max-width: 90%;
-  width: 720px;
-}
-
-.video-stream {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-  display: block;
+  text-align: center;
+  font-style: italic;
 }
 </style>

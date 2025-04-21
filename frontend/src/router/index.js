@@ -28,7 +28,6 @@ import RequestBook from "@/views/Book-Pages/RequestBook.vue";
 import ScanBook from "@/views/Scan-Pages/ScanBook.vue";
 import RfidScan from "@/views/Scan-Pages/RfidScan.vue";
 import BarcodeScan from "@/views/Scan-Pages/BarcodeScan.vue";
-import IsbnSearch from "@/views/Scan-Pages/IsbnSearch.vue";
 
 // Admin-Page
 import AdminPage from "@/views/Admin/AdminPage.vue";
