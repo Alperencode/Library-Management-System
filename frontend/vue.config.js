@@ -18,6 +18,7 @@ module.exports = defineConfig({
           VUE_APP_API_HOST: JSON.stringify(localIp),
           VUE_APP_API_PORT: JSON.stringify(8000),
           VUE_APP_RFID_PORT: JSON.stringify(8001),
+          VUE_APP_BARCODE_PORT: JSON.stringify(8001),
         },
         '__VUE_OPTIONS_API__': JSON.stringify(true),
         '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(false),

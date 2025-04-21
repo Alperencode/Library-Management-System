@@ -20,4 +20,9 @@ export default {
   width: 100%;
   margin-top: auto;
 }
+
+.header {
+  background-color: transparent !important;
+  transition: background-color 0.3s ease;
+}
 </style>
