@@ -238,6 +238,11 @@ async def notify_me(book_id: str, user: User = Depends(get_current_user)):
             )
         )
 
+    if user.id == book.currently_borrowed_by:
+        return SuccessResponse(
+            code=SUCCESS, message="You can't subscribe to book which is borrowed by you"
+        )
+
     if user.id in book.notify_me_list:
         return SuccessResponse(
             code=SUCCESS, message="You have already subscribed."
