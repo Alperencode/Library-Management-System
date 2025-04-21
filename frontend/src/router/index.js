@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { createToastInterface } from "vue-toastification";
 import store from '@/store';
 import api from '@/api/axios'
 
@@ -96,7 +97,7 @@ const routes = [
       { path: "penalty", component: PenaltyManagement },
       { path: "banned-users", component: BannedUserManagement },
       { path: "add-book", component: AdminAddBook },
-      
+
       // Dashboard Sub-Routes
       { path: "dashboard/borrow-count", component: BorrowCount },
       { path: "dashboard/penalty-book", component: PenaltyBookCount },
@@ -107,12 +108,14 @@ const routes = [
   }
 ];
 
+const toast = createToastInterface();
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 
 import { useAuth } from "@/composables/useAuth";
+
 
 router.beforeEach(async (to, from, next) => {
   const protectedPaths = ['/user-page', '/request-book', '/scan-book'];
@@ -124,6 +127,7 @@ router.beforeEach(async (to, from, next) => {
   const isAuthenticated = store.state.user !== null;
 
   if (requiresAuth && !isAuthenticated) {
+    toast.error("You must be logged in to continue.");
     return next('/login');
   }
 

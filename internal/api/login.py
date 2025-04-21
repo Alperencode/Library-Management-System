@@ -62,7 +62,7 @@ async def register_user(
 
     return PublicUserResponse(
         code=SUCCESS,
-        message="User registered successfully",
+        message="Creation and login successful",
         user=PublicUser(
             id=user.id,
             username=user.username,

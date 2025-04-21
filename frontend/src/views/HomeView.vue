@@ -11,16 +11,16 @@
           <div class="row">
             <div class="col-lg-12">
               <div class="caption">
-                <h6>Hello Everyone</h6>
+                <h6 v-if="user">Welcome back, {{ user.username }}</h6>
+                <h6 v-else>Welcome to your digital library</h6>
                 <h2>Welcome to Library Management System</h2>
                 <p>
-                  Manage your library with ease – scan books using RFID or ISBN,
-                  explore titles via Google Books, and request your favorite
-                  books directly from the system.
+                  Easily manage your library activities, scan books with RFID or ISBN,
+                  discover new titles via Google Books, and request additions directly through the system.
                 </p>
                 <div class="main-button-red">
                   <div class="scroll-to-section">
-                    <a href="/books">Check Out For Books!</a>
+                    <a href="/books">Check Out the Book Catalog</a>
                   </div>
                 </div>
               </div>
@@ -112,21 +112,10 @@
           Recently Added Books
         </h2>
         <div class="slick-carousel">
-          <div
-            class="course-card"
-            v-for="book in recentlyAddedBooks"
-            :key="book.id"
-          >
+          <div class="course-card" v-for="book in recentlyAddedBooks" :key="book.id">
             <div class="card text-center text-dark">
-              <router-link
-                :to="`/books/${book.id}`"
-                class="text-decoration-none"
-              >
-                <img
-                  :src="book.cover_url || defaultCover"
-                  :alt="book.title"
-                  class="card-img-top"
-                />
+              <router-link :to="`/books/${book.id}`" class="text-decoration-none">
+                <img :src="book.cover_url || defaultCover" :alt="book.title" class="card-img-top" />
               </router-link>
               <div class="card-body d-flex flex-column justify-content-between">
                 <div>
@@ -136,10 +125,7 @@
                   </p>
                 </div>
                 <div class="mt-3">
-                  <router-link
-                    :to="`/books/${book.id}`"
-                    class="view-details-btn"
-                  >
+                  <router-link :to="`/books/${book.id}`" class="view-details-btn">
                     View Details →
                   </router-link>
                 </div>
@@ -158,101 +144,50 @@
     <section class="apply-now" id="apply">
       <div class="container">
         <div class="item">
-          <h3 style="text-align: center">Request a Book from Google Books</h3>
-
-          <!-- Başlangıç: RequestBook içeriği -->
+          <h3 class="text-center mb-3">Request a Book from Google Books</h3>
           <div class="meetings-page">
             <div class="main-content">
-              <!-- Arama Çubuğu -->
-              <div class="search-bar">
-                <input
-                  class="input-line full-width"
-                  type="text"
-                  :value="searchQuery"
-                  @input="updateSearchQuery"
-                  @keyup.enter="performSearch"
-                  placeholder="Search by Author, Title, Publisher, ISBN..."
-                />
+              <div class="search-bar mb-4">
+                <input class="input-line full-width" type="text" :value="searchQuery" @input="updateSearchQuery"
+                  @keyup.enter="performSearch" placeholder="Search by Author, Title, Publisher, ISBN..." />
               </div>
 
-              <!-- Sonuç Yoksa -->
-              <div
-                v-if="requestBooks.length === 0 && searchPerformed"
-                class="no-results"
-              >
+              <div v-if="requestBooks.length === 0 && searchPerformed" class="no-results">
                 <p class="no-results-text">
                   No books found for "{{ searchQuery }}"
                 </p>
               </div>
 
-              <!-- Kitap Kartları -->
               <div v-else>
                 <div class="row grid">
-                  <div
-                    v-for="(book, index) in requestBooks.slice(0, 8)"
-                    :key="index"
-                    class="meeting-item"
-                  >
+                  <div v-for="(book, index) in requestBooks.slice(0, 8)" :key="index" class="meeting-item">
                     <div class="meeting-box">
-                      <!-- Kapak Görseli -->
                       <div class="thumb">
-                        <img
-                          :src="book.cover_image"
-                          :alt="book.title"
-                          class="book-thumbnail"
-                        />
+                        <img :src="book.cover_image" :alt="book.title" class="book-thumbnail" />
                       </div>
-
-                      <!-- Kitap Bilgileri -->
                       <div class="down-content">
                         <h4 class="book-title">{{ book.title }}</h4>
-
-                        <p
-                          style="color: black"
-                          class="text-ellipsis"
-                          :title="book.authors.join(', ')"
-                        >
+                        <p class="text-ellipsis" :title="book.authors.join(', ')">
                           <strong>Author:</strong> {{ book.authors.join(", ") }}
                         </p>
-
-                        <p
-                          style="color: black"
-                          class="text-ellipsis"
-                          :title="book.publisher"
-                        >
+                        <p class="text-ellipsis" :title="book.publisher">
                           <strong>Publisher:</strong> {{ book.publisher }}
                         </p>
-
-                        <p
-                          style="color: black"
-                          v-if="book.categories"
-                          class="text-ellipsis"
-                          :title="book.categories"
-                        >
+                        <p v-if="book.categories" class="text-ellipsis" :title="book.categories">
                           <strong>Categories:</strong> {{ book.categories }}
                         </p>
-
-                        <!-- Request Butonu -->
-                        <button
-                          v-if="user"
-                          class="request-button"
-                          @click="requestBook(book)"
-                          :disabled="requestedBookIds.has(book.id)"
-                        >
-                          {{
-                            requestedBookIds.has(book.id)
-                              ? "Requested"
-                              : "Request"
-                          }}
+                        <button v-if="user" class="request-button" @click="requestBook(book)"
+                          :disabled="requestedBookIds.has(book.id)">
+                          {{ requestedBookIds.has(book.id) ? "Requested" : "Request" }}
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
-          <!-- Bitiş: RequestBook içeriği -->
         </div>
       </div>
     </section>
@@ -265,15 +200,8 @@
         <div class="slick-carousel">
           <div class="course-card" v-for="book in books" :key="book.id">
             <div class="card text-center text-dark">
-              <router-link
-                :to="`/books/${book.id}`"
-                class="text-decoration-none"
-              >
-                <img
-                  :src="book.cover_image || defaultCover"
-                  :alt="book.title"
-                  class="card-img-top"
-                />
+              <router-link :to="`/books/${book.id}`" class="text-decoration-none">
+                <img :src="book.cover_image || defaultCover" :alt="book.title" class="card-img-top" />
               </router-link>
               <div class="card-body d-flex flex-column justify-content-between">
                 <div>
@@ -283,10 +211,7 @@
                   </p>
                 </div>
                 <div class="mt-3">
-                  <router-link
-                    :to="`/books/${book.id}`"
-                    class="view-details-btn"
-                  >
+                  <router-link :to="`/books/${book.id}`" class="view-details-btn">
                     View Details →
                   </router-link>
                 </div>
@@ -347,33 +272,21 @@
 </template>
 
 <script>
-import { onMounted, ref, nextTick } from "vue";
+import { onMounted, ref, nextTick, computed } from "vue";
+import { useStore } from "vuex";
 import api from "../api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 
 export default {
   name: "HomeView",
   setup() {
+    const store = useStore();
+    const user = computed(() => store.state.user);
+
     const books = ref([]);
     const recentlyAddedBooks = ref([]);
     const totalBooks = ref(0);
-
-    const user = ref(null);
     const requestedBookIds = ref(new Set());
-
-    const fetchUser = async () => {
-      try {
-        const res = await api.get("/me");
-        user.value = res.data.user;
-
-        // Eğer kullanıcıdan requested_books geldiyse, onları kullan
-        const requested = res.data.user.requested_books || [];
-        requestedBookIds.value = new Set(requested.map((b) => b.id));
-      } catch (err) {
-        console.warn("Kullanıcı bilgisi alınamadı:", err);
-        user.value = null;
-      }
-    };
 
     const fetchRequestedBooks = async () => {
       try {
@@ -412,18 +325,17 @@ export default {
               ? book.authors
               : ["Unknown"];
           const publisher = book.publisher || "Unknown";
-
           const categoriesString =
             Array.isArray(book.categories) && book.categories.length
               ? book.categories
-                  .map((cat) => {
-                    let main = cat.category || "Unknown Category";
-                    if (cat.subcategory) {
-                      main += ` - ${cat.subcategory}`;
-                    }
-                    return main;
-                  })
-                  .join(", ")
+                .map((cat) => {
+                  let main = cat.category || "Unknown Category";
+                  if (cat.subcategory) {
+                    main += ` - ${cat.subcategory}`;
+                  }
+                  return main;
+                })
+                .join(", ")
               : "Unknown";
 
           return {
@@ -475,9 +387,6 @@ export default {
     };
 
     onMounted(async () => {
-      await fetchUser();
-      await fetchRequestedBooks(); // Ek olarak çağrılıyor
-
       const scripts = [
         "vendor/jquery/jquery.min.js",
         "assets/js/isotope.min.js",
@@ -489,19 +398,33 @@ export default {
         "assets/js/custom.js",
       ];
 
-      scripts.forEach((src) => {
+      for (const src of scripts) {
         const script = document.createElement("script");
         script.src = src;
-        script.async = true;
-        document.body.appendChild(script);
-      });
+        script.async = false;
+        document.head.appendChild(script);
+      }
 
-      const res = await api.get("/books?most_borrowed=true&limit=10");
-      books.value = res.data.books;
-      await nextTick();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      if (user.value) {
+        await fetchRequestedBooks();
+      }
 
       try {
-        const { data } = await api.get("/books", {
+        const mostBorrowedRes = await api.get("/books", {
+          params: {
+            page: 1,
+            limit: 10,
+            most_borrowed: true,
+          },
+        });
+
+        if (mostBorrowedRes.data.code === "Success" && mostBorrowedRes.data.books) {
+          books.value = mostBorrowedRes.data.books;
+        }
+
+        const recentlyAddedRes = await api.get("/books", {
           params: {
             page: 1,
             limit: 10,
@@ -509,8 +432,8 @@ export default {
           },
         });
 
-        if (data.code === "Success" && data.books) {
-          recentlyAddedBooks.value = data.books.map((book) => ({
+        if (recentlyAddedRes.data.code === "Success" && recentlyAddedRes.data.books) {
+          recentlyAddedBooks.value = recentlyAddedRes.data.books.map((book) => ({
             id: book.id,
             title: book.title || "No Title",
             authors: book.authors || ["Unknown Author"],
@@ -518,17 +441,16 @@ export default {
             created_at: book.borrowed_at || new Date().toISOString(),
             borrow_count: book.borrowed ? 1 : 0,
           }));
-        } else {
-          console.error("No books found or error in response:", data.message);
+
+          totalBooks.value = recentlyAddedRes.data.total;
         }
 
-        const totalBooksRes = await api.get("/books");
-        totalBooks.value = totalBooksRes.data.total;
       } catch (error) {
-        console.error("Error fetching recently added books:", error);
+        console.error("Error fetching books:", error);
       }
 
       await nextTick();
+
       if (window.$ && window.$(".slick-carousel").slick) {
         window.$(".slick-carousel").slick({
           slidesToShow: 4,
@@ -543,8 +465,6 @@ export default {
             { breakpoint: 480, settings: { slidesToShow: 1 } },
           ],
         });
-      } else {
-        console.error("Slick failed to load!");
       }
 
       setTimeout(() => {
@@ -935,5 +855,28 @@ export default {
     max-width: 300px;
     margin: auto;
   }
+}
+
+.apply-now {
+  padding: 40px 0;
+}
+
+.apply-now .item {
+  padding: 24px 0;
+}
+
+.apply-now .main-content {
+  padding: 24px;
+}
+
+.search-bar {
+  margin: 30px 0 20px;
+}
+
+.meetings-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 500px;
 }
 </style>

@@ -9,32 +9,34 @@ from internal.models.book import BookPreview, BookCategory
 from internal.types.responses import (
     FailResponse,
     BookResponse,
-    BookPreviewListResponse,
+    PaginatedBookPreviewListResponse,
     BulkExternalBookAddResponse,
 )
 
 router = APIRouter()
 
 
-@router.get("/google-books/search", response_model=BookPreviewListResponse)
-async def search_books_external(q: str = Query(..., min_length=1)):
+@router.get("/google-books/search", response_model=PaginatedBookPreviewListResponse)
+async def search_books_external(
+    q: str = Query(..., min_length=1),
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=40)
+):
     results = search_google_books(q)
     if not results:
         return JSONResponse(
             status_code=404,
             content=jsonable_encoder(
-                FailResponse(code=FAIL, message="No books found from external source")
+                FailResponse(code=FAIL, message="We couldn't find any books matching your search.")
             )
         )
 
-    books = [
+    all_books = [
         BookPreview(
             id=item["id"],
             title=item["title"],
             authors=item.get("authors", []),
-            categories=[
-                BookCategory(category=cat) for cat in item.get("categories", [])
-            ],
+            categories=[BookCategory(category=cat) for cat in item.get("categories", [])],
             publisher=item.get("publisher"),
             cover_image=item.get("cover_image"),
             isbn=item.get("isbn"),
@@ -43,10 +45,21 @@ async def search_books_external(q: str = Query(..., min_length=1)):
         for item in results
     ]
 
-    return BookPreviewListResponse(
+    total = len(all_books)
+    last_page = (total + limit - 1) // limit
+    page = min(page, last_page) if last_page > 0 else 1
+    start = (page - 1) * limit
+    end = start + limit
+    paginated_books = all_books[start:end]
+
+    return PaginatedBookPreviewListResponse(
         code=SUCCESS,
         message="Books found via external search",
-        books=books
+        books=paginated_books,
+        total=total,
+        page=page,
+        has_next=end < total and page < last_page,
+        last_page=last_page
     )
 
 
