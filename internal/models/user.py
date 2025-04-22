@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from bson import ObjectId
 from typing import Optional, List
 from .request import BookRequest
+from .book import BookPenalty
 import bcrypt
 
 
@@ -14,9 +15,9 @@ class User(BaseModel):
     borrowed_books: Optional[List[str]] = []
     borrowed_history: Optional[List[str]] = []
     overdue_books: Optional[List[str]] = []
-    requested_books: Optional[list[BookRequest]] = None
+    requested_books: Optional[list[BookRequest]] = []
     notify_me_list: Optional[List[str]] = []
-    penalty_amount: Optional[str] = ""
+    penalties: Optional[List[BookPenalty]] = {}
 
     def check_password(self, plain_password: str) -> bool:
         return bcrypt.checkpw(plain_password.encode(), self.password.encode())
@@ -35,6 +36,6 @@ class PublicUser(BaseModel):
     borrowed_books: Optional[List[str]] = []
     borrowed_history: Optional[List[str]] = []
     overdue_books: Optional[List[str]] = []
-    requested_books: Optional[list[BookRequest]] = None
+    requested_books: Optional[list[BookRequest]] = []
     notify_me_list: Optional[List[str]] = []
-    penalty_amount: Optional[str] = ""
+    penalties: Optional[List[BookPenalty]] = {}

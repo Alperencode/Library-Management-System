@@ -290,6 +290,20 @@ async def return_book(
             )
         )
 
+    if user.penalties:
+        for penalty in user.penalties:
+            if penalty.book_id == book.id and penalty.amount > 0:
+                return JSONResponse(
+                    status_code=403,
+                    content=jsonable_encoder(
+                        FailResponse(
+                            code=FAIL,
+                            message="You have a penalty on this book." +
+                            " Please contact the library staff to return it."
+                        )
+                    )
+                )
+
     book.available_copies += 1
     if book.available_copies >= book.total_copies:
         book.borrowed = False
@@ -358,6 +372,20 @@ async def extend_return(book_id: str, user: User = Depends(get_current_user)):
                 FailResponse(code=FAIL, message="Not borrowed by you.")
             )
         )
+
+    if user.penalties:
+        for penalty in user.penalties:
+            if penalty.book_id == book.id and penalty.amount > 0:
+                return JSONResponse(
+                    status_code=403,
+                    content=jsonable_encoder(
+                        FailResponse(
+                            code=FAIL,
+                            message="You have a penalty on this book." +
+                            " Please contact the library staff to return it."
+                        )
+                    )
+                )
 
     if book.has_extended:
         return JSONResponse(
