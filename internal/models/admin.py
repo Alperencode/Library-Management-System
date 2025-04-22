@@ -19,7 +19,7 @@ class Admin(BaseModel):
         super().__setattr__(name, value)
 
 
-class PublicUser(BaseModel):
+class PublicAdmin(BaseModel):
     id: str
     username: str
     email: str

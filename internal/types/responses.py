@@ -1,6 +1,7 @@
 from typing import List
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
+from internal.models.admin import PublicAdmin
 from internal.models.book import Book, BookPreview
 from internal.models.request import BookRequest
 from .types import LanguageItem
@@ -22,6 +23,10 @@ class VersionResponse(SuccessResponse):
 
 class PublicUserResponse(SuccessResponse):
     user: PublicUser = Field(None)
+
+
+class PublicAdminResponse(SuccessResponse):
+    admin: PublicAdmin
 
 
 class TokenResponse(SuccessResponse):
