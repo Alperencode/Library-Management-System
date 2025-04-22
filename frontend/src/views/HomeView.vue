@@ -1,6 +1,5 @@
 <template>
   <div id="home">
-    <!-- ***** Main Banner Area Start ***** -->
     <section class="section main-banner" id="top" data-section="section1">
       <video autoplay muted loop id="bg-video">
         <source src="assets/images/course-video.mp4" type="video/mp4" />
@@ -29,7 +28,6 @@
         </div>
       </div>
     </section>
-    <!-- ***** Main Banner Area End ***** -->
 
     <section class="services">
       <div class="container">
@@ -134,7 +132,6 @@
           </div>
         </div>
 
-        <!-- Eğer hiç kitap yoksa -->
         <div v-if="recentlyAddedBooks.length === 0" class="no-results mt-4">
           <p>No recently added books available.</p>
         </div>
@@ -273,15 +270,17 @@
 
 <script>
 import { onMounted, ref, nextTick, computed } from "vue";
-import { useStore } from "vuex";
 import api from "../api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 
 export default {
   name: "HomeView",
   setup() {
-    const store = useStore();
-    const user = computed(() => store.state.user);
+
+    const user = computed(() => {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
+    });
 
     const books = ref([]);
     const recentlyAddedBooks = ref([]);

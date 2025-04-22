@@ -68,23 +68,31 @@
 </template>
 
 <script>
-import { computed } from "vue";
-import { useStore } from "vuex";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "@/api/axios";
 
 export default {
   setup() {
-    const store = useStore();
     const router = useRouter();
-    const user = computed(() => store.state.user);
+    const user = ref(null);
+
+    const loadUserFromLocalStorage = () => {
+      const stored = localStorage.getItem("user");
+      user.value = stored ? JSON.parse(stored) : null;
+    };
 
     const logout = async () => {
       await api.post("/logout");
-
-      store.commit("logout");
+      localStorage.removeItem("user");
+      loadUserFromLocalStorage();
       router.push("/login");
     };
+
+    onMounted(() => {
+      loadUserFromLocalStorage();
+      window.addEventListener("storage", loadUserFromLocalStorage);
+    });
 
     return {
       user,

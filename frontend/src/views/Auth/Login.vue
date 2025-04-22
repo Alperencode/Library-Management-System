@@ -21,7 +21,6 @@
 <script>
 import api from "@/api/axios";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
 
 const toast = useToast();
@@ -39,9 +38,9 @@ export default {
 
   setup() {
     const router = useRouter();
-    const store = useStore();
-    return { router, store };
+    return { router };
   },
+
   methods: {
     async login() {
       try {
@@ -52,7 +51,6 @@ export default {
         });
 
         toast.success(response.data.message);
-
         await this.fetchUser();
         this.router.push("/");
       } catch (error) {
@@ -63,7 +61,8 @@ export default {
     async fetchUser() {
       const response = await api.get("/me");
       if (response.data.user) {
-        this.store.commit("setUser", response.data.user);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        window.dispatchEvent(new Event("storage"));
       }
     },
   },

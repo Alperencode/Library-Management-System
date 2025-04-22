@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { createToastInterface } from "vue-toastification";
-import store from '@/store';
 import api from '@/api/axios'
 
 
@@ -124,7 +123,7 @@ router.beforeEach(async (to, from, next) => {
   const { fetchUser } = useAuth();
   await fetchUser();
 
-  const isAuthenticated = store.state.user !== null;
+  const isAuthenticated = !!localStorage.getItem("user");
 
   if (requiresAuth && !isAuthenticated) {
     toast.error("You must be logged in to continue.");

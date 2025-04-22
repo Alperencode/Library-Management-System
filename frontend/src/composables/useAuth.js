@@ -1,26 +1,24 @@
-import { useStore } from "vuex";
 import api from "@/api/axios";
 
 let userPromise = null
 
 export const useAuth = () => {
-  const store = useStore();
 
   const fetchUser = async () => {
-    if (store.state.user || userPromise) return userPromise;
-
+    if (localStorage.getItem("user") || userPromise) return userPromise;
+  
     userPromise = api.get("/me")
       .then((res) => {
         if (res.data.user) {
-          store.commit("setUser", res.data.user);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
         }
       })
       .catch(() => {
-        store.commit("setUser", null);
+        localStorage.removeItem("user");
       });
-
+  
     return userPromise;
-  };
+  };  
 
   return { fetchUser };
 };

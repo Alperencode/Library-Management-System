@@ -1,5 +1,4 @@
 import axios from 'axios'
-import store from '@/store'
 import { createToastInterface } from 'vue-toastification'
 
 const protocol = window.location.protocol;
@@ -61,7 +60,8 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const userId = store.state.user?.id || null;
+        const user = JSON.parse(localStorage.getItem("user"));
+        const userId = user?.id || null;        
 
         await plainAxios.post(
           '/refresh-token',
