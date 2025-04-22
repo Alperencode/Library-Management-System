@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { createToastInterface } from "vue-toastification";
-import store from '@/store';
-import api from '@/api/axios'
-
+import store from "@/store";
+import api from "@/api/axios";
 
 // Homeview
 import HomeView from "@/views/HomeView.vue";
@@ -35,13 +34,13 @@ import AdminPage from "@/views/Admin/AdminPage.vue";
 import BookList from "@/views/Admin/Sub-Pages/BookList.vue";
 import UserList from "@/views/Admin/Sub-Pages/UserList.vue";
 import RequestList from "@/views/Admin/Sub-Pages/RequestList.vue";
-import BorrowManagement from "@/views/Admin/Sub-Pages/BorrowManagement.vue"
+import BorrowManagement from "@/views/Admin/Sub-Pages/BorrowManagement.vue";
 import PenaltyManagement from "@/views/Admin/Sub-Pages/PenaltyManagement.vue";
 import BannedUserManagement from "@/views/Admin/Sub-Pages/BannedUserManagement.vue";
-import AdminAddBook from "@/views/Admin/Sub-Pages/AdminAddBook.vue"
+import AdminAddBook from "@/views/Admin/Sub-Pages/AdminAddBook.vue";
 
 //  Admin Dashboard Sub-Pages
-import AdminDashboard from "@/views/Admin/Sub-Pages/AdminDashboard.vue"
+import AdminDashboard from "@/views/Admin/Sub-Pages/AdminDashboard.vue";
 import BorrowCount from "@/views/Admin/Sub-Pages/Dashboard/BorrowCount.vue";
 import PenaltyBookCount from "@/views/Admin/Sub-Pages/Dashboard/PenaltyBookCount.vue";
 import BookRequests from "@/views/Admin/Sub-Pages/Dashboard/BookRequests.vue";
@@ -49,6 +48,9 @@ import PenaltyUserCount from "@/views/Admin/Sub-Pages/Dashboard/PenaltyUserCount
 import CurrentBookCount from "@/views/Admin/Sub-Pages/Dashboard/CurrentBookCount.vue";
 
 import BookScanResult from "@/views/Scan-Pages/BookScanResult.vue";
+
+// Not-Found
+import NotFound from "@/views/NotFound.vue";
 
 const routes = [
   // Homeview
@@ -81,7 +83,7 @@ const routes = [
   { path: "/scan-book", component: ScanBook },
   { path: "/rfid-scan", component: RfidScan },
   { path: "/barcode-scan", component: BarcodeScan },
-  { path: "/scan-book/:id", component: BookScanResult},
+  { path: "/scan-book/:id", component: BookScanResult },
 
   // Admin-Page
   {
@@ -104,8 +106,9 @@ const routes = [
       { path: "dashboard/requests", component: BookRequests },
       { path: "dashboard/penalty-users", component: PenaltyUserCount },
       { path: "dashboard/current-books", component: CurrentBookCount },
-    ]
-  }
+    ],
+  },
+  { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
 ];
 
 const toast = createToastInterface();
@@ -116,10 +119,9 @@ const router = createRouter({
 
 import { useAuth } from "@/composables/useAuth";
 
-
 router.beforeEach(async (to, from, next) => {
-  const protectedPaths = ['/user-page', '/request-book', '/scan-book'];
-  const requiresAuth = protectedPaths.some(path => to.path.startsWith(path));
+  const protectedPaths = ["/user-page", "/request-book", "/scan-book"];
+  const requiresAuth = protectedPaths.some((path) => to.path.startsWith(path));
 
   const { fetchUser } = useAuth();
   await fetchUser();
@@ -128,18 +130,22 @@ router.beforeEach(async (to, from, next) => {
 
   if (requiresAuth && !isAuthenticated) {
     toast.error("You must be logged in to continue.");
-    return next('/login');
+    return next("/login");
   }
 
   return next();
 });
 
 router.afterEach((to, from) => {
-  const leftScanBookRoute = from.path.startsWith('/scan-book/') && !to.path.startsWith('/scan-book/');
+  const leftScanBookRoute =
+    from.path.startsWith("/scan-book/") && !to.path.startsWith("/scan-book/");
 
   if (leftScanBookRoute) {
-    api.post('/remove-scanned').catch(err => {
-      console.warn("Failed to remove scanned_book cookie:", err?.response?.data?.message || err.message);
+    api.post("/remove-scanned").catch((err) => {
+      console.warn(
+        "Failed to remove scanned_book cookie:",
+        err?.response?.data?.message || err.message
+      );
     });
   }
 });
