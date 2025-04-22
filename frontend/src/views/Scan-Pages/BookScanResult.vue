@@ -60,30 +60,24 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/axios'
 import defaultCover from '@/assets/images/default-cover.png'
 import { formatDate } from "@/utils/date"
-import { useStore } from 'vuex'
 import { useToast } from 'vue-toastification'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
-const store = useStore()
+
+const user = ref(null)
+const savedUser = localStorage.getItem("user")
+if (savedUser) {
+  user.value = JSON.parse(savedUser)
+}
 
 const book = ref(null)
 const notifyList = ref([])
-
-if (!store.state.user) {
-  const savedUser = localStorage.getItem('user')
-  if (savedUser) {
-    store.commit('setUser', JSON.parse(savedUser))
-  }
-}
-
-const user = computed(() => store.state.user)
 
 const isMine = computed(() => book.value?.currently_borrowed_by === user.value?.id)
 const isBorrowedByAnother = computed(() => {
