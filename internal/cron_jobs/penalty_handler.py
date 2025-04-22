@@ -3,8 +3,7 @@ from datetime import datetime
 from internal.database.books import get_all_borrowed_books
 from internal.database.users import get_user_by_id, update_user
 from internal.models.user import BookPenalty
-
-PENALTY_AMOUNT = 10.0
+from config.config import get_config
 
 
 async def check_penalties():
@@ -23,7 +22,7 @@ async def check_penalties():
             user.penalties = []
 
         if not any(p.book_id == book.id for p in user.penalties):
-            user.penalties.append(BookPenalty(book_id=book.id, amount=PENALTY_AMOUNT))
+            user.penalties.append(BookPenalty(book_id=book.id, amount=get_config("penalty_amount")))
 
         if not user.overdue_books:
             user.overdue_books = []
