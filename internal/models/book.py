@@ -9,6 +9,11 @@ class BookCategory(BaseModel):
     subcategory: Optional[str] = None
 
 
+class BookPenalty(BaseModel):
+    book_id: str
+    amount: float
+
+
 class Book(BaseModel):
     id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     title: str
