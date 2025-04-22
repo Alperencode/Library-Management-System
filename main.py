@@ -4,7 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 from internal.api.admin import admin_auth, admin_operations
 from internal.api.auth import login, token
-from internal.api.book import book, google_books, request_book, user_book_operations
+from internal.api.book import books, google_books, request_book, user_book_operations
 from internal.api.user import user
 from internal.utils.logger import logger
 from internal.database.database import check_connection, client
@@ -59,7 +59,7 @@ app.include_router(login.router, prefix=get_config("api_prefix"), tags=["Authent
 app.include_router(token.router, prefix=get_config("api_prefix"), tags=["Token Management"])
 app.include_router(user.router, prefix=get_config("api_prefix"), tags=["User Management"])
 app.include_router(service_status.router, prefix=get_config("api_prefix"), tags=["Service Status"])
-app.include_router(book.router, prefix=get_config("api_prefix"), tags=["Book Management"])
+app.include_router(books.router, prefix=get_config("api_prefix"), tags=["Book Management"])
 app.include_router(google_books.router, prefix=get_config("api_prefix"), tags=["Google Books"])
 app.include_router(user_book_operations.router, prefix=get_config("api_prefix"), tags=["User Book Operations"])
 app.include_router(request_book.router, prefix=get_config("api_prefix"), tags=["Request Book Operations"])
