@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
-from internal.api.admin import admin_auth
+from internal.api.admin import admin_auth, admin_operations
 from internal.api.auth import login, token
-from internal.api.book.book import book, google_books, request_book, user_book_operations
+from internal.api.book import book, google_books, request_book, user_book_operations
 from internal.api.user import user
 from internal.utils.logger import logger
 from internal.database.database import check_connection, client
@@ -63,7 +63,8 @@ app.include_router(book.router, prefix=get_config("api_prefix"), tags=["Book Man
 app.include_router(google_books.router, prefix=get_config("api_prefix"), tags=["Google Books"])
 app.include_router(user_book_operations.router, prefix=get_config("api_prefix"), tags=["User Book Operations"])
 app.include_router(request_book.router, prefix=get_config("api_prefix"), tags=["Request Book Operations"])
-app.include_router(admin_auth.router, prefix=get_config("api_prefix"), tags=["Admin Operations"])
+app.include_router(admin_auth.router, prefix=get_config("api_prefix"), tags=["Admin Management"])
+app.include_router(admin_operations.router, prefix=get_config("api_prefix"), tags=["Admin Operations"])
 
 # Exception handlers
 app.add_exception_handler(Exception, generic_exception_handler)

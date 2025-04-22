@@ -1,6 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
-from internal.database.books import get_all_borrowed_books
+from internal.database.books import get_all_borrowed_books, get_book_by_id, update_book
 from internal.database.users import get_user_by_id, update_user
 from internal.models.user import BookPenalty
 from config.config import get_config
@@ -30,7 +30,13 @@ async def check_penalties():
         if book.id not in user.overdue_books:
             user.overdue_books.append(book.id)
 
+        book = await get_book_by_id(book.id)
+        if not book.has_penalty:
+            book.has_penalty = bool
+        book.has_penalty = True
+
         await update_user(user)
+        await update_book(book)
 
 
 def start_cron_jobs():

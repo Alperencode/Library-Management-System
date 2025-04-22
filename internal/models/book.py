@@ -36,6 +36,7 @@ class Book(BaseModel):
     last_borrowed_by: Optional[str] = None
     notify_me_list: List[str] = []
     has_extended: bool = False
+    has_penalty: bool = False
 
     def __setattr__(self, name, value):
         if name == "id" and hasattr(self, "id"):
@@ -56,3 +57,4 @@ class BookPreview(BaseModel):
     isbn: Optional[str] = None
     borrowed_at: Optional[datetime] = None
     return_date: Optional[datetime] = None
+    has_penalty: bool = False

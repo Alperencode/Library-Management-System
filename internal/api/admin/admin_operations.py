@@ -9,10 +9,10 @@ from internal.database.books import (
 )
 from internal.database.users import get_penalty_users_count
 
-router = APIRouter()
+router = APIRouter(prefix="/admin")
 
 
-@router.get("admin/dashboard", response_model=AdminDashboardResponse)
+@router.get("/dashboard", response_model=AdminDashboardResponse)
 async def get_admin_dashboard(admin=Depends(get_current_admin)):
     borrowed_books_count = await get_borrowed_books_count()
     penalty_books_count = await get_penalty_books_count()
