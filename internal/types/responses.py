@@ -81,3 +81,10 @@ class LanguageListResponse(SuccessResponse):
 
 class BookRequestListResponse(SuccessResponse):
     books: List[BookRequest]
+
+
+class AdminDashboardResponse(SuccessResponse):
+    borrowed_books_count: int
+    penalty_books_count: int
+    penalty_users_count: int
+    total_books_count: int

@@ -26,6 +26,10 @@ async def get_user_by_email(email: str) -> Optional[User]:
     return User(**user_data) if user_data else None
 
 
+async def get_penalty_users_count() -> int:
+    return await users_collection.count_documents({"penalties.0": {"$exists": True}})
+
+
 async def update_user(user: User) -> bool:
     user_data = user.model_dump(by_alias=True)
     result = await users_collection.update_one(
