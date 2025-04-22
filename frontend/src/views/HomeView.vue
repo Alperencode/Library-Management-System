@@ -276,6 +276,9 @@ import { onMounted, ref, nextTick, computed } from "vue";
 import { useStore } from "vuex";
 import api from "../api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
 
 export default {
   name: "HomeView",
@@ -377,12 +380,10 @@ export default {
         };
 
         const res = await api.post("/request-book", payload);
-        alert(res.data.message || "Book request submitted successfully.");
+        toast.success(res.data.message)
         requestedBookIds.value.add(book.id);
       } catch (err) {
-        const message =
-          err?.response?.data?.message || "Failed to request the book.";
-        alert(message);
+        console.error("Failed to request the book:", err)
       }
     };
 
