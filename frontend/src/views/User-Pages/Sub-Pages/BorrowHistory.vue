@@ -5,12 +5,10 @@
         <h2>Borrow History</h2>
         <p>Here you can see the books you have previously borrowed.</p>
 
-        <!-- Eğer ödünç alınan kitap yoksa mesaj göster -->
         <div v-if="borrowHistory.length === 0" class="no-results">
           <p class="no-results-text">You have not borrowed any books yet.</p>
         </div>
 
-        <!-- Ödünç alınan kitapları listele -->
         <div v-else>
           <div class="row grid">
             <div

@@ -5,12 +5,10 @@
         <h2>Overdue Books</h2>
         <p>Here you can see the books that are overdue.</p>
 
-        <!-- Kullanıcının gecikmiş kitabı yoksa mesaj göster -->
         <div v-if="overdueBooks.length === 0" class="no-results">
           <p class="no-results-text">You have no overdue books.</p>
         </div>
 
-        <!-- Gecikmiş kitapları listele -->
         <div v-else>
           <div class="row grid">
             <div
