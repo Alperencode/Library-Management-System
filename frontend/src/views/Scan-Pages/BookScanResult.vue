@@ -51,7 +51,8 @@
           </div>
           <div v-if="penaltyAmount > 0" class="info-box info-small-box"
             style="background-color: #b91c1c; color: white; margin-top: 0.5rem;">
-            <strong>Warning:</strong> You have exceeded the return date.
+            <strong>Warning:</strong> You have exceeded the return date,
+            please contact the library staff to return it.
           </div>
         </div>
       </div>

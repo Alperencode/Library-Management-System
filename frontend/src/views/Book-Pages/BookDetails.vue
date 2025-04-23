@@ -68,17 +68,9 @@ const toast = useToast()
 
 const book = ref(null)
 const notifyList = ref([])
-const user = ref(null);
+import { useAuth } from "@/composables/useAuth";
 
-onMounted(() => {
-  const stored = localStorage.getItem("user");
-  user.value = stored ? JSON.parse(stored) : null;
-
-  window.addEventListener("storage", () => {
-    const updated = localStorage.getItem("user");
-    user.value = updated ? JSON.parse(updated) : null;
-  });
-});
+const { user } = useAuth();
 
 const isMine = computed(() => book.value?.currently_borrowed_by === user.value?.id)
 const isBorrowedByAnother = computed(() => {
