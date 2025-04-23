@@ -14,13 +14,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(user) in users" :key="user.id">
+          <tr v-for="user in users" :key="user.id">
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.borrow_count }}</td>
             <td>
-              <span :class="user.penalty_status ? 'penalty' : 'no-penalty'">
-                {{ user.penalty_status ? 'Penalty' : 'No Penalty' }}
+              <span :class="user.has_penalty ? 'penalty' : 'no-penalty'">
+                {{ user.has_penalty ? 'Has Penalty' : 'No Penalty' }}
               </span>
             </td>
             <td>
@@ -32,33 +32,55 @@
     </div>
 
     <div v-else class="no-users">No users found.</div>
+
+    <div class="pagination">
+      <button :disabled="page === 1" @click="changePage(page - 1)">‹</button>
+      <button v-for="p in lastPage" :key="p" @click="changePage(p)" :class="{ active: p === page }">
+        {{ p }}
+      </button>
+      <button :disabled="page === lastPage" @click="changePage(page + 1)">›</button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import api from '@/api/axios'
 
 const users = ref([])
+const page = ref(1)
+const limit = 10
+const lastPage = ref(1)
 
-const exampleUsers = [
-  { id: 1, username: 'user1', email: 'user1@example.com', borrow_count: 5, penalty_status: true },
-  { id: 2, username: 'user2', email: 'user2@example.com', borrow_count: 2, penalty_status: false },
-  { id: 3, username: 'user3', email: 'user3@example.com', borrow_count: 8, penalty_status: true },
-  { id: 4, username: 'user4', email: 'user4@example.com', borrow_count: 1, penalty_status: false },
-]
+const fetchUsers = async () => {
+  try {
+    const response = await api.get('/admin/users', {
+      params: {
+        page: page.value,
+        limit
+      }
+    })
+    users.value = response.data.users
+    lastPage.value = response.data.last_page || 1
+  } catch (err) {
+    console.error('Failed to fetch users:', err)
+    users.value = []
+  }
+}
 
-onMounted(() => {
-  users.value = exampleUsers
-})
+const changePage = (newPage) => {
+  page.value = newPage
+  fetchUsers()
+}
 
 const banUser = (userId) => {
   console.log(`User with ID: ${userId} is banned.`)
-  // API call to fetch users
 }
+
+onMounted(fetchUsers)
 </script>
 
 <style scoped>
-
 .admin-users-container {
   padding: 24px;
 }
@@ -104,4 +126,29 @@ const banUser = (userId) => {
   font-style: italic;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 6px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border: none;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination button.active {
+  background-color: #d4881a;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>
