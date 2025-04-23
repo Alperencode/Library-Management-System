@@ -1,5 +1,4 @@
 import axios from 'axios'
-import store from '@/store'
 import { createToastInterface } from 'vue-toastification'
 
 const protocol = window.location.protocol;
@@ -45,12 +44,17 @@ api.interceptors.response.use(
     return res;
   },
   async (err) => {
-    const originalRequest = err.config;
+    const originalRequest = err?.config || {};
     const originalPath = extractApiPath(originalRequest.url);
 
     const isIgnoredForToast = ignoredApiToastPaths.includes(originalPath);
 
-    if (err.response?.status === 401 && !originalRequest._retry && !isIgnoredForToast) {
+    if (
+      err.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isIgnoredForToast &&
+      originalRequest?.url
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -61,10 +65,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const userId = store.state.user?.id || null;
+        const user = JSON.parse(localStorage.getItem("user"));
+        const userId = user?.id || null;
 
         await plainAxios.post(
-          '/refresh-token',
+          "/refresh-token",
           userId ? { id: userId } : {},
           { withCredentials: true }
         );
@@ -75,6 +80,7 @@ api.interceptors.response.use(
         const router = require('@/router').default;
         if (!hasRedirected && router.currentRoute.value.path !== '/login') {
           hasRedirected = true;
+          localStorage.removeItem("user");
           router.push('/login');
         }
 

@@ -1,26 +1,19 @@
-import { useStore } from "vuex";
-import api from "@/api/axios";
+import { ref } from 'vue'
 
-let userPromise = null
+const user = ref(JSON.parse(localStorage.getItem('user')))
 
-export const useAuth = () => {
-  const store = useStore();
+export function useAuth() {
+  const setUser = (val) => {
+    user.value = val
+    if (val) {
+      localStorage.setItem('user', JSON.stringify(val))
+    } else {
+      localStorage.removeItem('user')
+    }
+  }
 
-  const fetchUser = async () => {
-    if (store.state.user || userPromise) return userPromise;
-
-    userPromise = api.get("/me")
-      .then((res) => {
-        if (res.data.user) {
-          store.commit("setUser", res.data.user);
-        }
-      })
-      .catch(() => {
-        store.commit("setUser", null);
-      });
-
-    return userPromise;
-  };
-
-  return { fetchUser };
-};
+  return {
+    user,
+    setUser,
+  }
+}

@@ -38,35 +38,19 @@
   </div>
 </template>
 
-<script>
-import { useRouter } from "vue-router";
-import { useStore, mapState } from "vuex";
-import api from "@/api/axios";
+<script setup>
+import { useRouter } from 'vue-router'
+import api from '@/api/axios'
+import { useAuth } from '@/composables/useAuth'
 
-export default {
-  name: "UserPage",
-  computed: {
-    ...mapState({
-      user: (state) => state.user,
-    }),
-  },
-  setup() {
-    const router = useRouter();
-    const store = useStore();
+const router = useRouter()
+const { user, setUser } = useAuth()
 
-    const logout = async () => {
-      try {
-        await api.post("/logout");
-        store.commit("setUser", null);
-        router.push("/");
-      } catch (error) {
-        console.error("Logout API request failed:", error);
-      }
-    };
-
-    return { logout };
-  },
-};
+const logout = async () => {
+  await api.post("/logout")
+  setUser(null)
+  router.push("/login")
+}
 </script>
 
 <style scoped>

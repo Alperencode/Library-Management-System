@@ -142,6 +142,7 @@ const requestBook = async (book) => {
     }
 
     const res = await api.post("/request-book", payload)
+    requestedBookIds.value.add(book.id)
     toast.success(res.data.message)
   } catch (err) {
     console.error("Failed to request the book:", err)

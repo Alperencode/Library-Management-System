@@ -1,6 +1,5 @@
 <template>
   <div id="home">
-    <!-- ***** Main Banner Area Start ***** -->
     <section class="section main-banner" id="top" data-section="section1">
       <video autoplay muted loop id="bg-video">
         <source src="assets/images/course-video.mp4" type="video/mp4" />
@@ -29,7 +28,6 @@
         </div>
       </div>
     </section>
-    <!-- ***** Main Banner Area End ***** -->
 
     <section class="services">
       <div class="container">
@@ -134,7 +132,6 @@
           </div>
         </div>
 
-        <!-- Eğer hiç kitap yoksa -->
         <div v-if="recentlyAddedBooks.length === 0" class="no-results mt-4">
           <p>No recently added books available.</p>
         </div>
@@ -273,7 +270,6 @@
 
 <script>
 import { onMounted, ref, nextTick, computed } from "vue";
-import { useStore } from "vuex";
 import api from "../api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { useToast } from 'vue-toastification'
@@ -283,8 +279,11 @@ const toast = useToast()
 export default {
   name: "HomeView",
   setup() {
-    const store = useStore();
-    const user = computed(() => store.state.user);
+
+    const user = computed(() => {
+      const stored = localStorage.getItem("user");
+      return stored ? JSON.parse(stored) : null;
+    });
 
     const books = ref([]);
     const recentlyAddedBooks = ref([]);
@@ -292,13 +291,9 @@ export default {
     const requestedBookIds = ref(new Set());
 
     const fetchRequestedBooks = async () => {
-      try {
-        const res = await api.get("/request-book");
-        const ids = res.data.books.map((book) => book.id);
-        ids.forEach((id) => requestedBookIds.value.add(id));
-      } catch (err) {
-        console.warn("İstek yapılan kitaplar alınamadı:", err);
-      }
+      const res = await api.get("/request-book");
+      const ids = res.data.books.map((book) => book.id);
+      ids.forEach((id) => requestedBookIds.value.add(id));
     };
 
     const searchQuery = ref("");
@@ -353,6 +348,10 @@ export default {
         });
 
         searchPerformed.value = true;
+
+        if (user.value) {
+          await fetchRequestedBooks();
+        }
       } catch (err) {
         requestBooks.value = [];
         searchPerformed.value = true;
@@ -407,10 +406,6 @@ export default {
       }
 
       await new Promise((resolve) => setTimeout(resolve, 300));
-
-      if (user.value) {
-        await fetchRequestedBooks();
-      }
 
       try {
         const mostBorrowedRes = await api.get("/books", {

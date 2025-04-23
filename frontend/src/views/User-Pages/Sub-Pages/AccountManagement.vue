@@ -30,8 +30,8 @@
 
 <script>
 import api from "@/api/axios";
-import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useAuth } from "@/composables/useAuth";
 
 const toast = useToast();
 
@@ -55,8 +55,8 @@ export default {
     },
   },
   setup() {
-    const store = useStore();
-    return { store };
+    const { setUser } = useAuth();
+    return { setUser };
   },
   methods: {
     async updateAccount() {
@@ -84,12 +84,11 @@ export default {
       }
     },
 
-
     async fetchUser() {
       try {
         const response = await api.get("/me");
         if (response.data.user) {
-          this.store.commit("setUser", response.data.user);
+          this.setUser(response.data.user);
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);

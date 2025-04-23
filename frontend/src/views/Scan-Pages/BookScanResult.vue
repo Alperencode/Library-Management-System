@@ -51,7 +51,8 @@
           </div>
           <div v-if="penaltyAmount > 0" class="info-box info-small-box"
             style="background-color: #b91c1c; color: white; margin-top: 0.5rem;">
-            <strong>Warning:</strong> You have exceeded the return date.
+            <strong>Warning:</strong> You have exceeded the return date,
+            please contact the library staff to return it.
           </div>
         </div>
       </div>
@@ -65,31 +66,25 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/axios'
 import defaultCover from '@/assets/images/default-cover.png'
 import { formatDate } from "@/utils/date"
-import { useStore } from 'vuex'
 import { useToast } from 'vue-toastification'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
-const store = useStore()
+
+const user = ref(null)
+const savedUser = localStorage.getItem("user")
+if (savedUser) {
+  user.value = JSON.parse(savedUser)
+}
 
 const book = ref(null)
 const notifyList = ref([])
 const actionBlocked = ref(false)
-
-if (!store.state.user) {
-  const savedUser = localStorage.getItem('user')
-  if (savedUser) {
-    store.commit('setUser', JSON.parse(savedUser))
-  }
-}
-
-const user = computed(() => store.state.user)
 
 const isMine = computed(() => book.value?.currently_borrowed_by === user.value?.id)
 const isBorrowedByAnother = computed(() => {

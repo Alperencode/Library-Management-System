@@ -21,8 +21,8 @@
 <script>
 import api from "@/api/axios";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
+import { useAuth } from "@/composables/useAuth";
 
 const toast = useToast();
 
@@ -39,9 +39,10 @@ export default {
 
   setup() {
     const router = useRouter();
-    const store = useStore();
-    return { router, store };
+    const { setUser } = useAuth();
+    return { router, setUser };
   },
+
   methods: {
     async login() {
       try {
@@ -52,7 +53,6 @@ export default {
         });
 
         toast.success(response.data.message);
-
         await this.fetchUser();
         this.router.push("/");
       } catch (error) {
@@ -63,7 +63,7 @@ export default {
     async fetchUser() {
       const response = await api.get("/me");
       if (response.data.user) {
-        this.store.commit("setUser", response.data.user);
+        this.setUser(response.data.user);
       }
     },
   },
@@ -71,7 +71,6 @@ export default {
 </script>
 
 <style scoped>
-
 .login-page {
   display: flex;
   flex-direction: column;
@@ -145,12 +144,15 @@ export default {
   font-size: 14px;
   margin-top: 10px;
 }
+
 .remember-me input {
   margin-right: 5px;
 }
+
 .spacer {
   height: 20px;
 }
+
 .remember-me {
   display: flex;
   align-items: center;
@@ -315,7 +317,7 @@ button:focus {
   color: rgba(255, 255, 255, 0.65);
 }
 
-::-webkit-input-placeholder .input-line:focus + ::input-placeholder {
+::-webkit-input-placeholder .input-line:focus+ ::input-placeholder {
   color: #fff;
 }
 
@@ -430,8 +432,7 @@ button:focus {
   height: 300px;
   width: 360px;
   margin: auto;
-  background: url("https://pexels.imgix.net/photos/27718/pexels-photo-27718.jpg?fit=crop&w=1280&h=823")
-    top left no-repeat;
+  background: url("https://pexels.imgix.net/photos/27718/pexels-photo-27718.jpg?fit=crop&w=1280&h=823") top left no-repeat;
 }
 
 .overlay {
@@ -452,8 +453,7 @@ button:focus {
   height: 360px;
   z-index: 1;
   opacity: 0.1;
-  background: url("https://pexels.imgix.net/photos/27718/pexels-photo-27718.jpg?fit=crop&w=1280&h=823")
-    left no-repeat;
+  background: url("https://pexels.imgix.net/photos/27718/pexels-photo-27718.jpg?fit=crop&w=1280&h=823") left no-repeat;
   background-size: cover;
 }
 
@@ -462,6 +462,7 @@ button:focus {
     width: 100%;
     height: 100%;
   }
+
   .overlay {
     width: 100%;
     height: 100%;

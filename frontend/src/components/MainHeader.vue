@@ -68,28 +68,22 @@
 </template>
 
 <script>
-import { computed } from "vue";
-import { useStore } from "vuex";
 import { useRouter } from "vue-router";
 import api from "@/api/axios";
+import { useAuth } from '@/composables/useAuth'
 
 export default {
   setup() {
-    const store = useStore();
-    const router = useRouter();
-    const user = computed(() => store.state.user);
+    const { user, setUser } = useAuth()
+    const router = useRouter()
 
     const logout = async () => {
-      await api.post("/logout");
+      await api.post("/logout")
+      setUser(null)
+      router.push("/login")
+    }
 
-      store.commit("logout");
-      router.push("/login");
-    };
-
-    return {
-      user,
-      logout,
-    };
+    return { user, logout }
   },
 };
 </script>

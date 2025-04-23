@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { createToastInterface } from "vue-toastification";
-import store from "@/store";
-import api from "@/api/axios";
+import api from '@/api/axios'
+
 
 // Homeview
 import HomeView from "@/views/HomeView.vue";
@@ -119,14 +119,13 @@ const router = createRouter({
 
 import { useAuth } from "@/composables/useAuth";
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const protectedPaths = ["/user-page", "/request-book", "/scan-book"];
   const requiresAuth = protectedPaths.some((path) => to.path.startsWith(path));
 
-  const { fetchUser } = useAuth();
-  await fetchUser();
+  const { user } = useAuth();
 
-  const isAuthenticated = store.state.user !== null;
+  const isAuthenticated = !!user.value;
 
   if (requiresAuth && !isAuthenticated) {
     toast.error("You must be logged in to continue.");

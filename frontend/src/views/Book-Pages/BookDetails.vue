@@ -60,25 +60,17 @@ import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/axios'
 import defaultCover from '@/assets/images/default-cover.png'
 import { formatDate } from "@/utils/date"
-import { useStore } from 'vuex'
 import { useToast } from 'vue-toastification'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const store = useStore()
 
 const book = ref(null)
 const notifyList = ref([])
+import { useAuth } from "@/composables/useAuth";
 
-if (!store.state.user) {
-  const savedUser = localStorage.getItem('user')
-  if (savedUser) {
-    store.commit('setUser', JSON.parse(savedUser))
-  }
-}
-
-const user = computed(() => store.state.user)
+const { user } = useAuth();
 
 const isMine = computed(() => book.value?.currently_borrowed_by === user.value?.id)
 const isBorrowedByAnother = computed(() => {
@@ -119,7 +111,6 @@ onMounted(async () => {
     }
   }
 })
-
 
 function goToScanBook() {
   router.push('/scan-book')

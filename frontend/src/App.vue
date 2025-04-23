@@ -14,8 +14,7 @@ import { useRoute } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import MainHeader from "@/components/MainHeader.vue";
 import MainFooter from "@/components/MainFooter.vue";
-import api from "@/api/axios";
-
+import axios from "axios";
 
 export default {
   components: {
@@ -24,22 +23,37 @@ export default {
   },
   setup() {
     const route = useRoute();
-    const { fetchUser } = useAuth();
-    const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+    const { user, setUser } = useAuth();
+
+    const isAdminRoute = computed(() => route.path.startsWith("/admin"));
+    const hideLayout = computed(() => route.meta.hideLayout);
 
     onMounted(async () => {
+      const savedUser = localStorage.getItem("user");
+      if (!savedUser) return;
+
+      const parsedUser = JSON.parse(savedUser);
+
+      const protocol = window.location.protocol;
+      const hostname = process.env.VUE_APP_API_HOST || window.location.hostname;
+      const port = process.env.VUE_APP_API_PORT || 8000;
+      const baseUrl = `${protocol}//${hostname}:${port}/api/v1`;
+
+      const plain = axios.create({
+        baseURL: baseUrl,
+        withCredentials: true,
+      });
+
       try {
-        await fetchUser();
-      } catch (error) {
-        await api.post('/refresh-token', {}, { withCredentials: true });
-        await fetchUser();
-        console.log("failed to fetch the user")
+        await plain.post("/refresh-token", {});
+        setUser(parsedUser);
+      } catch (err) {
+        localStorage.removeItem("user");
+        setUser(null);
       }
     });
 
-    const hideLayout = computed(() => route.meta.hideLayout);
-
-    return { hideLayout, isAdminRoute };
+    return { hideLayout, isAdminRoute, user };
   },
 };
 </script>
