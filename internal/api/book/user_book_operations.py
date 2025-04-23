@@ -42,7 +42,8 @@ async def get_borrowed_books(user: User = Depends(get_current_user)):
                 borrowed=book.borrowed,
                 isbn=book.isbn,
                 borrowed_at=book.borrowed_at,
-                return_date=book.return_date
+                return_date=book.return_date,
+                currently_borrowed_by=book.currently_borrowed_by
             )
         )
 
@@ -78,7 +79,8 @@ async def get_borrowed_history(user: User = Depends(get_current_user)):
                 borrowed=book.borrowed,
                 isbn=book.isbn,
                 borrowed_at=book.borrowed_at,
-                return_date=book.return_date
+                return_date=book.return_date,
+                currently_borrowed_by=book.currently_borrowed_by
             )
         )
 
@@ -113,7 +115,8 @@ async def get_notify_me_list(user: User = Depends(get_current_user)):
                 borrowed=book.borrowed,
                 isbn=book.isbn,
                 borrowed_at=book.borrowed_at,
-                return_date=book.return_date
+                return_date=book.return_date,
+                currently_borrowed_by=book.currently_borrowed_by
             )
         )
 
@@ -148,7 +151,8 @@ async def get_overdue_books(user: User = Depends(get_current_user)):
                 borrowed=book.borrowed,
                 isbn=book.isbn,
                 borrowed_at=book.borrowed_at,
-                return_date=book.return_date
+                return_date=book.return_date,
+                currently_borrowed_by=book.currently_borrowed_by
             )
         )
 

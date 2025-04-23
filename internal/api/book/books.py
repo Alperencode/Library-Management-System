@@ -54,7 +54,8 @@ async def list_books(
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         return PaginatedBookPreviewListResponse(
             code=SUCCESS,
@@ -134,7 +135,8 @@ async def list_books(
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         for book in paginated_books
     ]
@@ -197,7 +199,8 @@ async def search_books(q: str = Query(...)):
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         return BookPreviewListResponse(
             code=SUCCESS,
@@ -248,7 +251,8 @@ async def search_books(q: str = Query(...)):
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         for book in matched
     ]
@@ -352,7 +356,8 @@ async def related_books(book_id: str):
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         for book in sorted_related
     ]

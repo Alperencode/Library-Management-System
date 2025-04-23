@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Query, Depends
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from typing import Optional, List
 from rapidfuzz import fuzz
 from internal.utils.utils import get_current_admin
-from internal.types.responses import AdminDashboardResponse
-from internal.types.types import SUCCESS
-from internal.database.users import get_all_users
-from internal.models.user import User
+from internal.types.responses import AdminDashboardResponse, PublicUserResponse, FailResponse
+from internal.types.types import SUCCESS, FAIL
+from internal.database.users import get_all_users, get_user_by_id
+from internal.models.user import User, PublicUser
 from internal.models.user import UserPreview, PaginatedUserPreviewListResponse
 from internal.database.users import get_penalty_users_count
 from internal.database.books import (
@@ -84,4 +86,33 @@ async def list_users(
         page=page,
         has_next=end < total_users and page < last_page,
         last_page=last_page
+    )
+
+
+@router.get("/users/{user_id}", response_model=PublicUserResponse)
+async def get_user_details(user_id: str, admin=Depends(get_current_admin)):
+    user = await get_user_by_id(user_id)
+    if not user:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="User not found"
+            ))
+        )
+
+    return PublicUserResponse(
+        code=SUCCESS,
+        message="User details retrieved successfully",
+        user=PublicUser(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            role=user.role,
+            borrowed_books=user.borrowed_books,
+            borrowed_history=user.borrowed_history,
+            overdue_books=user.overdue_books,
+            notify_me_list=user.notify_me_list,
+            penalties=user.penalties
+        )
     )
