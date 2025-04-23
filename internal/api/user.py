@@ -24,7 +24,7 @@ async def get_current_user_info(user: User = Depends(get_current_user)):
             borrowed_history=user.borrowed_history,
             overdue_books=user.overdue_books,
             notify_me_list=user.notify_me_list,
-            penalty_amount=user.penalty_amount
+            penalties=user.penalties
         )
     )
 

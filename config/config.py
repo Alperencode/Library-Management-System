@@ -25,6 +25,7 @@ conf["api_port"] = int(os.environ.get("API_PORT", "8000"))
 conf["api_prefix"] = os.environ.get("API_PREFIX", "/api/v1")
 conf["access_token_expire_minutes"] = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 conf["refresh_token_expire_days"] = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+conf["penalty_amount"] = float(os.environ.get("PENALTY_AMOUNT", "10"))
 
 # Required variables
 required_envs = {

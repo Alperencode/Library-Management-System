@@ -36,6 +36,12 @@ async def get_all_books() -> List[Book]:
     return books
 
 
+async def get_all_borrowed_books() -> List[Book]:
+    books_cursor = books_collection.find({"borrowed": True})
+    books = [Book(**doc) async for doc in books_cursor]
+    return books
+
+
 async def update_book(book: Book) -> bool:
     book_data = book.model_dump(by_alias=True)
     result = await books_collection.update_one(

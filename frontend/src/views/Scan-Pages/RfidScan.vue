@@ -64,7 +64,9 @@ const startRfidScan = async () => {
     if (response.ok) {
       if (result.code === "Success") {
         if (result.message) toast.success(result.message);
+        setTimeout(async () => {
         await handleIsbn(result.data);
+      }, 1000);
       } else {
         toast.error(result.message || "RFID scan failed");
       }
@@ -89,7 +91,7 @@ const handleIsbn = async (isbn, rfidMessage = null) => {
     const books = searchResponse.data.books;
 
     if (Array.isArray(books) && books.length > 0 && books[0]?.id) {
-      const message = rfidMessage || searchResponse.data.message || "Kitap başarıyla tarandı.";
+      const message = rfidMessage || searchResponse.data.message || "Book scanned successfully.";
       toast.success(message);
       router.push(`/scan-book/${books[0].id}`);
     } else {
@@ -103,9 +105,14 @@ const handleIsbn = async (isbn, rfidMessage = null) => {
     const errorMessage =
       error.response?.data?.message ||
       error.response?.data?.detail ||
-      error.message || "Kitap bulunamadı."
+      error.message ||
+      "Book not found.";
 
     toast.error(errorMessage);
+
+    setTimeout(() => {
+      router.push("/scan-book");
+    }, 2000);
   }
 };
 

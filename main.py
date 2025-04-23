@@ -6,6 +6,7 @@ from internal.utils.logger import logger
 from internal.database.database import check_connection, client
 from internal.api.exception_handlers import generic_exception_handler, validation_exception_handler
 from internal.api import book, user, login, token, service_status, google_books, user_book_operations, request_book
+from internal.cron_jobs.penalty_handler import start_cron_jobs, check_penalties
 from config.config import get_config, set_config, LOCAL_IP
 import uvicorn
 import sys
@@ -17,6 +18,12 @@ async def lifespan(app: FastAPI):
     try:
         await check_connection()
         logger.info("Successfully connected to the database.")
+
+        start_cron_jobs()
+        logger.info("Successfully started the cron jobs.")
+
+        await check_penalties()
+        logger.info("Successfully checked penalties.")
     except Exception as e:
         logger.error(f"Failed to connect to the database. Details: {e}")
         sys.exit(1)
