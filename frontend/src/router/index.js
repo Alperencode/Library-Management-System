@@ -119,14 +119,13 @@ const router = createRouter({
 
 import { useAuth } from "@/composables/useAuth";
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach((to, from, next) => {
   const protectedPaths = ["/user-page", "/request-book", "/scan-book"];
   const requiresAuth = protectedPaths.some((path) => to.path.startsWith(path));
 
-  const { fetchUser } = useAuth();
-  await fetchUser();
+  const { user } = useAuth();
 
-  const isAuthenticated = !!localStorage.getItem("user");
+  const isAuthenticated = !!user.value;
 
   if (requiresAuth && !isAuthenticated) {
     toast.error("You must be logged in to continue.");

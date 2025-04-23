@@ -291,13 +291,9 @@ export default {
     const requestedBookIds = ref(new Set());
 
     const fetchRequestedBooks = async () => {
-      try {
-        const res = await api.get("/request-book");
-        const ids = res.data.books.map((book) => book.id);
-        ids.forEach((id) => requestedBookIds.value.add(id));
-      } catch (err) {
-        console.warn("İstek yapılan kitaplar alınamadı:", err);
-      }
+      const res = await api.get("/request-book");
+      const ids = res.data.books.map((book) => book.id);
+      ids.forEach((id) => requestedBookIds.value.add(id));
     };
 
     const searchQuery = ref("");
@@ -352,6 +348,10 @@ export default {
         });
 
         searchPerformed.value = true;
+
+        if (user.value) {
+          await fetchRequestedBooks();
+        }
       } catch (err) {
         requestBooks.value = [];
         searchPerformed.value = true;
@@ -406,10 +406,6 @@ export default {
       }
 
       await new Promise((resolve) => setTimeout(resolve, 300));
-
-      if (user.value) {
-        await fetchRequestedBooks();
-      }
 
       try {
         const mostBorrowedRes = await api.get("/books", {

@@ -40,28 +40,16 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
-const user = ref(null)
-
-onMounted(() => {
-  const savedUser = localStorage.getItem('user')
-  if (savedUser) {
-    user.value = JSON.parse(savedUser)
-  }
-})
+const { user, setUser } = useAuth()
 
 const logout = async () => {
-  try {
-    await api.post('/logout')
-    localStorage.removeItem('user')
-    location.reload()
-    router.push('/')
-  } catch (error) {
-    console.error('Logout API request failed:', error)
-  }
+  await api.post("/logout")
+  setUser(null)
+  router.push("/login")
 }
 </script>
 

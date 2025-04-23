@@ -1,5 +1,5 @@
 import bcrypt
-import jwt
+from jose import jwt
 import smtplib
 from fastapi import Request
 from email.mime.text import MIMEText

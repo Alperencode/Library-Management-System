@@ -52,28 +52,25 @@ import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { formatDate } from "@/utils/date";
 import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 
 
-const store = useStore();
 const router = useRouter();
 const overdueBooks = ref([]);
 
 const returnBook = () => {
   router.push("/scan-book");
 };
-const user = store.state.user;
-if (!store.state.user) {
-  const savedUser = localStorage.getItem("user");
-  if (savedUser) {
-    store.commit("setUser", JSON.parse(savedUser));
-  }
+
+const user = ref(null)
+const savedUser = localStorage.getItem("user")
+if (savedUser) {
+  user.value = JSON.parse(savedUser)
 }
 
 const fetchOverdueBooks = async () => {
   try {
     const res = await api.get("/borrowed/overdue-books");
-    const penalties = user?.penalties || [];
+    const penalties = user?.value.penalties || [];
 
     overdueBooks.value = res.data.books.map((book) => {
       const match = penalties.find((p) => p.book_id === book.id);
