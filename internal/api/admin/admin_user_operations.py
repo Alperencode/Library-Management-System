@@ -27,13 +27,20 @@ async def get_admin_dashboard(admin=Depends(get_current_admin)):
     penalty_users_count = await get_penalty_users_count()
     total_books_count = await get_books_count()
 
+    available_books_count = total_books_count - borrowed_books_count
+
+    all_users = await get_all_users()
+    total_users_count = len(all_users)
+
     return AdminDashboardResponse(
         code=SUCCESS,
         message="Dashboard statistics fetched successfully",
         borrowed_books_count=borrowed_books_count,
         penalty_books_count=penalty_books_count,
         penalty_users_count=penalty_users_count,
-        total_books_count=total_books_count
+        total_books_count=total_books_count,
+        available_books_count=available_books_count,
+        total_users_count=total_users_count
     )
 
 

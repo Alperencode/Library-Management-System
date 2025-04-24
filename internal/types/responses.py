@@ -88,3 +88,12 @@ class AdminDashboardResponse(SuccessResponse):
     penalty_books_count: int
     penalty_users_count: int
     total_books_count: int
+    available_books_count: int
+    total_users_count: int
+
+
+class BooksOverviewResponse(SuccessResponse):
+    total_books: int
+    total_users: int
+    total_borrowed_books: int
+    total_available_books: int

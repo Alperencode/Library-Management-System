@@ -237,8 +237,8 @@
                   </div>
                   <div class="col-12">
                     <div class="count-area-content">
-                      <div class="count-digit">126</div>
-                      <div class="count-title">Current Teachers</div>
+                      <div class="count-digit">{{ totalBorrowedBooks }}</div>
+                      <div class="count-title">Total Borrowed Books</div>
                     </div>
                   </div>
                 </div>
@@ -247,14 +247,14 @@
                 <div class="row">
                   <div class="col-12">
                     <div class="count-area-content new-students">
-                      <div class="count-digit">2345</div>
-                      <div class="count-title">New Students</div>
+                      <div class="count-digit">{{ totalAvailableBooks }}</div>
+                      <div class="count-title">Available Books</div>
                     </div>
                   </div>
                   <div class="col-12">
                     <div class="count-area-content">
-                      <div class="count-digit">32</div>
-                      <div class="count-title">Awards</div>
+                      <div class="count-digit">{{ totalUsers }}</div>
+                      <div class="count-title">Total Users</div>
                     </div>
                   </div>
                 </div>
@@ -285,10 +285,13 @@ export default {
       return stored ? JSON.parse(stored) : null;
     });
 
-    const books = ref([]);
-    const recentlyAddedBooks = ref([]);
-    const totalBooks = ref(0);
-    const requestedBookIds = ref(new Set());
+    const books = ref([])
+    const recentlyAddedBooks = ref([])
+    const requestedBookIds = ref(new Set())
+    const totalUsers = ref(0)
+    const totalBooks = ref(0)
+    const totalBorrowedBooks = ref(0)
+    const totalAvailableBooks = ref(0)
 
     const fetchRequestedBooks = async () => {
       const res = await api.get("/request-book");
@@ -437,12 +440,22 @@ export default {
             created_at: book.borrowed_at || new Date().toISOString(),
             borrow_count: book.borrowed ? 1 : 0,
           }));
-
-          totalBooks.value = recentlyAddedRes.data.total;
         }
 
       } catch (error) {
         console.error("Error fetching books:", error);
+      }
+
+      try {
+        const overviewRes = await api.get("/overview");
+        if (overviewRes.data.code === "Success") {
+          totalBooks.value = overviewRes.data.total_books;
+          totalUsers.value = overviewRes.data.total_users;
+          totalBorrowedBooks.value = overviewRes.data.total_borrowed_books;
+          totalAvailableBooks.value = overviewRes.data.total_available_books;
+        }
+      } catch (error) {
+        console.error("Failed to load public overview:", error);
       }
 
       await nextTick();
@@ -479,7 +492,6 @@ export default {
       books,
       defaultCover,
       recentlyAddedBooks,
-      totalBooks,
       searchQuery,
       searchPerformed,
       requestBooks,
@@ -488,6 +500,10 @@ export default {
       updateSearchQuery,
       requestBook,
       user,
+      totalBooks,
+      totalUsers,
+      totalBorrowedBooks,
+      totalAvailableBooks,
     };
   },
 };
