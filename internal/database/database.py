@@ -8,6 +8,7 @@ client = AsyncIOMotorClient(MONGODB_URI)
 database = client[DB_NAME]
 
 users_collection = database["users"]
+admins_collection = database["admins"]
 books_collection = database["books"]
 
 

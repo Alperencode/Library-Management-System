@@ -2,12 +2,8 @@
   <div class="admin-books-container">
     <h2 class="mb-4">Book List</h2>
 
-    <input
-      v-model="searchQuery"
-      @keyup.enter="onSearchEnter"
-      class="search-input"
-      placeholder="Search by title, author, publisher..."
-    />
+    <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
+      placeholder="Search by title, author, publisher..." />
 
     <div v-if="books.length > 0" class="book-table-wrapper">
       <table class="book-table">
@@ -23,12 +19,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="(book, index) in books"
-            :key="book.id"
-            class="fade-in-row"
-            :style="{ animationDelay: `${index * 80}ms` }"
-          >
+          <tr v-for="(book, index) in books" :key="book.id" class="fade-in-row"
+            :style="{ animationDelay: `${index * 80}ms` }">
             <td>
               <img :src="book.cover_image || defaultCover" alt="Cover" class="book-cover" />
             </td>
@@ -40,7 +32,15 @@
                 {{ book.borrowed ? 'Taken' : 'Available' }}
               </span>
             </td>
-            <td>{{ book.currently_borrowed_by || '-' }}</td>
+            <td>
+              <span v-if="usernames[book.currently_borrowed_by]">
+                <a :href="`/admin/users/${book.currently_borrowed_by}`">
+                  {{ usernames[book.currently_borrowed_by] }}
+                </a>
+              </span>
+              <span v-else-if="book.currently_borrowed_by">Loading...</span>
+              <span v-else>-</span>
+            </td>
             <td>
               <button class="edit-btn">Edit</button>
               <button class="delete-btn">Delete</button>
@@ -54,12 +54,7 @@
 
     <div class="pagination">
       <button :disabled="page === 1" @click="changePage(page - 1)">‹</button>
-      <button
-        v-for="p in lastPage"
-        :key="p"
-        @click="changePage(p)"
-        :class="{ active: p === page }"
-      >
+      <button v-for="p in lastPage" :key="p" @click="changePage(p)" :class="{ active: p === page }">
         {{ p }}
       </button>
       <button :disabled="page === lastPage" @click="changePage(page + 1)">›</button>
@@ -68,8 +63,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import axios from '@/api/axios'
+import { ref, onMounted,  watch, reactive } from 'vue'
+import api from '@/api/axios'
 import defaultCover from '@/assets/images/default-cover.png'
 
 const books = ref([])
@@ -77,10 +72,29 @@ const searchQuery = ref('')
 const page = ref(1)
 const limit = 10
 const lastPage = ref(1)
+const usernames = reactive({})
+
+watch(
+  () => books.value,
+  async (newBooks) => {
+    for (const book of newBooks) {
+      const userId = book.currently_borrowed_by
+      if (userId && !usernames[userId]) {
+        try {
+          const res = await api.get(`/admin/users/${userId}`)
+          usernames[userId] = res.data.admin?.username || res.data.user?.username || '(Unknown)'
+        } catch {
+          usernames[userId] = '(Error)'
+        }
+      }
+    }
+  },
+  { immediate: true }
+)
 
 const fetchBooks = async () => {
   try {
-    const response = await axios.get('/books', {
+    const response = await api.get('/books', {
       params: {
         page: page.value,
         limit,
@@ -109,7 +123,6 @@ onMounted(fetchBooks)
 </script>
 
 <style scoped>
-
 .admin-books-container {
   padding: 24px;
 }
@@ -172,10 +185,12 @@ onMounted(fetchBooks)
   cursor: pointer;
   font-size: 13px;
 }
+
 .edit-btn {
   background-color: #2980b9;
   color: white;
 }
+
 .delete-btn {
   background-color: #c0392b;
   color: white;
@@ -193,6 +208,7 @@ onMounted(fetchBooks)
   margin-top: 20px;
   gap: 6px;
 }
+
 .pagination button {
   padding: 6px 12px;
   border: none;
@@ -200,11 +216,13 @@ onMounted(fetchBooks)
   cursor: pointer;
   border-radius: 4px;
 }
+
 .pagination button.active {
   background-color: #d4881a;
   color: white;
   font-weight: bold;
 }
+
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -219,10 +237,10 @@ onMounted(fetchBooks)
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
 </style>

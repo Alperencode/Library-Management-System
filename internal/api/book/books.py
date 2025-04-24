@@ -8,6 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from internal.models.book import BookPreview
 from internal.utils.utils import get_scanned_book
 from internal.database.books import get_all_books, get_book_by_id, get_book_by_isbn
+from internal.database.users import get_all_users
 from internal.types.types import SUCCESS, FAIL, LanguageItem
 from internal.types.responses import (
     FailResponse,
@@ -17,7 +18,8 @@ from internal.types.responses import (
     GroupedCategory,
     BookPreviewListResponse,
     PaginatedBookPreviewListResponse,
-    LanguageListResponse
+    LanguageListResponse,
+    BooksOverviewResponse
 )
 
 router = APIRouter()
@@ -54,7 +56,8 @@ async def list_books(
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         return PaginatedBookPreviewListResponse(
             code=SUCCESS,
@@ -134,7 +137,8 @@ async def list_books(
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         for book in paginated_books
     ]
@@ -197,7 +201,8 @@ async def search_books(q: str = Query(...)):
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         return BookPreviewListResponse(
             code=SUCCESS,
@@ -248,7 +253,8 @@ async def search_books(q: str = Query(...)):
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         for book in matched
     ]
@@ -257,6 +263,26 @@ async def search_books(q: str = Query(...)):
         code=SUCCESS,
         message="Books found by query",
         books=previews
+    )
+
+
+@router.get("/overview", response_model=BooksOverviewResponse)
+async def get_public_library_overview():
+    books = await get_all_books()
+    users = await get_all_users()
+
+    total_books = len(books)
+    total_users = len(users)
+    total_borrowed_books = sum(1 for book in books if book.borrowed)
+    total_available_books = total_books - total_borrowed_books
+
+    return BooksOverviewResponse(
+        code=SUCCESS,
+        message="Library overview retrieved successfully",
+        total_books=total_books,
+        total_users=total_users,
+        total_borrowed_books=total_borrowed_books,
+        total_available_books=total_available_books
     )
 
 
@@ -352,7 +378,8 @@ async def related_books(book_id: str):
             publisher=book.publisher,
             cover_image=book.cover_image,
             borrowed=book.borrowed,
-            isbn=book.isbn
+            isbn=book.isbn,
+            currently_borrowed_by=book.currently_borrowed_by
         )
         for book in sorted_related
     ]

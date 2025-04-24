@@ -1,6 +1,7 @@
 from typing import List
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
+from internal.models.admin import PublicAdmin
 from internal.models.book import Book, BookPreview
 from internal.models.request import BookRequest
 from .types import LanguageItem
@@ -22,6 +23,10 @@ class VersionResponse(SuccessResponse):
 
 class PublicUserResponse(SuccessResponse):
     user: PublicUser = Field(None)
+
+
+class PublicAdminResponse(SuccessResponse):
+    admin: PublicAdmin
 
 
 class TokenResponse(SuccessResponse):
@@ -76,3 +81,19 @@ class LanguageListResponse(SuccessResponse):
 
 class BookRequestListResponse(SuccessResponse):
     books: List[BookRequest]
+
+
+class AdminDashboardResponse(SuccessResponse):
+    borrowed_books_count: int
+    penalty_books_count: int
+    penalty_users_count: int
+    total_books_count: int
+    available_books_count: int
+    total_users_count: int
+
+
+class BooksOverviewResponse(SuccessResponse):
+    total_books: int
+    total_users: int
+    total_borrowed_books: int
+    total_available_books: int

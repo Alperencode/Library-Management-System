@@ -39,3 +39,21 @@ class PublicUser(BaseModel):
     requested_books: Optional[list[BookRequest]] = []
     notify_me_list: Optional[List[str]] = []
     penalties: Optional[List[BookPenalty]] = []
+
+
+class UserPreview(BaseModel):
+    id: str
+    username: str
+    email: str
+    borrow_count: int
+    has_penalty: bool
+
+
+class PaginatedUserPreviewListResponse(BaseModel):
+    code: str
+    message: str
+    users: List[UserPreview]
+    total: int
+    page: int
+    has_next: bool
+    last_page: int

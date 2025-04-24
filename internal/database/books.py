@@ -50,6 +50,18 @@ async def update_book(book: Book) -> bool:
     return result.modified_count > 0
 
 
+async def get_borrowed_books_count() -> int:
+    return await books_collection.count_documents({"borrowed": True})
+
+
+async def get_penalty_books_count() -> int:
+    return await books_collection.count_documents({"has_penalty": True})
+
+
+async def get_books_count() -> int:
+    return await books_collection.estimated_document_count()
+
+
 async def delete_book(book_id: str) -> bool:
     result = await books_collection.delete_one({"_id": ObjectId(book_id)})
     return result.deleted_count > 0

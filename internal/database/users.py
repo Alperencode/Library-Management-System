@@ -1,7 +1,7 @@
 from internal.database.database import users_collection
 from internal.models.user import User
 from pymongo.errors import DuplicateKeyError
-from typing import Optional
+from typing import Optional, List
 from bson import ObjectId
 
 
@@ -26,6 +26,10 @@ async def get_user_by_email(email: str) -> Optional[User]:
     return User(**user_data) if user_data else None
 
 
+async def get_penalty_users_count() -> int:
+    return await users_collection.count_documents({"penalties.0": {"$exists": True}})
+
+
 async def update_user(user: User) -> bool:
     user_data = user.model_dump(by_alias=True)
     result = await users_collection.update_one(
@@ -37,3 +41,8 @@ async def update_user(user: User) -> bool:
 async def delete_user(user_id: str) -> bool:
     result = await users_collection.delete_one({"_id": ObjectId(user_id)})
     return result.deleted_count > 0
+
+
+async def get_all_users() -> List[User]:
+    cursor = users_collection.find()
+    return [User(**doc) async for doc in cursor]
