@@ -101,6 +101,16 @@ async def login_user(
             ))
         )
 
+    # If the entity is a user and banned, reject login
+    if role == "user" and getattr(entity, "banned", False):
+        return JSONResponse(
+            status_code=403,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="Your account has been banned. Please contact support."
+            ))
+        )
+
     # Assign access_token to current user/admin
     if not verify_token_owner(request, entity, "access_token"):
         err = create_access_token(entity.id, entity.role, response)

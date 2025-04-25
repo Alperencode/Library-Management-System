@@ -4,6 +4,7 @@ from typing import Optional
 
 SUCCESS = "Success"
 FAIL = "Fail"
+NEED_ACTION = "NeedAction"
 
 
 class LoginRequest(BaseModel):

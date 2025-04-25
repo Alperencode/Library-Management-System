@@ -1,7 +1,7 @@
 from internal.database.database import books_collection
+from internal.database.users import users_collection
 from internal.models.book import Book
 from typing import Optional, List
-from bson import ObjectId
 
 
 async def create_book(book: Book) -> Optional[Book]:
@@ -63,5 +63,33 @@ async def get_books_count() -> int:
 
 
 async def delete_book(book_id: str) -> bool:
-    result = await books_collection.delete_one({"_id": ObjectId(book_id)})
+    result = await books_collection.delete_one({"_id": book_id})
     return result.deleted_count > 0
+
+
+async def delete_book_by_id(book_id: str) -> bool:
+    result = await books_collection.delete_one({"_id": book_id})
+    return result.deleted_count > 0
+
+
+async def remove_book_from_notify_lists(book_id: str):
+    await users_collection.update_many(
+        {"notify_me_list": book_id},
+        {"$pull": {"notify_me_list": book_id}}
+    )
+
+
+async def clear_books_from_user(user_id: str, book_ids: List[str]) -> None:
+    if not book_ids:
+        return
+
+    await users_collection.update_one(
+        {"_id": user_id},
+        {
+            "$pull": {
+                "borrowed_books": {"$in": book_ids},
+                "overdue_books":  {"$in": book_ids},
+                "penalties":     {"book_id": {"$in": book_ids}}
+            }
+        }
+    )
