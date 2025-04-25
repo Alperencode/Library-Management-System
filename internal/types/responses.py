@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
 from internal.models.admin import PublicAdmin
 from internal.models.book import Book, BookPreview
-from internal.models.request import BookRequest, BookRequestPreview
+from internal.models.request import BookRequest, BookRequestPreview, RequestDetails, RequesterInfo
 from .types import LanguageItem
 
 
@@ -105,3 +105,9 @@ class BookRequestPreviewListResponse(SuccessResponse):
     page: int
     has_next: bool
     last_page: int
+
+
+class BookRequestDetailsResponse(SuccessResponse):
+    request: RequestDetails
+    requester_count: int
+    requesters: List[RequesterInfo]

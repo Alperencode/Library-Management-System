@@ -84,34 +84,7 @@ async def iter_all_requests(skip: int, limit: int) -> List[Dict[str, Any]]:
     return await users_collection.aggregate(pipeline).to_list(length=limit)
 
 
-async def count_all_requests() -> int:
-    """Total number of book-requests system-wide."""
-    pipeline = [
-        {"$unwind": "$requested_books"},
-        {"$count": "total"}
-    ]
-    doc = await users_collection.aggregate(pipeline).to_list(length=1)
-    return doc[0]["total"] if doc else 0
-
-
-async def update_request_status_in_db(
-    user_id: str,
-    request_id: str,
-    new_status: RequestStatus
-) -> bool:
-    result = await users_collection.update_one(
-        {"_id": user_id, "requested_books.id": request_id},
-        {
-            "$set": {
-                "requested_books.$.status": new_status,
-                "requested_books.$.status_updated_at": datetime.now(),
-            }
-        }
-    )
-    return result.modified_count > 0
-
-
-async def update_request_status_for_all(request_id: str, new_status: str) -> bool:
+async def update_request_status_for_all(request_id: str, new_status: RequestStatus) -> bool:
     result = await users_collection.update_many(
         {"requested_books.id": request_id},
         {

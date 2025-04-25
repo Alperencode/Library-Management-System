@@ -12,6 +12,24 @@ class RequestStatus(str, Enum):
     ON_HOLD = "On Hold"
 
 
+class RequesterInfo(BaseModel):
+    id: str
+    username: str
+    email: str
+
+
+class RequestDetails(BaseModel):
+    id: str
+    title: Optional[str]
+    authors: Optional[List[str]]
+    isbn: Optional[str]
+    publisher: Optional[str]
+    cover_image: Optional[str]
+    status: str
+    requested_at: Optional[datetime]
+    status_updated_at: Optional[datetime]
+
+
 class BookRequest(BaseModel):
     id: str
     title: str
@@ -37,4 +55,5 @@ class BookRequestPreview(BaseModel):
     publisher: Optional[str] = None
     cover_image: Optional[str] = None
     status: RequestStatus = RequestStatus.REQUEST_SENT
+    requested_at: datetime
     status_updated_at: datetime

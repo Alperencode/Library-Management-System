@@ -23,7 +23,11 @@
           <tr v-for="(book, index) in requests" :key="book.id" class="fade-in-row"
             :style="{ animationDelay: `${index * 80}ms` }">
             <td><img :src="book.cover_image || defaultCover" class="book-cover" /></td>
-            <td>{{ book.title }}</td>
+            <td>
+              <router-link :to="`/admin/requests/${book.id}`" class="book-link">
+                {{ book.title }}
+              </router-link>
+            </td>
             <td class="ellipsis">{{ book.authors?.join(', ') || 'Unknown' }}</td>
             <td class="ellipsis">{{ book.publisher || 'Unknown' }}</td>
             <td>
@@ -40,8 +44,8 @@
                 <option value="On Hold">On Hold</option>
               </select>
             </td>
-            <td>{{ formatDate(book.requested_at) }}</td>
-            <td>{{ formatDate(book.status_updated_at) }}</td>
+            <td>{{ formatDateWithoutTime(book.requested_at) }}</td>
+            <td>{{ formatDateWithoutTime(book.status_updated_at) }}</td>
           </tr>
         </tbody>
       </table>
@@ -58,7 +62,7 @@ import { ref, onMounted, computed } from 'vue'
 import defaultCover from '@/assets/images/default-cover.png'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
-import { formatDate } from "@/utils/date"
+import { formatDateWithoutTime } from "@/utils/date"
 
 
 const toast = useToast()
@@ -115,11 +119,10 @@ const applyChanges = async () => {
     try {
       if (book.newStatus === 'Added') {
         await api.post('/admin/add-book', {
-          user_id: book.user_id,
           request_id: book.id
         })
       } else {
-        await api.patch(`/admin/requested-books/${book.user_id}/${book.id}`, {
+        await api.patch(`/admin/requested-books/${book.id}`, {
           status: book.newStatus
         })
       }
@@ -262,5 +265,15 @@ select {
   margin-bottom: 16px;
   border-radius: 6px;
   border: 1px solid #ccc;
+}
+
+.book-link {
+  color: #2980b9;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.book-link:hover {
+  text-decoration: underline;
 }
 </style>
