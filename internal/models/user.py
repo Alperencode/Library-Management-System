@@ -12,6 +12,7 @@ class User(BaseModel):
     email: str
     password: str
     role: str
+    banned: bool = False
     borrowed_books: Optional[List[str]] = []
     borrowed_history: Optional[List[str]] = []
     overdue_books: Optional[List[str]] = []
@@ -39,6 +40,7 @@ class PublicUser(BaseModel):
     requested_books: Optional[list[BookRequest]] = []
     notify_me_list: Optional[List[str]] = []
     penalties: Optional[List[BookPenalty]] = []
+    banned: bool = False
 
 
 class UserPreview(BaseModel):
@@ -47,6 +49,7 @@ class UserPreview(BaseModel):
     email: str
     borrow_count: int
     has_penalty: bool
+    banned: bool = False
 
 
 class PaginatedUserPreviewListResponse(BaseModel):

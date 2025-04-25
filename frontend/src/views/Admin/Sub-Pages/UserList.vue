@@ -24,7 +24,13 @@
               </span>
             </td>
             <td>
-              <button class="ban-btn" @click="banUser(user.id)">Ban the User</button>
+              <button v-if="!user.banned" class="ban-btn" @click="banUser(user.id)">
+                Ban User
+              </button>
+
+              <button v-else class="unban-btn" @click="unbanUser(user.id)">
+                Un-ban User
+              </button>
             </td>
           </tr>
         </tbody>
@@ -40,12 +46,43 @@
       </button>
       <button :disabled="page === lastPage" @click="changePage(page + 1)">›</button>
     </div>
+
+    <div v-if="showModal" class="modal-overlay">
+      <div class="confirm-modal">
+        <h3>Force Ban User?</h3>
+        <p>
+          This user has active borrowed books. Hard banning will remove their books
+          from the library system. Are you sure you want to continue?
+        </p>
+
+        <div class="modal-actions">
+          <button class="details-btn" @click="viewUserBooks">View User’s Books</button>
+          <button class="confirm-btn" @click="hardBanUser">Yes, Hard Ban</button>
+          <button class="cancel-btn" @click="showModal = false">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import api from '@/api/axios'
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
+const router = useRouter()
+
+const viewUserBooks = () => {
+  if (selectedUserId.value) {
+    router.push(`/admin/users/${selectedUserId.value}`)
+    showModal.value = false
+  }
+}
+
+const showModal = ref(false)
+const selectedUserId = ref(null)
 
 const users = ref([])
 const page = ref(1)
@@ -73,8 +110,49 @@ const changePage = (newPage) => {
   fetchUsers()
 }
 
-const banUser = (userId) => {
-  console.log(`User with ID: ${userId} is banned.`)
+const banUser = async (userId) => {
+  try {
+    const { data } = await api.post(`/admin/ban/${userId}`)
+
+    if (data.code === "Success") {
+      toast.success(data.message)
+      fetchUsers()
+    } else if (data.code === "NeedAction") {
+      selectedUserId.value = userId
+      showModal.value = true
+    } else {
+      toast.error(data.message || "Unexpected response")
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Failed to ban user")
+  }
+}
+
+const hardBanUser = async () => {
+  try {
+    const response = await api.post(`/admin/hard-ban/${selectedUserId.value}`)
+    if (response.data.code === "Success") {
+      toast.success(response.data.message)
+      showModal.value = false
+      fetchUsers()
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Failed to hard-ban user")
+  }
+}
+
+const unbanUser = async (userId) => {
+  try {
+    const { data } = await api.post(`/admin/unban/${userId}`)
+    if (data.code === "Success") {
+      toast.success(data.message)
+      fetchUsers()
+    } else {
+      toast.error(data.message || "Unexpected response")
+    }
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Failed to un-ban user")
+  }
 }
 
 onMounted(fetchUsers)
@@ -150,5 +228,76 @@ onMounted(fetchUsers)
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.confirm-modal {
+  background: #fff;
+  padding: 24px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-modal h3 {
+  margin: 0 0 15px;
+  font-size: 20px;
+}
+
+.confirm-modal p {
+  margin: 0 0 20px;
+  color: #555;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirm-btn {
+  padding: 8px 16px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  padding: 8px 16px;
+  background: #bdc3c7;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.details-btn {
+  padding: 8px 16px;
+  background: #2980b9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.unban-btn {
+  padding: 6px 12px;
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>

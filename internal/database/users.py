@@ -46,3 +46,19 @@ async def delete_user(user_id: str) -> bool:
 async def get_all_users() -> List[User]:
     cursor = users_collection.find()
     return [User(**doc) async for doc in cursor]
+
+
+async def ban_user(user_id: str) -> bool:
+    result = await users_collection.update_one(
+        {"_id": user_id},
+        {"$set": {"banned": True}}
+    )
+    return result.modified_count > 0
+
+
+async def unban_user(user_id: str) -> bool:
+    result = await users_collection.update_one(
+        {"_id": user_id},
+        {"$set": {"banned": False}}
+    )
+    return result.modified_count > 0
