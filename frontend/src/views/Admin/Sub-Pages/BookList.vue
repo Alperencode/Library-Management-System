@@ -34,7 +34,7 @@
             </td>
             <td>
               <span v-if="usernames[book.currently_borrowed_by]">
-                <a :href="`/admin/users/${book.currently_borrowed_by}`">
+                <a :href="`/admin/users/${book.currently_borrowed_by}`" class="user-link">
                   {{ usernames[book.currently_borrowed_by] }}
                 </a>
               </span>
@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted,  watch, reactive } from 'vue'
+import { ref, onMounted, watch, reactive } from 'vue'
 import api from '@/api/axios'
 import defaultCover from '@/assets/images/default-cover.png'
 
@@ -242,5 +242,14 @@ onMounted(fetchBooks)
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.user-link {
+  text-decoration: none;
+  color: #2980b9;
+}
+
+.user-link:hover {
+  text-decoration: underline;
 }
 </style>

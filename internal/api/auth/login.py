@@ -55,13 +55,13 @@ async def register_user(
 
     # Assign access_token to current user
     if not verify_token_owner(request, user, "access_token"):
-        err = create_access_token(user.id, response)
+        err = create_access_token(user.id, user.role, response)
         if err:
             logger.error(f"Failed to create access token while registering new user: {err}")
 
     # Assign refresh_token to current user
     if not verify_token_owner(request, user, "refresh_token"):
-        err = create_refresh_token(user.id, response)
+        err = create_refresh_token(user.id, user.role, response)
         if err:
             logger.error(f"Failed to create refresh token while registering new user: {err}")
 
