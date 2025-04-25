@@ -222,46 +222,29 @@
     <section class="our-facts">
       <div class="container">
         <div class="row">
-          <div class="col-lg-6">
-            <div class="row">
-              <div class="col-lg-12">
-                <h2>A Few Facts About Our Library Management System</h2>
-              </div>
-              <div class="col-lg-6">
-                <div class="row">
-                  <div class="col-12">
-                    <div class="count-area-content">
-                      <div class="count-digit">{{ totalBooks }}</div>
-                      <div class="count-title">Total Books</div>
-                    </div>
-                  </div>
-                  <div class="col-12">
-                    <div class="count-area-content">
-                      <div class="count-digit">{{ totalBorrowedBooks }}</div>
-                      <div class="count-title">Total Borrowed Books</div>
-                    </div>
-                  </div>
+          <div class="col-lg-12">
+            <div class="facts-wrapper">
+              <h2>A Few Facts About Our Library Management System</h2>
+              <div class="facts-grid">
+                <div class="count-area-content">
+                  <div class="count-digit">{{ animatedTotalBooks }}</div>
+                  <div class="count-title">Total Books</div>
                 </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="row">
-                  <div class="col-12">
-                    <div class="count-area-content new-students">
-                      <div class="count-digit">{{ totalAvailableBooks }}</div>
-                      <div class="count-title">Available Books</div>
-                    </div>
-                  </div>
-                  <div class="col-12">
-                    <div class="count-area-content">
-                      <div class="count-digit">{{ totalUsers }}</div>
-                      <div class="count-title">Total Users</div>
-                    </div>
-                  </div>
+                <div class="count-area-content">
+                  <div class="count-digit">{{ animatedTotalAvailableBooks }}</div>
+                  <div class="count-title">Available Books</div>
+                </div>
+                <div class="count-area-content">
+                  <div class="count-digit">{{ animatedTotalBorrowedBooks }}</div>
+                  <div class="count-title">Total Borrowed Books</div>
+                </div>
+                <div class="count-area-content">
+                  <div class="count-digit">{{ animatedTotalUsers }}</div>
+                  <div class="count-title">Total Users</div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-lg-6 align-self-center"></div>
         </div>
       </div>
     </section>
@@ -292,6 +275,10 @@ export default {
     const totalBooks = ref(0)
     const totalBorrowedBooks = ref(0)
     const totalAvailableBooks = ref(0)
+    const animatedTotalBooks = ref(0)
+    const animatedTotalBorrowedBooks = ref(0)
+    const animatedTotalAvailableBooks = ref(0)
+    const animatedTotalUsers = ref(0)
 
     const fetchRequestedBooks = async () => {
       const res = await api.get("/request-book");
@@ -389,6 +376,21 @@ export default {
       }
     };
 
+    const animateCount = (target, refVar, duration = 1500) => {
+      const frameRate = 30
+      const totalFrames = duration / (1000 / frameRate)
+      let frame = 0
+
+      const counter = setInterval(() => {
+        frame++
+        refVar.value = Math.floor((frame / totalFrames) * target)
+        if (frame >= totalFrames) {
+          refVar.value = target
+          clearInterval(counter)
+        }
+      }, 1000 / frameRate)
+    }
+
     onMounted(async () => {
       const scripts = [
         "vendor/jquery/jquery.min.js",
@@ -449,10 +451,10 @@ export default {
       try {
         const overviewRes = await api.get("/overview");
         if (overviewRes.data.code === "Success") {
-          totalBooks.value = overviewRes.data.total_books;
-          totalUsers.value = overviewRes.data.total_users;
-          totalBorrowedBooks.value = overviewRes.data.total_borrowed_books;
-          totalAvailableBooks.value = overviewRes.data.total_available_books;
+          animateCount(overviewRes.data.total_books, animatedTotalBooks)
+          animateCount(overviewRes.data.total_borrowed_books, animatedTotalBorrowedBooks)
+          animateCount(overviewRes.data.total_available_books, animatedTotalAvailableBooks)
+          animateCount(overviewRes.data.total_users, animatedTotalUsers)
         }
       } catch (error) {
         console.error("Failed to load public overview:", error);
@@ -504,6 +506,10 @@ export default {
       totalUsers,
       totalBorrowedBooks,
       totalAvailableBooks,
+      animatedTotalBooks,
+      animatedTotalBorrowedBooks,
+      animatedTotalAvailableBooks,
+      animatedTotalUsers,
     };
   },
 };
@@ -890,5 +896,36 @@ export default {
   flex-direction: column;
   justify-content: flex-start;
   min-height: 500px;
+}
+
+.our-facts .facts-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.our-facts h2 {
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+}
+
+.facts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 300px);
+  gap: 24px 40px;
+  justify-content: center;
+}
+
+.count-area-content {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 24px 16px;
+  border-radius: 20px;
+  text-align: center;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 </style>
