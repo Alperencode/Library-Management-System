@@ -139,7 +139,7 @@ async def add_book_from_request(
             status_code=409,
             content=jsonable_encoder(FailResponse(
                 code=FAIL,
-                message="Could't add book to catalog, Book might already exist in library"
+                message="Couldn't add book to catalog, Book might already exist in library"
             ))
         )
 
