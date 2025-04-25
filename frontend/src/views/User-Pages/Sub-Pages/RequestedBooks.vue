@@ -244,7 +244,7 @@ onMounted(fetchRequestedBooks)
 }
 
 .status-badge.approved {
-  background-color: #27ae60;
+  background-color: #2980b9;
 }
 
 .status-badge.denied {
@@ -252,7 +252,7 @@ onMounted(fetchRequestedBooks)
 }
 
 .status-badge.added {
-  background-color: #2980b9;
+  background-color: #27ae60;
 }
 
 .status-badge.on-hold {

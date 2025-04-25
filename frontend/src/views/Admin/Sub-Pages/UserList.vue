@@ -15,7 +15,11 @@
         </thead>
         <tbody>
           <tr v-for="user in users" :key="user.id">
-            <td>{{ user.username }}</td>
+            <td>
+              <router-link :to="`/admin/users/${user.id}`" class="user-link">
+                {{ user.username }}
+              </router-link>
+            </td>
             <td>{{ user.email }}</td>
             <td>{{ user.borrow_count }}</td>
             <td>
@@ -299,5 +303,14 @@ onMounted(fetchUsers)
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.user-link {
+  text-decoration: none;
+  color: #2980b9;
+}
+
+.user-link:hover {
+  text-decoration: underline;
 }
 </style>

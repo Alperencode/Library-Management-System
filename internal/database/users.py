@@ -1,8 +1,11 @@
 from internal.database.database import users_collection
 from internal.models.user import User
 from pymongo.errors import DuplicateKeyError
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from bson import ObjectId
+from pymongo import ASCENDING
+from internal.models.request import RequestStatus
+from datetime import datetime
 
 
 async def create_user(user: User) -> Optional[User]:
@@ -60,5 +63,71 @@ async def unban_user(user_id: str) -> bool:
     result = await users_collection.update_one(
         {"_id": user_id},
         {"$set": {"banned": False}}
+    )
+    return result.modified_count > 0
+
+
+async def iter_all_requests(skip: int, limit: int) -> List[Dict[str, Any]]:
+    pipeline = [
+        {"$unwind": "$requested_books"},
+        {"$project": {
+            "_id": 0,
+            "user_id": "$_id",
+            "username": 1,
+            "email": 1,
+            "request": "$requested_books",
+        }},
+        {"$sort": {"request.requested_at": ASCENDING}},
+        {"$skip": skip},
+        {"$limit": limit},
+    ]
+    return await users_collection.aggregate(pipeline).to_list(length=limit)
+
+
+async def count_all_requests() -> int:
+    """Total number of book-requests system-wide."""
+    pipeline = [
+        {"$unwind": "$requested_books"},
+        {"$count": "total"}
+    ]
+    doc = await users_collection.aggregate(pipeline).to_list(length=1)
+    return doc[0]["total"] if doc else 0
+
+
+async def update_request_status_in_db(
+    user_id: str,
+    request_id: str,
+    new_status: RequestStatus
+) -> bool:
+    result = await users_collection.update_one(
+        {"_id": user_id, "requested_books.id": request_id},
+        {
+            "$set": {
+                "requested_books.$.status": new_status,
+                "requested_books.$.status_updated_at": datetime.now(),
+            }
+        }
+    )
+    return result.modified_count > 0
+
+
+async def update_request_status_for_all(request_id: str, new_status: str) -> bool:
+    result = await users_collection.update_many(
+        {"requested_books.id": request_id},
+        {
+            "$set": {
+                "requested_books.$[elem].status": new_status,
+                "requested_books.$[elem].status_updated_at": datetime.now(),
+            }
+        },
+        array_filters=[{"elem.id": request_id}]
+    )
+    return result.modified_count > 0
+
+
+async def delete_request_from_all_users(request_id: str) -> bool:
+    result = await users_collection.update_many(
+        {"requested_books": {"$type": "array"}},
+        {"$pull": {"requested_books": {"id": request_id}}}
     )
     return result.modified_count > 0
