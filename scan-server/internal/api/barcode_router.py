@@ -82,7 +82,9 @@ def barcode_video_feed():
                 draw = ImageDraw.Draw(pil_img)
 
                 text = display_title
-                text_width, text_height = draw.textsize(text, font=font)
+                bbox = draw.textbbox((0, 0), text, font=font)
+                text_width = bbox[2] - bbox[0]
+                text_height = bbox[3] - bbox[1]
                 img_width, img_height = pil_img.size
                 x = (img_width - text_width) // 2
                 y = 30
