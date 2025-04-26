@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Path, Body, Query
 from typing import Optional, List
 from fastapi.responses import JSONResponse
@@ -112,7 +112,13 @@ async def update_borrowed_book(
             content=jsonable_encoder(FailResponse(code=FAIL, message="Book not found"))
         )
 
-    book.return_date = return_date
+    try:
+        book.return_date = datetime.strptime(return_date, "%Y-%m-%d")
+    except ValueError:
+        return JSONResponse(
+            status_code=400,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="Invalid return_date format. Expected YYYY-MM-DD."))
+        )
     updated = await update_book(book)
 
     if not updated:
