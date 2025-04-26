@@ -11,11 +11,19 @@
 
         <div v-else>
           <div class="row grid">
-            <div v-for="(book, index) in borrowedBooks" :key="index" class="meeting-item">
+            <div
+              v-for="(book, index) in paginatedBooks"
+              :key="index"
+              class="meeting-item"
+            >
               <div class="meeting-box">
                 <div class="thumb">
                   <router-link :to="book.link">
-                    <img :src="book.image" :alt="book.title" class="book-thumbnail" />
+                    <img
+                      :src="book.image"
+                      :alt="book.title"
+                      class="book-thumbnail"
+                    />
                   </router-link>
                 </div>
 
@@ -24,7 +32,8 @@
                     <h4 class="book-title">{{ book.title }}</h4>
                   </router-link>
                   <p class="text-ellipsis" :title="book.authors.join(', ')">
-                    <strong>Author:</strong> {{ book.authors.join(", ") || "Unknown" }}
+                    <strong>Author:</strong>
+                    {{ book.authors.join(", ") || "Unknown" }}
                   </p>
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
@@ -38,12 +47,42 @@
                   <button class="return-btn" @click="returnBook(book.id)">
                     Return
                   </button>
-                  <button class="extend-btn" :disabled="book.has_extended" @click="extendReturn(book.id)">
-                    {{ book.has_extended ? "Already Extended" : "Extend Return" }}
+                  <button
+                    class="extend-btn"
+                    :disabled="book.has_extended"
+                    @click="extendReturn(book.id)"
+                  >
+                    {{
+                      book.has_extended ? "Already Extended" : "Extend Return"
+                    }}
                   </button>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Pagination controls -->
+          <div class="pagination" v-if="totalPages > 1">
+            <button
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
+            >
+              Prev
+            </button>
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+              @click="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+            <button
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -52,21 +91,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { formatDate } from "@/utils/date";
 import { useRouter } from "vue-router";
-import { useToast } from 'vue-toastification'
-
 const router = useRouter();
-const toast = useToast()
-
-const returnBook = () => {
-  router.push("/scan-book");
-};
 
 const borrowedBooks = ref([]);
+const currentPage = ref(1);
+const itemsPerPage = 3;
 
 const fetchBorrowedBooks = async () => {
   try {
@@ -87,13 +121,34 @@ const fetchBorrowedBooks = async () => {
   }
 };
 
+const paginatedBooks = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return borrowedBooks.value.slice(start, start + itemsPerPage);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(borrowedBooks.value.length / itemsPerPage);
+});
+
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+const returnBook = () => {
+  router.push("/scan-book");
+};
+
 const extendReturn = async (bookId) => {
   try {
     const res = await api.post(`/extend-return/${bookId}`);
-    toast.success(res.data.message)
+    alert(res.data.message);
     await fetchBorrowedBooks();
   } catch (err) {
-    console.error("Extend return error:", err);
+    const message =
+      err?.response?.data?.message || "Failed to extend return date.";
+    alert(message);
   }
 };
 
@@ -101,6 +156,42 @@ onMounted(fetchBorrowedBooks);
 </script>
 
 <style scoped>
+.page-content {
+  width: 960px;
+  height: 650.57px;
+  background-color: #ffffff;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+.pagination {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.pagination button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination button.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #2980b9;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Diğer stiller */
 .extend-btn {
   background-color: #2980b9;
   color: white;
@@ -196,7 +287,6 @@ onMounted(fetchBorrowedBooks);
   background-color: #ffffff;
   padding: 8px;
   overflow: hidden;
-  border-radius: 8px;
 }
 
 .book-thumbnail {

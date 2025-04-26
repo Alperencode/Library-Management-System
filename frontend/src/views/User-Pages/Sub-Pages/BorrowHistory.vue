@@ -5,16 +5,14 @@
         <h2>Borrow History</h2>
         <p>Here you can see the books you have previously borrowed.</p>
 
-        <!-- Eğer ödünç alınan kitap yoksa mesaj göster -->
         <div v-if="borrowHistory.length === 0" class="no-results">
           <p class="no-results-text">You have not borrowed any books yet.</p>
         </div>
 
-        <!-- Ödünç alınan kitapları listele -->
         <div v-else>
           <div class="row grid">
             <div
-              v-for="(book, index) in borrowHistory"
+              v-for="(book, index) in paginatedBooks"
               :key="index"
               class="history-item"
             >
@@ -41,6 +39,33 @@
               </div>
             </div>
           </div>
+
+          <!-- Sayfalama -->
+          <div class="pagination" v-if="totalPages > 1">
+            <button
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="page-btn"
+            >
+              Prev
+            </button>
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+              @click="goToPage(page)"
+              class="page-btn"
+            >
+              {{ page }}
+            </button>
+            <button
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="page-btn"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -48,11 +73,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 
 const borrowHistory = ref([]);
+const currentPage = ref(1);
+const itemsPerPage = 3;
 
 const fetchBorrowHistory = async () => {
   try {
@@ -67,6 +94,22 @@ const fetchBorrowHistory = async () => {
     }));
   } catch (error) {
     console.error("Error retrieving borrow history:", error);
+  }
+};
+
+const paginatedBooks = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return borrowHistory.value.slice(start, start + itemsPerPage);
+});
+
+const totalPages = computed(() => {
+  const pages = Math.ceil(borrowHistory.value.length / itemsPerPage);
+  return pages > 0 ? pages : 1;
+});
+
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
   }
 };
 
@@ -99,6 +142,7 @@ onMounted(fetchBorrowHistory);
   font-size: 15px;
   font-weight: bold;
 }
+
 .grid {
   display: flex;
   flex-wrap: wrap;
@@ -169,5 +213,32 @@ onMounted(fetchBorrowHistory);
   display: block;
   width: 100%;
   max-width: 100%;
+}
+
+.pagination {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.pagination button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination button.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #2980b9;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

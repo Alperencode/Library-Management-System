@@ -4,15 +4,17 @@
       <div class="container">
         <h2>Notify Me List</h2>
         <p>Here you can see the books you've requested to be notified about.</p>
+
         <div v-if="notifyMeBooks.length === 0" class="no-results">
           <p class="no-results-text">
             You have not added any books to the notify me list yet.
           </p>
         </div>
+
         <div v-else>
           <div class="row grid">
             <div
-              v-for="(book, index) in notifyMeBooks"
+              v-for="(book, index) in paginatedNotifyMeBooks"
               :key="index"
               class="book-item"
             >
@@ -47,6 +49,30 @@
               </div>
             </div>
           </div>
+
+          <!-- Sayfalama numaralı -->
+          <div class="pagination" v-if="totalPages > 1">
+            <button
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
+            >
+              Prev
+            </button>
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+              @click="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+            <button
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -54,13 +80,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
-import { useToast } from "vue-toastification"
+import { useToast } from "vue-toastification";
 
 const notifyMeBooks = ref([]);
-const toast = useToast()
+const currentPage = ref(1);
+const booksPerPage = 3;
+const toast = useToast();
 
 const fetchNotifyMeList = async () => {
   try {
@@ -72,7 +100,6 @@ const fetchNotifyMeList = async () => {
       link: `/books/${book.id}`,
       authors: book.authors || [],
       publisher: book.publisher || "Unknown",
-
     }));
   } catch (error) {
     console.error("Error retrieving notify me list:", error);
@@ -91,18 +118,28 @@ const removeFromNotifyList = async (bookId) => {
   }
 };
 
+const paginatedNotifyMeBooks = computed(() => {
+  const start = (currentPage.value - 1) * booksPerPage;
+  return notifyMeBooks.value.slice(start, start + booksPerPage);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(notifyMeBooks.value.length / booksPerPage);
+});
+
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
 onMounted(fetchNotifyMeList);
 </script>
 
 <style scoped>
-.book-title a {
-  color: inherit;
-  text-decoration: none;
-}
-
 .notify-list {
   padding-top: 40px;
-  min-height: auto;
+  padding-bottom: 40px;
 }
 
 .container {
@@ -146,19 +183,20 @@ onMounted(fetchNotifyMeList);
 .book-box {
   border: 1px solid #ccc;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: white;
   height: 100%;
-  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .thumb {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 180px;
+  height: 200px;
   background-color: #ffffff;
-  padding: 8px;
   overflow: hidden;
   border-radius: 8px;
 }
@@ -170,6 +208,10 @@ onMounted(fetchNotifyMeList);
 }
 
 .down-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   text-align: left;
   padding: 10px;
 }
@@ -197,12 +239,38 @@ onMounted(fetchNotifyMeList);
   border-radius: 5px;
   font-size: 14px;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: auto;
   width: 100%;
   text-align: center;
 }
-
 .remove-btn:hover {
   background-color: #c0392b;
+}
+
+.pagination {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.pagination button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination button.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #2980b9;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

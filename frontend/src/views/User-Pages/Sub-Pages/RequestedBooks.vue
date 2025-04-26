@@ -9,9 +9,9 @@
         </p>
 
         <div v-if="user">
-          <RouterLink to="/request-book" class="request-btn"
-            >Request a Book</RouterLink
-          >
+          <RouterLink to="/request-book" class="request-btn">
+            Request a Book
+          </RouterLink>
         </div>
 
         <div v-if="requestedBooks.length === 0" class="no-results">
@@ -21,7 +21,7 @@
         <div v-else>
           <div class="row grid">
             <div
-              v-for="(book, index) in requestedBooks"
+              v-for="(book, index) in paginatedBooks"
               :key="index"
               class="book-item"
             >
@@ -35,7 +35,7 @@
                 </div>
                 <div class="down-content">
                   <h4 class="book-title">{{ book.title }}</h4>
-                  <p class="text-ellipsis">
+                  <p class="text-ellipsis-author">
                     <strong>Author:</strong>
                     {{ book.authors.join(", ") || "Unknown" }}
                   </p>
@@ -45,10 +45,9 @@
                   <p class="text-ellipsis">
                     <strong>Status:</strong>
                     <span
-                      :class="
-                        'status-badge ' +
-                        book.status.toLowerCase().replace(/\s+/g, '-')
-                      "
+                      :class="`status-badge ${book.status
+                        .toLowerCase()
+                        .replace(/\s+/g, '-')}`"
                     >
                       {{ book.status }}
                     </span>
@@ -63,6 +62,30 @@
               </div>
             </div>
           </div>
+
+          <!-- Pagination controls -->
+          <div class="pagination" v-if="totalPages > 1">
+            <button
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
+            >
+              Prev
+            </button>
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+              @click="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+            <button
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -70,18 +93,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
-import api from "@/api/axios"
-import defaultCover from "@/assets/images/default-cover.png"
-import { formatDate } from "@/utils/date"
-import { useToast } from "vue-toastification"
+import { ref, onMounted, computed } from "vue";
+import { useAuth } from "@/composables/useAuth";
+import api from "@/api/axios";
+import defaultCover from "@/assets/images/default-cover.png";
+import { formatDate } from "@/utils/date";
 
-const requestedBooks = ref([])
-const toast = useToast()
+const requestedBooks = ref([]);
+const { user } = useAuth();
+
+const currentPage = ref(1);
+const itemsPerPage = 3;
+
+const paginatedBooks = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return requestedBooks.value.slice(start, start + itemsPerPage);
+});
+
+const totalPages = computed(() => {
+  return Math.ceil(requestedBooks.value.length / itemsPerPage);
+});
+
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
 
 const fetchRequestedBooks = async () => {
   try {
-    const res = await api.get("/request-book")
+    const res = await api.get("/request-book");
     requestedBooks.value = res.data.books.map((book) => ({
       id: book.id,
       title: book.title || "No Title",
@@ -90,26 +131,43 @@ const fetchRequestedBooks = async () => {
       publisher: book.publisher || "Unknown",
       status: book.status || "Request Sent",
       requested_at: formatDate(book.requested_at),
-    }))
+    }));
   } catch (error) {
-    console.error("Error retrieving requested books:", error)
+    console.error("Error retrieving requested books:", error);
   }
-}
+};
 
 const deleteRequest = async (id) => {
   try {
-    const res = await api.delete(`/requests/${id}`)
-    toast.success(res.data.message)
-    requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id)
+    await api.delete("/requests/${id}");
+    requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id);
   } catch (error) {
-    console.error("Failed to delete book request:", error)
+    console.error("Failed to delete book request:", error);
   }
-}
+};
 
-onMounted(fetchRequestedBooks)
+onMounted(fetchRequestedBooks);
 </script>
 
 <style scoped>
+.page-content {
+  width: 960px !important;
+  height: 650.57px !important;
+  background-color: #ffffff !important;
+  padding: 30px !important;
+  box-sizing: border-box !important;
+}
+
+.requested-books {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .request-btn {
   display: inline-block;
   padding: 10px 16px;
@@ -123,16 +181,6 @@ onMounted(fetchRequestedBooks)
 
 .request-btn:hover {
   background-color: #2980b9;
-}
-
-.requested-books {
-  padding-top: 40px;
-  min-height: auto;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
 .no-results {
@@ -171,30 +219,39 @@ onMounted(fetchRequestedBooks)
 .book-box {
   border: 1px solid #ccc;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: white;
-  height: 100%;
-  min-height: 100px;
+  width: 100%;
+  height: 550px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .thumb {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 180px;
+  height: 240px;
+  width: 100%;
   background-color: #ffffff;
-  padding: 8px;
+
   overflow: hidden;
-  border-radius: 8px;
 }
 
 .book-thumbnail {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 140px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
 .down-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   text-align: left;
   padding: 10px;
 }
@@ -222,11 +279,10 @@ onMounted(fetchRequestedBooks)
   border-radius: 5px;
   font-size: 14px;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: auto;
   width: 100%;
   text-align: center;
 }
-
 .remove-btn:hover {
   background-color: #c0392b;
 }
@@ -261,5 +317,40 @@ onMounted(fetchRequestedBooks)
 
 .status-badge.request-sent {
   background-color: #7f8c8d;
+}
+
+.pagination {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.pagination button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination button.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #2980b9;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.text-ellipsis-author {
+  white-space: nowrap; /* Tek satır */
+  overflow: hidden; /* Taşanı gizle */
+  text-overflow: ellipsis; /* ... göster */
+  display: block; /* Gerekirse inline-block da olur */
+  max-width: 100%;
 }
 </style>

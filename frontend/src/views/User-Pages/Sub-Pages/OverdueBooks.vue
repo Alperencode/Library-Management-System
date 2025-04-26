@@ -5,17 +5,27 @@
         <h2>Overdue Books</h2>
         <p>Here you can see the books that are overdue.</p>
 
+        <!-- Kullanıcının gecikmiş kitabı yoksa mesaj göster -->
         <div v-if="overdueBooks.length === 0" class="no-results">
           <p class="no-results-text">You have no overdue books.</p>
         </div>
 
+        <!-- Gecikmiş kitapları listele -->
         <div v-else>
           <div class="row grid">
-            <div v-for="(book, index) in overdueBooks" :key="index" class="meeting-item">
+            <div
+              v-for="(book, index) in paginatedBooks"
+              :key="index"
+              class="meeting-item"
+            >
               <div class="meeting-box">
                 <div class="thumb">
                   <router-link :to="book.link">
-                    <img :src="book.image" :alt="book.title" class="book-thumbnail" />
+                    <img
+                      :src="book.image"
+                      :alt="book.title"
+                      class="book-thumbnail"
+                    />
                   </router-link>
                 </div>
                 <div class="down-content">
@@ -29,16 +39,39 @@
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
-                  <p><strong>Return Date was:</strong> {{ book.return_date }}</p>
-                  <p v-if="book.penalty > 0" style="color: #b91c1c; font-weight: 600;">
-                    <strong>Penalty:</strong> {{ book.penalty }} ₺
+                  <p>
+                    <strong>Return Date was:</strong> {{ book.return_date }}
                   </p>
-                  <button class="return-btn" @click="returnBook(book.id)">
-                    Return
-                  </button>
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Sayfalama -->
+          <div class="pagination" v-if="totalPages > 1">
+            <button
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="page-btn"
+            >
+              Prev
+            </button>
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              :class="{ active: currentPage === page }"
+              @click="goToPage(page)"
+              class="page-btn"
+            >
+              {{ page }}
+            </button>
+            <button
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="page-btn"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -47,49 +80,45 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { formatDate } from "@/utils/date";
-import { useRouter } from "vue-router";
-import { useStore } from "vuex";
 
-
-const store = useStore();
-const router = useRouter();
 const overdueBooks = ref([]);
-
-const returnBook = () => {
-  router.push("/scan-book");
-};
-const user = store.state.user;
-if (!store.state.user) {
-  const savedUser = localStorage.getItem("user");
-  if (savedUser) {
-    store.commit("setUser", JSON.parse(savedUser));
-  }
-}
+const currentPage = ref(1);
+const itemsPerPage = 3;
 
 const fetchOverdueBooks = async () => {
   try {
     const res = await api.get("/borrowed/overdue-books");
-    const penalties = user?.penalties || [];
-
-    overdueBooks.value = res.data.books.map((book) => {
-      const match = penalties.find((p) => p.book_id === book.id);
-      return {
-        id: book.id,
-        title: book.title || "No Title",
-        image: book.cover_image || defaultCover,
-        link: `/books/${book.id}`,
-        authors: book.authors || [],
-        publisher: book.publisher || "Unknown",
-        return_date: formatDate(book.return_date),
-        penalty: match ? match.amount : 0,
-      };
-    });
+    overdueBooks.value = res.data.books.map((book) => ({
+      id: book.id,
+      title: book.title || "No Title",
+      image: book.cover_image || defaultCover,
+      link: `/books/${book.id}`,
+      authors: book.authors || [],
+      publisher: book.publisher || "Unknown",
+      return_date: formatDate(book.return_date),
+    }));
   } catch (error) {
     console.error("Error retrieving overdue books:", error);
+  }
+};
+
+const paginatedBooks = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return overdueBooks.value.slice(start, start + itemsPerPage);
+});
+
+const totalPages = computed(() => {
+  const pages = Math.ceil(overdueBooks.value.length / itemsPerPage);
+  return pages > 0 ? pages : 1;
+});
+
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
   }
 };
 
@@ -195,20 +224,30 @@ onMounted(fetchOverdueBooks);
   max-width: 100%;
 }
 
-.return-btn {
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  font-size: 14px;
-  cursor: pointer;
-  margin-top: 10px;
-  width: 100%;
+.pagination {
+  margin-top: 30px;
   text-align: center;
 }
 
-.return-btn:hover {
-  background-color: #1e8449;
+.pagination button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination button.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #2980b9;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>
