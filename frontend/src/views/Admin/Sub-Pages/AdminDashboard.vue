@@ -67,6 +67,15 @@
       </div>
     </div>
 
+    <div class="progress-container">
+      <h3>Borrowed Books Usage</h3>
+      <div class="progress-bar">
+        <div class="progress-fill"
+          :style="{ width: (stats.borrowed_books_count / stats.total_books_count * 100) + '%' }"></div>
+      </div>
+      <p>{{ ((stats.borrowed_books_count / stats.total_books_count) * 100).toFixed(1) }}% of books are borrowed</p>
+    </div>
+
     <div class="recent-users">
       <h3 class="section-title">Banned Users</h3>
       <div v-if="bannedUsers && bannedUsers.length === 0" class="no-users">
@@ -81,15 +90,6 @@
           <div class="view-details" @click="goToUserDetail(user.id)">User Details</div>
         </div>
       </div>
-    </div>
-
-    <div class="progress-container">
-      <h3>Borrowed Books Usage</h3>
-      <div class="progress-bar">
-        <div class="progress-fill"
-          :style="{ width: (stats.borrowed_books_count / stats.total_books_count * 100) + '%' }"></div>
-      </div>
-      <p>{{ ((stats.borrowed_books_count / stats.total_books_count) * 100).toFixed(1) }}% of books are borrowed</p>
     </div>
 
     <div v-if="showAdminModal" class="modal-overlay">
