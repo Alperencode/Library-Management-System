@@ -6,7 +6,7 @@ from internal.models.user import User, PublicUser
 from internal.models.admin import PublicAdmin
 from internal.utils.utils import hash_password, verify_token_owner
 from internal.tokens.tokens import create_access_token, create_refresh_token
-from internal.database.users import create_user, get_user_by_email
+from internal.database.users import create_user, get_user_by_email, get_user_by_username
 from internal.database.admins import get_admin_by_email
 from internal.types.types import (
     LoginRequest, UserRequest,
@@ -26,13 +26,23 @@ async def register_user(
     request: Request,
     response: Response
 ):
-    existing_user = await get_user_by_email(request_body.email)
-    if existing_user:
+    existing_email_user = await get_user_by_email(request_body.email)
+    if existing_email_user:
         return JSONResponse(
             status_code=409,
             content=jsonable_encoder(FailResponse(
                 code=FAIL,
                 message="Email already registered"
+            ))
+        )
+
+    existing_username_user = await get_user_by_username(request_body.username)
+    if existing_username_user:
+        return JSONResponse(
+            status_code=409,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="Username already taken"
             ))
         )
 

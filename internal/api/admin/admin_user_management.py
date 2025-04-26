@@ -51,19 +51,27 @@ async def list_users(
     admin=Depends(get_current_admin)
 ):
     all_users: List[User] = await get_all_users()
-    threshold = 60
+    q_lower = q.lower() if q else None
     filtered_users: List[User] = []
 
-    q_lower = q.lower() if q else None
+    if q_lower:
+        exact_username_matches = [user for user in all_users if user.username.lower() == q_lower]
 
-    for user in all_users:
-        if q_lower:
-            username_match = fuzz.partial_ratio(q_lower, user.username.lower())
-            email_match = fuzz.partial_ratio(q_lower, user.email.lower())
-            if max(username_match, email_match) < threshold:
-                continue
-
-        filtered_users.append(user)
+        if exact_username_matches:
+            filtered_users = exact_username_matches
+        else:
+            exact_email_matches = [user for user in all_users if user.email.lower() == q_lower]
+            if exact_email_matches:
+                filtered_users = exact_email_matches
+            else:
+                threshold = 60
+                for user in all_users:
+                    username_match = fuzz.partial_ratio(q_lower, user.username.lower())
+                    email_match = fuzz.partial_ratio(q_lower, user.email.lower())
+                    if max(username_match, email_match) >= threshold:
+                        filtered_users.append(user)
+    else:
+        filtered_users = all_users
 
     total_users = len(filtered_users)
     last_page = (total_users + limit - 1) // limit

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.utils.utils import hash_password, get_current_user
-from internal.database.users import get_user_by_id, update_user
+from internal.database.users import get_user_by_id, update_user, get_user_by_username, get_user_by_email
 from internal.types.responses import FailResponse, PublicUserResponse
 from internal.types.types import SUCCESS, FAIL, UserUpdateRequest
 from internal.models.user import User, PublicUser
@@ -42,11 +42,29 @@ async def update_user_info(update_data: UserUpdateRequest, user: User = Depends(
 
     isUpdated = False
     if update_data.username and update_data.username != user.username:
+        existing_username_user = await get_user_by_username(update_data.username)
+        if existing_username_user:
+            return JSONResponse(status_code=409, content=jsonable_encoder(
+                FailResponse(
+                    code=FAIL,
+                    message="Username already taken"
+                )
+            ))
         user.username = update_data.username
         isUpdated = True
+
     if update_data.email and update_data.email != user.email:
+        existing_email_user = await get_user_by_email(update_data.email)
+        if existing_email_user:
+            return JSONResponse(status_code=409, content=jsonable_encoder(
+                FailResponse(
+                    code=FAIL,
+                    message="Email already registered"
+                )
+            ))
         user.email = update_data.email
         isUpdated = True
+
     if update_data.password and not user.check_password(update_data.password):
         user.password = hash_password(update_data.password)
         isUpdated = True
