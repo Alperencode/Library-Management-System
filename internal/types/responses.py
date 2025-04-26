@@ -2,7 +2,7 @@ from typing import List
 from pydantic import BaseModel, Field
 from internal.models.user import PublicUser
 from internal.models.admin import PublicAdmin
-from internal.models.book import Book, BookPreview
+from internal.models.book import Book, BookPreview, BorrowedBookPreview
 from internal.models.request import BookRequest, BookRequestPreview, RequestDetails, RequesterInfo
 from .types import LanguageItem
 
@@ -111,3 +111,11 @@ class BookRequestDetailsResponse(SuccessResponse):
     request: RequestDetails
     requester_count: int
     requesters: List[RequesterInfo]
+
+
+class BorrowedBookListResponse(SuccessResponse):
+    books: List[BorrowedBookPreview]
+    total: int
+    page: int
+    has_next: bool
+    last_page: int

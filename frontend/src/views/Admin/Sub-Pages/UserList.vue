@@ -2,6 +2,9 @@
   <div class="admin-users-container">
     <h2 class="mb-4">User List</h2>
 
+    <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
+      placeholder="Search by username or email..." />
+
     <div v-if="users.length > 0" class="user-table-wrapper">
       <table class="user-table">
         <thead>
@@ -78,17 +81,11 @@ import { useToast } from 'vue-toastification'
 const toast = useToast()
 const router = useRouter()
 
-const viewUserBooks = () => {
-  if (selectedUserId.value) {
-    router.push(`/admin/users/${selectedUserId.value}`)
-    showModal.value = false
-  }
-}
-
 const showModal = ref(false)
 const selectedUserId = ref(null)
 
 const users = ref([])
+const searchQuery = ref('')
 const page = ref(1)
 const limit = 10
 const lastPage = ref(1)
@@ -98,7 +95,8 @@ const fetchUsers = async () => {
     const response = await api.get('/admin/users', {
       params: {
         page: page.value,
-        limit
+        limit,
+        q: searchQuery.value || undefined
       }
     })
     users.value = response.data.users
@@ -109,9 +107,21 @@ const fetchUsers = async () => {
   }
 }
 
+const onSearchEnter = () => {
+  page.value = 1
+  fetchUsers()
+}
+
 const changePage = (newPage) => {
   page.value = newPage
   fetchUsers()
+}
+
+const viewUserBooks = () => {
+  if (selectedUserId.value) {
+    router.push(`/admin/users/${selectedUserId.value}`)
+    showModal.value = false
+  }
 }
 
 const banUser = async (userId) => {
@@ -312,5 +322,13 @@ onMounted(fetchUsers)
 
 .user-link:hover {
   text-decoration: underline;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 </style>

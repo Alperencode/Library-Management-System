@@ -59,3 +59,16 @@ class BookPreview(BaseModel):
     return_date: Optional[datetime] = None
     has_penalty: bool = False
     currently_borrowed_by: Optional[str] = None
+
+
+class BorrowedBookPreview(BaseModel):
+    id: str
+    title: str
+    authors: List[str]
+    publisher: Optional[str]
+    cover_image: Optional[str]
+    borrowed: bool
+    isbn: Optional[str]
+    borrowed_at: datetime
+    return_date: datetime
+    currently_borrowed_by: Optional[str]

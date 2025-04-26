@@ -104,3 +104,10 @@ async def delete_request_from_all_users(request_id: str) -> bool:
         {"$pull": {"requested_books": {"id": request_id}}}
     )
     return result.modified_count > 0
+
+
+async def get_user_by_username(username: str) -> Optional[User]:
+    doc = await users_collection.find_one({"username": username})
+    if not doc:
+        return None
+    return User(**doc)

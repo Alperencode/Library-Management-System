@@ -37,6 +37,9 @@ async def list_requested_books(
                 continue
             seen_ids.add(req.id)
 
+            if req.status in ("Added", "Denied"):
+                continue  # Filter out here
+
             previews.append(
                 BookRequestPreview(
                     user_id=u.id,
@@ -61,8 +64,6 @@ async def list_requested_books(
             if fuzz.partial_ratio(q_lower, (p.title or "").lower()) >= 60
             or (p.isbn and q_lower in p.isbn.lower())
         ]
-    else:
-        previews = [p for p in previews if p.status not in ("Added", "Denied")]
 
     total = len(previews)
     last_page = (total + limit - 1) // limit

@@ -31,8 +31,7 @@ const extractApiPath = (url) => {
 };
 
 const ignoredApiToastPaths = [
-  '/refresh-token',
-  '/me'
+  '/refresh-token'
 ];
 
 api.interceptors.response.use(
