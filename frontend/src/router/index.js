@@ -47,6 +47,8 @@ import BookScanResult from "@/views/Scan-Pages/BookScanResult.vue";
 // Not-Found
 import NotFound from "@/views/NotFound.vue";
 
+import UserDetail from "@/views/Admin/Sub-Pages/UserDetail.vue";
+
 const routes = [
   // Homeview
   { path: "/", component: HomeView },
@@ -94,6 +96,7 @@ const routes = [
       { path: "penalty", component: PenaltyManagement },
       { path: "banned-users", component: BannedUserManagement },
       { path: "add-book", component: AdminAddBook },
+      { path: "users/:id", component: UserDetail },
     ],
   },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
