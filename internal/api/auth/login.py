@@ -7,7 +7,7 @@ from internal.models.admin import PublicAdmin
 from internal.utils.utils import hash_password, verify_token_owner
 from internal.tokens.tokens import create_access_token, create_refresh_token
 from internal.database.users import create_user, get_user_by_email, get_user_by_username
-from internal.database.admins import get_admin_by_email
+from internal.database.admins import get_admin_by_email, get_admin_by_username
 from internal.types.types import (
     LoginRequest, UserRequest,
     FAIL, SUCCESS
@@ -27,7 +27,8 @@ async def register_user(
     response: Response
 ):
     existing_email_user = await get_user_by_email(request_body.email)
-    if existing_email_user:
+    existing_email_admin = await get_admin_by_email(request_body.email)
+    if existing_email_user or existing_email_admin:
         return JSONResponse(
             status_code=409,
             content=jsonable_encoder(FailResponse(
@@ -37,7 +38,8 @@ async def register_user(
         )
 
     existing_username_user = await get_user_by_username(request_body.username)
-    if existing_username_user:
+    existing_username_admin = await get_admin_by_username(request_body.username)
+    if existing_username_user or existing_username_admin:
         return JSONResponse(
             status_code=409,
             content=jsonable_encoder(FailResponse(
