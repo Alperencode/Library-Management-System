@@ -49,6 +49,14 @@
 
     <div v-else class="no-requests">No requested books found.</div>
 
+    <div class="pagination" v-if="lastPage > 1">
+      <button :disabled="page === 1" @click="changePage(page - 1)">‹</button>
+      <button v-for="p in lastPage" :key="p" @click="changePage(p)" :class="{ active: p === page }">
+        {{ p }}
+      </button>
+      <button :disabled="page === lastPage" @click="changePage(page + 1)">›</button>
+    </div>
+
     <div class="apply-discard-buttons" v-if="changedBooks.length">
       <button class="discard-btn" @click="showDiscardModal = true">Discard</button>
       <button class="apply-btn" @click="showApplyModal = true">Apply Changes</button>
@@ -94,6 +102,9 @@ import { formatDateWithoutTime } from "@/utils/date"
 const toast = useToast()
 const requests = ref([])
 const searchQuery = ref('')
+const page = ref(1)
+const limit = 10
+const lastPage = ref(1)
 
 const statusColor = (status) => {
   switch (status) {
@@ -135,8 +146,8 @@ const fetchRequests = async () => {
   try {
     const { data } = await api.get('/admin/requested-books', {
       params: {
-        page: 1,
-        limit: 100,
+        page: page.value,
+        limit,
         q: searchQuery.value || undefined
       }
     })
@@ -145,12 +156,19 @@ const fetchRequests = async () => {
       newStatus: req.status,
       changed: false
     }))
+    lastPage.value = data.last_page || 1
   } catch (err) {
     toast.error('Failed to fetch requests')
   }
 }
 
 const onSearchEnter = () => {
+  page.value = 1
+  fetchRequests()
+}
+
+const changePage = (newPage) => {
+  page.value = newPage
   fetchRequests()
 }
 
@@ -414,5 +432,31 @@ select {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 6px;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border: none;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination button.active {
+  background-color: #d4881a;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

@@ -26,6 +26,11 @@ async def get_admin_by_email(email: str) -> Optional[Admin]:
     return Admin(**admin_data) if admin_data else None
 
 
+async def get_admin_by_username(username: str) -> Optional[Admin]:
+    admin_data = await admins_collection.find_one({"username": username})
+    return Admin(**admin_data) if admin_data else None
+
+
 async def update_admin(admin: Admin) -> bool:
     admin_data = admin.model_dump(by_alias=True)
     result = await admins_collection.update_one(

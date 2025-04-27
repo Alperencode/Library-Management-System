@@ -41,16 +41,13 @@ import AdminAddBook from "@/views/Admin/Sub-Pages/AdminAddBook.vue";
 
 //  Admin Dashboard Sub-Pages
 import AdminDashboard from "@/views/Admin/Sub-Pages/AdminDashboard.vue";
-import BorrowCount from "@/views/Admin/Sub-Pages/Dashboard/BorrowCount.vue";
-import PenaltyBookCount from "@/views/Admin/Sub-Pages/Dashboard/PenaltyBookCount.vue";
-import BookRequests from "@/views/Admin/Sub-Pages/Dashboard/BookRequests.vue";
-import PenaltyUserCount from "@/views/Admin/Sub-Pages/Dashboard/PenaltyUserCount.vue";
-import CurrentBookCount from "@/views/Admin/Sub-Pages/Dashboard/CurrentBookCount.vue";
 
 import BookScanResult from "@/views/Scan-Pages/BookScanResult.vue";
 
 // Not-Found
 import NotFound from "@/views/NotFound.vue";
+
+import UserDetail from "@/views/Admin/Sub-Pages/UserDetail.vue";
 
 const routes = [
   // Homeview
@@ -99,13 +96,7 @@ const routes = [
       { path: "penalty", component: PenaltyManagement },
       { path: "banned-users", component: BannedUserManagement },
       { path: "add-book", component: AdminAddBook },
-
-      // Dashboard Sub-Routes
-      { path: "dashboard/borrow-count", component: BorrowCount },
-      { path: "dashboard/penalty-book", component: PenaltyBookCount },
-      { path: "dashboard/requests", component: BookRequests },
-      { path: "dashboard/penalty-users", component: PenaltyUserCount },
-      { path: "dashboard/current-books", component: CurrentBookCount },
+      { path: "users/:id", component: UserDetail },
     ],
   },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
