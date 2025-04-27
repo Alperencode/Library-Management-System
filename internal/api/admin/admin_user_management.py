@@ -127,6 +127,7 @@ async def get_user_details(user_id: str, admin=Depends(get_current_admin)):
             borrowed_books=user.borrowed_books,
             borrowed_history=user.borrowed_history,
             overdue_books=user.overdue_books,
+            requested_books=user.requested_books,
             notify_me_list=user.notify_me_list,
             penalties=user.penalties,
             banned=user.banned

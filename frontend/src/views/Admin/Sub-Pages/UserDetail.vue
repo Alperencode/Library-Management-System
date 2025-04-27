@@ -45,7 +45,8 @@
         <transition name="fade-slide">
             <div v-if="isBorrowedOpen" class="borrowed-books-section">
                 <h3>Borrowed Books</h3>
-                <table v-if="borrowedBooksDetails.length > 0" class="borrowed-books-table">
+                <div v-if="loadingBorrowed">Loading borrowed books...</div>
+                <table v-else-if="borrowedBooksDetails.length > 0" class="borrowed-books-table">
                     <thead>
                         <tr>
                             <th></th>
@@ -55,7 +56,11 @@
                     <tbody>
                         <tr v-for="(book, index) in borrowedBooksDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
-                            <td>{{ book.title || book.name }}</td>
+                            <td>
+                                <router-link :to="`/admin/book-view/${book.id}`" class="book-link">
+                                    {{ book.title || book.name }}
+                                </router-link>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -66,7 +71,8 @@
         <transition name="fade-slide">
             <div v-if="isOverdueOpen" class="borrowed-books-section">
                 <h3>Overdue Books</h3>
-                <table v-if="overdueBooksDetails.length > 0" class="borrowed-books-table">
+                <div v-if="loadingOverdue">Loading overdue books...</div>
+                <table v-else-if="overdueBooksDetails.length > 0" class="borrowed-books-table">
                     <thead>
                         <tr>
                             <th></th>
@@ -76,7 +82,11 @@
                     <tbody>
                         <tr v-for="(book, index) in overdueBooksDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
-                            <td>{{ book.title || book.name }}</td>
+                            <td>
+                                <router-link :to="`/admin/book-view/${book.id}`" class="book-link">
+                                    {{ book.title || book.name }}
+                                </router-link>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -87,7 +97,8 @@
         <transition name="fade-slide">
             <div v-if="isRequestedOpen" class="borrowed-books-section">
                 <h3>Requested Books</h3>
-                <table v-if="requestedBooksDetails.length > 0" class="borrowed-books-table">
+                <div v-if="loadingRequested">Loading requested books...</div>
+                <table v-else-if="requestedBooksDetails.length > 0" class="borrowed-books-table">
                     <thead>
                         <tr>
                             <th></th>
@@ -97,7 +108,11 @@
                     <tbody>
                         <tr v-for="(book, index) in requestedBooksDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
-                            <td>{{ book.title || book.name }}</td>
+                            <td>
+                                <router-link :to="`/admin/requested-book/${book.id}`" class="book-link">
+                                    {{ book.title || book.name }}
+                                </router-link>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -108,7 +123,8 @@
         <transition name="fade-slide">
             <div v-if="isNotifyOpen" class="borrowed-books-section">
                 <h3>Notify Me List</h3>
-                <table v-if="notifyMeListDetails.length > 0" class="borrowed-books-table">
+                <div v-if="loadingNotify">Loading notify me list...</div>
+                <table v-else-if="notifyMeListDetails.length > 0" class="borrowed-books-table">
                     <thead>
                         <tr>
                             <th></th>
@@ -118,7 +134,9 @@
                     <tbody>
                         <tr v-for="(book, index) in notifyMeListDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
-                            <td>{{ book.title || book.name }}</td>
+                            <router-link :to="`/admin/book-view/${book.id}`" class="book-link">
+                                {{ book.title || book.name }}
+                            </router-link>
                         </tr>
                     </tbody>
                 </table>
@@ -129,7 +147,8 @@
         <transition name="fade-slide">
             <div v-if="isPenaltiesOpen" class="borrowed-books-section">
                 <h3>Penalties</h3>
-                <table v-if="penaltiesDetails.length > 0" class="borrowed-books-table">
+                <div v-if="loadingPenalties">Loading penalties...</div>
+                <table v-else-if="penaltiesDetails.length > 0" class="borrowed-books-table">
                     <thead>
                         <tr>
                             <th></th>
@@ -140,7 +159,9 @@
                     <tbody>
                         <tr v-for="(penalty, index) in penaltiesDetails" :key="penalty.book.id">
                             <td>{{ index + 1 }}</td>
-                            <td>{{ penalty.book.title || penalty.book.name }}</td>
+                            <router-link :to="`/admin/book-view/${penalty.book.id}`" class="book-link">
+                                {{ penalty.book.title || penalty.book.name }}
+                            </router-link>
                             <td>₺{{ penalty.amount }}</td>
                         </tr>
                     </tbody>
@@ -158,7 +179,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '@/api/axios';
 
@@ -166,6 +187,7 @@ const route = useRoute();
 const router = useRouter();
 
 const user = ref(null);
+
 const borrowedBooksDetails = ref([]);
 const overdueBooksDetails = ref([]);
 const requestedBooksDetails = ref([]);
@@ -178,11 +200,35 @@ const isRequestedOpen = ref(false);
 const isNotifyOpen = ref(false);
 const isPenaltiesOpen = ref(false);
 
-const fetchBookDetails = async (bookIds) => {
+const loadingBorrowed = ref(false);
+const loadingOverdue = ref(false);
+const loadingRequested = ref(false);
+const loadingNotify = ref(false);
+const loadingPenalties = ref(false);
+
+const hasFetched = {
+    borrowed: ref(false),
+    overdue: ref(false),
+    requested: ref(false),
+    notify: ref(false),
+    penalties: ref(false),
+};
+
+const fetchBookDetails = async (bookIds, type = 'normal') => {
     try {
-        const promises = bookIds.map(id => api.get(`/books/${id}`));
+        const promises = bookIds.map(id => {
+            if (type === 'requested') {
+                return api.get(`/admin/requested-books/info/${id}`);
+            }
+            return api.get(`/books/${id}`);
+        });
         const results = await Promise.all(promises);
-        return results.map(res => res.data.book);
+        return results.map(res => {
+            if (type === 'requested') {
+                return res.data.request;
+            }
+            return res.data.book;
+        });
     } catch (error) {
         console.error('Failed to fetch book details:', error);
         return [];
@@ -194,28 +240,6 @@ const fetchUserDetail = async () => {
         const userId = route.params.id;
         const response = await api.get(`/admin/users/${userId}`);
         user.value = response.data.user;
-
-        if (user.value.borrowed_books.length > 0) {
-            borrowedBooksDetails.value = await fetchBookDetails(user.value.borrowed_books);
-        }
-        if (user.value.overdue_books.length > 0) {
-            overdueBooksDetails.value = await fetchBookDetails(user.value.overdue_books);
-        }
-        if (user.value.requested_books.length > 0) {
-            requestedBooksDetails.value = await fetchBookDetails(user.value.requested_books);
-        }
-        if (user.value.notify_me_list.length > 0) {
-            notifyMeListDetails.value = await fetchBookDetails(user.value.notify_me_list);
-        }
-        if (user.value.penalties.length > 0) {
-            const bookIds = user.value.penalties.map(p => p.book_id);
-            const books = await fetchBookDetails(bookIds);
-            penaltiesDetails.value = user.value.penalties.map((penalty, index) => ({
-                book: books[index],
-                amount: penalty.amount
-            }));
-        }
-
     } catch (error) {
         console.error('Failed to fetch user detail:', error);
     }
@@ -229,6 +253,83 @@ const totalPenaltyAmount = computed(() => {
     return penaltiesDetails.value.reduce((sum, penalty) => sum + penalty.amount, 0);
 });
 
+watch(isBorrowedOpen, async (newVal) => {
+    if (newVal && !hasFetched.borrowed.value && user.value?.borrowed_books?.length > 0) {
+        loadingBorrowed.value = true;
+        try {
+            borrowedBooksDetails.value = await fetchBookDetails(user.value.borrowed_books);
+            hasFetched.borrowed.value = true;
+        } catch (error) {
+            console.error('Failed to fetch borrowed books:', error);
+        } finally {
+            loadingBorrowed.value = false;
+        }
+    }
+});
+
+watch(isOverdueOpen, async (newVal) => {
+    if (newVal && !hasFetched.overdue.value && user.value?.overdue_books?.length > 0) {
+        loadingOverdue.value = true;
+        try {
+            overdueBooksDetails.value = await fetchBookDetails(user.value.overdue_books);
+            hasFetched.overdue.value = true;
+        } catch (error) {
+            console.error('Failed to fetch overdue books:', error);
+        } finally {
+            loadingOverdue.value = false;
+        }
+    }
+});
+
+watch(isRequestedOpen, async (newVal) => {
+    if (newVal && !hasFetched.requested.value && user.value?.requested_books?.length > 0) {
+        loadingRequested.value = true;
+        try {
+            requestedBooksDetails.value = await fetchBookDetails(
+                user.value.requested_books.map(b => b.id),
+                'requested'
+            );
+            hasFetched.requested.value = true;
+        } catch (error) {
+            console.error('Failed to fetch requested books:', error);
+        } finally {
+            loadingRequested.value = false;
+        }
+    }
+});
+
+watch(isNotifyOpen, async (newVal) => {
+    if (newVal && !hasFetched.notify.value && user.value?.notify_me_list?.length > 0) {
+        loadingNotify.value = true;
+        try {
+            notifyMeListDetails.value = await fetchBookDetails(user.value.notify_me_list);
+            hasFetched.notify.value = true;
+        } catch (error) {
+            console.error('Failed to fetch notify me list:', error);
+        } finally {
+            loadingNotify.value = false;
+        }
+    }
+});
+
+watch(isPenaltiesOpen, async (newVal) => {
+    if (newVal && !hasFetched.penalties.value && user.value?.penalties?.length > 0) {
+        loadingPenalties.value = true;
+        try {
+            const bookIds = user.value.penalties.map(p => p.book_id);
+            const books = await fetchBookDetails(bookIds);
+            penaltiesDetails.value = user.value.penalties.map((penalty, index) => ({
+                book: books[index],
+                amount: penalty.amount
+            }));
+            hasFetched.penalties.value = true;
+        } catch (error) {
+            console.error('Failed to fetch penalties:', error);
+        } finally {
+            loadingPenalties.value = false;
+        }
+    }
+});
 
 onMounted(() => {
     fetchUserDetail();
@@ -409,5 +510,15 @@ onMounted(() => {
 .fade-slide-leave-to {
     opacity: 0;
     transform: scale(0.95);
+}
+
+.book-link {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.book-link:hover {
+    text-decoration: underline;
 }
 </style>
