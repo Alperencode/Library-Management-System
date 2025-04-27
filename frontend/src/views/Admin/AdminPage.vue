@@ -3,21 +3,15 @@
     <aside class="admin-sidebar">
       <h4 class="text-center mb-4">Admin Panel</h4>
       <ul class="nav flex-column">
-        <li
-          v-for="(item, index) in adminMenuItems"
-          :key="index"
-          class="nav-item mb-2"
-        >
-          <router-link
-            :to="item.path"
-            class="nav-link"
-            active-class="active-link"
-            exact-active-class="active-link"
-          >
+        <li v-for="(item, index) in adminMenuItems" :key="index" class="nav-item mb-2">
+          <router-link :to="item.path" class="nav-link" active-class="active-link" exact-active-class="active-link">
             {{ item.label }}
           </router-link>
         </li>
       </ul>
+      <div class="logout-container">
+        <a class="nav-link logout-link" @click="logout">Logout</a>
+      </div>
     </aside>
     <main class="admin-main">
       <router-view />
@@ -26,6 +20,11 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+import api from '@/api/axios'
+
+const router = useRouter()
+
 const adminMenuItems = [
   { label: "Dashboard", path: "/admin/dashboard" },
   { label: "Book List", path: "/admin/books" },
@@ -36,10 +35,19 @@ const adminMenuItems = [
   { label: "Banned User Management", path: "/admin/banned-users" },
   { label: "Add New Book", path: "/admin/add-book" },
 ];
+
+const logout = async () => {
+  try {
+    await api.post('/logout')
+    localStorage.removeItem('user')
+    router.push('/login')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
 </script>
 
 <style scoped>
-
 :root {
   --admin-orange: #d4881a;
   --sidebar-bg: #1e1e1e;
@@ -96,4 +104,23 @@ const adminMenuItems = [
   margin-top: -85px;
 }
 
+.logout-container {
+  padding-top: 16px;
+  border-top: 1px solid #333;
+}
+
+.logout-link {
+  color: #ccc;
+  font-size: 16px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.logout-link:hover {
+  background-color: var(--sidebar-hover);
+  color: var(--admin-orange);
+}
 </style>
