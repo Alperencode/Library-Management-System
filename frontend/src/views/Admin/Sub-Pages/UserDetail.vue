@@ -13,31 +13,31 @@
         <div class="user-summary-cards">
             <div class="summary-card clickable" @click="isBorrowedOpen = !isBorrowedOpen">
                 <p>Borrowed Books</p>
-                <h3>{{ user.borrowed_books.length }}</h3>
+                <h3>{{ user.borrowed_books?.length || 0 }}</h3>
                 <span>{{ isBorrowedOpen ? '↑' : '↓' }}</span>
             </div>
 
             <div class="summary-card clickable" @click="isOverdueOpen = !isOverdueOpen">
                 <p>Overdue Books</p>
-                <h3>{{ user.overdue_books.length }}</h3>
+                <h3>{{ user.overdue_books?.length || 0 }}</h3>
                 <span>{{ isOverdueOpen ? '↑' : '↓' }}</span>
             </div>
 
             <div class="summary-card clickable" @click="isRequestedOpen = !isRequestedOpen">
                 <p>Requested Books</p>
-                <h3>{{ user.requested_books.length }}</h3>
+                <h3>{{ user.requested_books?.length || 0 }}</h3>
                 <span>{{ isRequestedOpen ? '↑' : '↓' }}</span>
             </div>
 
             <div class="summary-card clickable" @click="isNotifyOpen = !isNotifyOpen">
                 <p>Notify Me List</p>
-                <h3>{{ user.notify_me_list.length }}</h3>
+                <h3>{{ user.notify_me_list?.length || 0 }}</h3>
                 <span>{{ isNotifyOpen ? '↑' : '↓' }}</span>
             </div>
 
             <div class="summary-card clickable" @click="isPenaltiesOpen = !isPenaltiesOpen">
                 <p>Penalties</p>
-                <h3>{{ user.penalties.length }}</h3>
+                <h3>{{ user.penalties?.length || 0 }}</h3>
                 <span>{{ isPenaltiesOpen ? '↑' : '↓' }}</span>
             </div>
         </div>
