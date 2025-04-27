@@ -1,12 +1,13 @@
 <template>
   <div class="admin-dashboard">
-    <div class="admin-info-card" v-if="adminInfo">
-      <p class="admin-welcome">Welcome, <strong>{{ adminInfo.username }}</strong>!</p>
-    </div>
-
-    <div class="quick-actions">
-      <button @click="goToAddBook">Add New Book</button>
-      <button @click="openAdminModal">Add Admin</button>
+    <div class="admin-header">
+      <div class="admin-info-card" v-if="adminInfo">
+        <p class="admin-welcome">Welcome, <strong>{{ adminInfo.username }}</strong>!</p>
+      </div>
+      <div class="quick-actions">
+        <button @click="goToAddBook">Add New Book</button>
+        <button @click="openAdminModal">Add Admin</button>
+      </div>
     </div>
 
     <div class="stats-container">
@@ -403,6 +404,14 @@ onMounted(() => {
   padding: 24px;
 }
 
+.admin-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
 .welcome-text {
   font-size: 28px;
   margin-bottom: 24px;
@@ -591,7 +600,8 @@ onMounted(() => {
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   width: 300px;
 }
@@ -600,6 +610,10 @@ onMounted(() => {
   font-size: 18px;
   margin: 0;
   color: #2e7d32;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .modal-overlay {

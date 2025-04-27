@@ -4,8 +4,12 @@ from fastapi.encoders import jsonable_encoder
 from internal.models.admin import Admin, PublicAdmin
 from internal.types.responses import PublicAdminResponse, FailResponse
 from internal.types.types import AdminUpdateRequest, SUCCESS, FAIL, AdminRequest
-from internal.database.admins import get_admin_by_id, update_admin, create_admin, get_admin_by_email
+from internal.database.users import get_user_by_username, get_user_by_email
 from internal.utils.utils import hash_password, get_current_admin
+from internal.database.admins import (
+    get_admin_by_id, update_admin, create_admin,
+    get_admin_by_email, get_admin_by_username
+)
 
 router = APIRouter(prefix="/admin")
 
@@ -75,13 +79,43 @@ async def register_admin(
     response: Response,
     admin: Admin = Depends(get_current_admin)
 ):
-    existing_admin = await get_admin_by_email(request_body.email)
-    if existing_admin:
+    existing_admin_email = await get_admin_by_email(request_body.email)
+    if existing_admin_email:
         return JSONResponse(
             status_code=409,
             content=jsonable_encoder(FailResponse(
                 code=FAIL,
                 message="Email already registered as admin"
+            ))
+        )
+
+    existing_user_email = await get_user_by_email(request_body.email)
+    if existing_user_email:
+        return JSONResponse(
+            status_code=409,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="Email already registered as user"
+            ))
+        )
+
+    existing_admin_username = await get_admin_by_username(request_body.username)
+    if existing_admin_username:
+        return JSONResponse(
+            status_code=409,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="Username already taken by an admin"
+            ))
+        )
+
+    existing_user_username = await get_user_by_username(request_body.username)
+    if existing_user_username:
+        return JSONResponse(
+            status_code=409,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="Username already taken by a user"
             ))
         )
 
