@@ -49,13 +49,40 @@
                 </ul>
               </li>
 
-              <li v-if="user">
+              <li v-if="admin" class="has-sub">
+                <RouterLink to="/admin">Welcome, {{ admin.username }}</RouterLink>
+                <ul class="sub-menu">
+                  <li>
+                    <RouterLink to="/admin/dashboard">Dashboard</RouterLink>
+                  </li>
+                  <li>
+                    <RouterLink to="/admin/books">Books</RouterLink>
+                  </li>
+                  <li>
+                    <RouterLink to="/admin/users">Users</RouterLink>
+                  </li>
+                  <li>
+                    <RouterLink to="/admin/requests">Requests</RouterLink>
+                  </li>
+                  <li>
+                    <RouterLink to="/admin/borrow">Borrow Management</RouterLink>
+                  </li>
+                  <li>
+                    <RouterLink to="/admin/penalty">Penalty Management</RouterLink>
+                  </li>
+                  <li>
+                    <RouterLink to="/admin/banned-users">Banned Users</RouterLink>
+                  </li>
+                </ul>
+              </li>
+
+              <li v-if="user || admin">
                 <a href="javascript:void(0)" @click="logout">Logout</a>
               </li>
-              <li v-if="!user">
+              <li v-if="!user && !admin">
                 <RouterLink to="/login">Login</RouterLink>
               </li>
-              <li v-if="!user">
+              <li v-if="!user && !admin">
                 <RouterLink to="/register">Register</RouterLink>
               </li>
             </ul>
@@ -74,16 +101,17 @@ import { useAuth } from '@/composables/useAuth'
 
 export default {
   setup() {
-    const { user, setUser } = useAuth()
+    const { user, admin, setUser, setAdmin } = useAuth()
     const router = useRouter()
 
     const logout = async () => {
       await api.post("/logout")
       setUser(null)
+      setAdmin(null)
       router.push("/login")
     }
 
-    return { user, logout }
+    return { user, admin, logout }
   },
 };
 </script>

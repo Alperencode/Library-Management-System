@@ -39,8 +39,8 @@ export default {
 
   setup() {
     const router = useRouter();
-    const { setUser } = useAuth();
-    return { router, setUser };
+    const { setUser, setAdmin } = useAuth();
+    return { router, setUser, setAdmin };
   },
 
   methods: {
@@ -53,20 +53,23 @@ export default {
         });
 
         toast.success(response.data.message);
-        await this.fetchUser();
-        this.router.push("/");
-      } catch (error) {
-        console.log("Login failed");
-      }
-    },
 
-    async fetchUser() {
-      const response = await api.get("/me");
-      if (response.data.user) {
-        this.setUser(response.data.user);
+        if (response.data.user) {
+          this.setUser(response.data.user);
+          this.router.push("/");
+        }
+        else if (response.data.admin) {
+          this.setAdmin(response.data.admin);
+          this.router.push("/admin");
+        }
+        else {
+          toast.error("Login failed. Unexpected response.");
+        }
+      } catch (error) {
+        toast.error("Login failed. Please check your credentials.");
       }
     },
-  },
+  }
 };
 </script>
 

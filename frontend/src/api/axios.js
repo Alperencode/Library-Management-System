@@ -65,11 +65,12 @@ api.interceptors.response.use(
 
       try {
         const user = JSON.parse(localStorage.getItem("user"));
-        const userId = user?.id || null;
+        const admin = JSON.parse(localStorage.getItem("admin"));
+        const id = user?.id || admin?.id || null;
 
         await plainAxios.post(
           "/refresh-token",
-          userId ? { id: userId } : {},
+          id ? { id: id } : {},
           { withCredentials: true }
         );
 
@@ -79,7 +80,10 @@ api.interceptors.response.use(
         const router = require('@/router').default;
         if (!hasRedirected && router.currentRoute.value.path !== '/login') {
           hasRedirected = true;
+
           localStorage.removeItem("user");
+          localStorage.removeItem("admin");
+
           router.push('/login');
         }
 
