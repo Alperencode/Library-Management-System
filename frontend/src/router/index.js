@@ -129,12 +129,12 @@ router.beforeEach((to, from, next) => {
   }
 
   if (isUserPage && !isUser) {
-    toast.error("You need user privilages to continue.");
+    toast.error("You need user privileges to continue.");
     return next("/");
   }
 
   if (isAdminPage && !isAdmin) {
-    toast.error("You need admins privilages to continue.");
+    toast.error("You need admins privileges to continue.");
     return next("/");
   }
 
