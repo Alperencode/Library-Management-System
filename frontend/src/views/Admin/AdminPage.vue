@@ -39,7 +39,7 @@ const adminMenuItems = [
 const logout = async () => {
   try {
     await api.post('/logout')
-    localStorage.removeItem('user')
+    localStorage.removeItem('admin')
     router.push('/login')
   } catch (error) {
     console.error('Logout failed:', error)

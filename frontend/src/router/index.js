@@ -111,16 +111,31 @@ const router = createRouter({
 import { useAuth } from "@/composables/useAuth";
 
 router.beforeEach((to, from, next) => {
-  const protectedPaths = ["/user-page", "/request-book", "/scan-book"];
-  const requiresAuth = protectedPaths.some((path) => to.path.startsWith(path));
+  const { user, admin } = useAuth();
 
-  const { user } = useAuth();
+  const isAuthenticated = !!user.value || !!admin.value;
+  const isAdmin = !!admin.value;
+  const isUser = !!user.value;
 
-  const isAuthenticated = !!user.value;
+  const adminPaths = ["/admin"];
+  const userPaths = ["/user-page", "/request-book", "/scan-book"];
 
-  if (requiresAuth && !isAuthenticated) {
+  const isAdminPage = adminPaths.some((path) => to.path.startsWith(path));
+  const isUserPage = userPaths.some((path) => to.path.startsWith(path));
+
+  if (!isAuthenticated && (isAdminPage || isUserPage)) {
     toast.error("You must be logged in to continue.");
     return next("/login");
+  }
+
+  if (isUserPage && !isUser) {
+    toast.error("You need user privilages to continue.");
+    return next("/");
+  }
+
+  if (isAdminPage && !isAdmin) {
+    toast.error("You need admins privilages to continue.");
+    return next("/");
   }
 
   return next();
