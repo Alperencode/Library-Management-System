@@ -130,7 +130,7 @@ router.beforeEach((to, from, next) => {
 
   if (isUserPage && !isUser) {
     toast.error("You need user privileges to continue.");
-    return next("/");
+    return next("/admin");
   }
 
   if (isAdminPage && !isAdmin) {

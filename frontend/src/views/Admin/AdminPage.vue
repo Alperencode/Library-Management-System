@@ -1,7 +1,7 @@
 <template>
   <div class="admin-layout">
     <aside class="admin-sidebar">
-      <h4 class="text-center mb-4">Admin Panel</h4>
+      <router-link to="/admin/dashboard" class="admin-panel-link">Admin Panel</router-link>
       <ul class="nav flex-column">
         <li v-for="(item, index) in adminMenuItems" :key="index" class="nav-item mb-2">
           <router-link :to="item.path" class="nav-link" active-class="active-link" exact-active-class="active-link">
@@ -10,6 +10,7 @@
         </li>
       </ul>
       <div class="logout-container">
+        <router-link to="/" class="nav-link">View the Home Page</router-link>
         <a class="nav-link logout-link" @click="logout">Logout</a>
       </div>
     </aside>
@@ -71,6 +72,20 @@ const logout = async () => {
   overflow-y: auto;
   z-index: 1000;
   margin-top: 30px;
+}
+
+.admin-panel-link {
+  display: block;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 24px;
+  text-decoration: none;
+}
+
+.admin-panel-link:hover {
+  color: var(--admin-orange);
 }
 
 .nav-link {
