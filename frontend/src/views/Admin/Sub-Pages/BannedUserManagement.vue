@@ -2,12 +2,8 @@
   <div class="admin-users-container">
     <h2 class="mb-4">Banned User</h2>
 
-    <input
-      v-model="searchQuery"
-      @keyup.enter="onSearchEnter"
-      class="search-input"
-      placeholder="Search banned user by username or email..."
-    />
+    <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
+      placeholder="Search banned user by username or email..." />
 
     <div v-if="bannedUsers.length > 0" class="user-table-wrapper">
       <table class="user-table">
@@ -78,7 +74,7 @@ const unbanUser = async (userId) => {
       toast.success(data.message)
       fetchBannedUsers()
     }
-  } catch (_) {}
+  } catch (_) { }
 }
 
 onMounted(fetchBannedUsers)
