@@ -10,32 +10,36 @@
       </div>
     </div>
 
-    <div class="stats-container">
-      <div class="stat-card">
-        <h3>Total Books</h3>
-        <p>{{ animatedStats.total_books_count }}</p>
+      <div class="stats-container">
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '0ms' }">
+          <h3>Total Books</h3>
+          <p>{{ animatedStats.total_books_count }}</p>
+        </div>
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '80ms' }">
+          <h3>Available Books</h3>
+          <p>{{ animatedStats.available_books_count }}</p>
+        </div>
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '160ms' }">
+          <h3>Borrowed Books</h3>
+          <p>{{ animatedStats.borrowed_books_count }}</p>
+        </div>
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '240ms' }">
+          <h3>Penalty Books</h3>
+          <p>{{ animatedStats.penalty_books_count }}</p>
+        </div>
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '320ms' }">
+          <h3>Total Users</h3>
+          <p>{{ animatedStats.total_users_count }}</p>
+        </div>
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '400ms' }">
+          <h3>Penalty Users</h3>
+          <p>{{ animatedStats.penalty_users_count }}</p>
+        </div>
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '480ms' }">
+          <h3>Total Penalty Fee</h3>
+          <p>₺{{ animatedStats.total_penalty_fee.toFixed(2) }}</p>
+        </div>
       </div>
-      <div class="stat-card">
-        <h3>Available Books</h3>
-        <p>{{ animatedStats.available_books_count }}</p>
-      </div>
-      <div class="stat-card">
-        <h3>Borrowed Books</h3>
-        <p>{{ animatedStats.borrowed_books_count }}</p>
-      </div>
-      <div class="stat-card">
-        <h3>Penalty Books</h3>
-        <p>{{ animatedStats.penalty_books_count }}</p>
-      </div>
-      <div class="stat-card">
-        <h3>Total Users</h3>
-        <p>{{ animatedStats.total_users_count }}</p>
-      </div>
-      <div class="stat-card">
-        <h3>Penalty Users</h3>
-        <p>{{ animatedStats.penalty_users_count }}</p>
-      </div>
-    </div>
 
     <div class="chart-wrapper">
       <div class="chart-row">
@@ -83,7 +87,7 @@
         No banned users found.
       </div>
       <div v-else class="user-list">
-        <div v-for="user in bannedUsers" :key="user.id" class="user-card">
+        <div v-for="(user, index) in bannedUsers" :key="user.id" class="user-card fade-in-row" :style="{ animationDelay: `${index * 80}ms` }">
           <div class="user-info">
             <div class="user-name">{{ user.username }}</div>
             <div class="user-email">({{ user.email }})</div>
@@ -128,6 +132,7 @@ const stats = ref({
   total_books_count: 0,
   available_books_count: 0,
   total_users_count: 0,
+  total_penalty_fee: 0
 });
 
 const animatedStats = ref({
@@ -137,6 +142,7 @@ const animatedStats = ref({
   penalty_books_count: 0,
   total_users_count: 0,
   penalty_users_count: 0,
+  total_penalty_fee: 0
 });
 
 const bannedUsers = ref([]);
@@ -223,6 +229,7 @@ const fetchDashboardData = async () => {
     animateStat('penalty_books_count', stats.value.penalty_books_count);
     animateStat('total_users_count', stats.value.total_users_count);
     animateStat('penalty_users_count', stats.value.penalty_users_count);
+    animateStat('total_penalty_fee', stats.value.total_penalty_fee);
 
     createCharts();
   } catch (error) {
@@ -273,7 +280,7 @@ const createCharts = () => {
     new Chart(barChartRef.value, {
       type: 'bar',
       data: {
-        labels: ['Penalty Books', 'Penalty Users'],
+        labels: ['Penalty Books', 'Users with penalty'],
         datasets: [{
           label: 'Penalties',
           data: [
@@ -332,7 +339,7 @@ const createCharts = () => {
     new Chart(usersChartRef.value, {
       type: 'pie',
       data: {
-        labels: ['Total Users', 'Penalty Users'],
+        labels: ['Total Users', 'Users with penalty'],
         datasets: [{
           label: 'Users Overview',
           data: [
@@ -731,5 +738,24 @@ onMounted(() => {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.fade-in-row {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.penalty-fee-card {
+  background: #fce4ec;
 }
 </style>

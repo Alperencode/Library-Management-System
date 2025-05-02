@@ -48,6 +48,7 @@ class UserPreview(BaseModel):
     username: str
     email: str
     borrow_count: int
+    penalty_fee: float
     has_penalty: bool
     banned: bool = False
 

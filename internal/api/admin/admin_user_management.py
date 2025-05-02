@@ -8,6 +8,7 @@ from internal.types.responses import AdminDashboardResponse, PublicUserResponse,
 from internal.types.types import SUCCESS, FAIL, NEED_ACTION
 from internal.database.users import get_all_users, get_user_by_id
 from internal.models.user import User, PublicUser, UserPreview, PaginatedUserPreviewListResponse
+from internal.utils.email import generate_penalty_email_html, send_email_to_user
 from internal.database.users import get_penalty_users_count, ban_user, unban_user
 from internal.database.books import (
     get_borrowed_books_count, delete_book_by_id,
@@ -31,6 +32,10 @@ async def get_admin_dashboard(admin=Depends(get_current_admin)):
     all_users = await get_all_users()
     total_users_count = len(all_users)
 
+    total_penalty_fee = sum(
+        p.amount for user in all_users for p in (user.penalties or [])
+    )
+
     return AdminDashboardResponse(
         code=SUCCESS,
         message="Dashboard statistics fetched successfully",
@@ -39,7 +44,8 @@ async def get_admin_dashboard(admin=Depends(get_current_admin)):
         penalty_users_count=penalty_users_count,
         total_books_count=total_books_count,
         available_books_count=available_books_count,
-        total_users_count=total_users_count
+        total_users_count=total_users_count,
+        total_penalty_fee=total_penalty_fee
     )
 
 
@@ -48,6 +54,8 @@ async def list_users(
     page: int = Query(1, ge=1),
     limit: int = Query(25, ge=1, le=100),
     q: Optional[str] = Query(None, min_length=1),
+    only_with_penalties: bool = Query(False),
+    only_banned: bool = Query(False),
     admin=Depends(get_current_admin)
 ):
     all_users: List[User] = await get_all_users()
@@ -73,6 +81,12 @@ async def list_users(
     else:
         filtered_users = all_users
 
+    if only_with_penalties:
+        filtered_users = [user for user in filtered_users if user.penalties and len(user.penalties) > 0]
+
+    if only_banned:
+        filtered_users = [user for user in filtered_users if user.banned]
+
     total_users = len(filtered_users)
     last_page = (total_users + limit - 1) // limit
     page = min(page, last_page) if last_page > 0 else 1
@@ -87,6 +101,7 @@ async def list_users(
             username=user.username,
             email=user.email,
             borrow_count=len(user.borrowed_books or []),
+            penalty_fee=sum(p.amount for p in user.penalties or []),
             has_penalty=bool(user.penalties and len(user.penalties) > 0),
             banned=user.banned
         )
@@ -226,3 +241,32 @@ async def unban_user_endpoint(user_id: str, admin=Depends(get_current_admin)):
         code=SUCCESS,
         message="User unbanned successfully and book references cleared"
     )
+
+
+@router.post("/notify/{user_id}", response_model=SuccessResponse)
+async def notify_penalty_user(user_id: str, admin=Depends(get_current_admin)):
+    user = await get_user_by_id(user_id)
+    if not user:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="User not found"))
+        )
+
+    if not user.penalties or len(user.penalties) == 0:
+        return JSONResponse(
+            status_code=400,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="User has no penalties"))
+        )
+
+    html = await generate_penalty_email_html(user, user.penalties)
+    subject = "Library Penalty Fee Reminder"
+
+    success = await send_email_to_user(user, html, subject)
+
+    if not success:
+        return JSONResponse(
+            status_code=500,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="Failed to send penalty email"))
+        )
+
+    return SuccessResponse(code=SUCCESS, message="Penalty reminder email sent to user.")

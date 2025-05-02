@@ -5,6 +5,15 @@
     <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
       placeholder="Search by username or email..." />
 
+
+    <div class="toggle-wrapper">
+      <label class="toggle-switch">
+        <input type="checkbox" v-model="onlyWithPenalties" @change="onSearchEnter" />
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Show only users with penalties</span>
+    </div>
+
     <div v-if="users.length > 0" class="user-table-wrapper">
       <table class="user-table">
         <thead>
@@ -12,14 +21,13 @@
             <th>Username</th>
             <th>E-mail</th>
             <th>Borrow Count</th>
-            <th>Penalty Day Count</th>
             <th>Penalty Fee</th>
             <th>Notify User</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.id">
+          <tr v-for="(user, index) in users" :key="user.id" class="fade-in-row" :style="{ animationDelay: `${index * 80}ms` }">
             <td>
               <router-link :to="`/admin/users/${user.id}`" class="user-link">
                 {{ user.username }}
@@ -27,7 +35,6 @@
             </td>
             <td>{{ user.email }}</td>
             <td>{{ user.borrow_count }}</td>
-            <td>{{ user.penalty_day_count || 0 }}</td>
             <td>₺{{ user.penalty_fee?.toFixed(2) || '0.00' }}</td>
             <td>
               <button class="notify-btn" @click="notifyUser(user.id)">
@@ -71,6 +78,11 @@ const searchQuery = ref('')
 const page = ref(1)
 const limit = 10
 const lastPage = ref(1)
+const onlyWithPenalties = ref(false)
+
+
+const selectedUserId = ref(null)
+const showModal = ref(false)
 
 const fetchUsers = async () => {
   try {
@@ -78,16 +90,20 @@ const fetchUsers = async () => {
       params: {
         page: page.value,
         limit,
-        q: searchQuery.value || undefined
+        q: searchQuery.value || undefined,
+        only_with_penalties: onlyWithPenalties.value || undefined
       }
     })
     users.value = response.data.users
     lastPage.value = response.data.last_page || 1
-  } catch (err) {
-    toast.error("Failed to fetch users.")
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to fetch users."
+    toast.error(msg)
     users.value = []
   }
 }
+
+onMounted(fetchUsers)
 
 const onSearchEnter = () => {
   page.value = 1
@@ -100,12 +116,26 @@ const changePage = (newPage) => {
 }
 
 const notifyUser = async (userId) => {
+  const user = users.value.find(u => u.id === userId)
+  if (!user) {
+    toast.error("User not found in the list.")
+    return
+  }
+
+  if (!user.penalty_fee || user.penalty_fee === 0) {
+    toast.warning("User has no penalty fee to notify.")
+    return
+  }
+
   try {
     const { data } = await api.post(`/admin/notify/${userId}`)
     if (data.code === "Success") {
       toast.success(data.message)
     }
-  } catch (_) { }
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to notify user."
+    toast.error(msg)
+  }
 }
 
 const banUser = async (userId) => {
@@ -118,18 +148,10 @@ const banUser = async (userId) => {
       selectedUserId.value = userId
       showModal.value = true
     }
-  } catch (_) { }
-}
-
-const hardBanUser = async () => {
-  try {
-    const { data } = await api.post(`/admin/hard-ban/${selectedUserId.value}`)
-    if (data.code === "Success") {
-      toast.success(data.message)
-      showModal.value = false
-      fetchUsers()
-    }
-  } catch (_) { }
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to ban user."
+    toast.error(msg)
+  }
 }
 
 const unbanUser = async (userId) => {
@@ -139,10 +161,11 @@ const unbanUser = async (userId) => {
       toast.success(data.message)
       fetchUsers()
     }
-  } catch (_) { }
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to unban user."
+    toast.error(msg)
+  }
 }
-
-onMounted(fetchUsers)
 </script>
 
 <style scoped>
@@ -237,4 +260,77 @@ onMounted(fetchUsers)
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: #40916c;
+}
+
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-label {
+  font-size: 14px;
+  color: #333;
+}
+
+.fade-in-row {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 </style>

@@ -2,7 +2,8 @@ from datetime import datetime, timedelta, time
 from fastapi import APIRouter, Depends, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from internal.utils.utils import get_current_user, send_email_to_subscribers, get_scanned_book
+from internal.utils.utils import get_current_user, get_scanned_book
+from internal.utils.email import send_email_to_subscribers
 from internal.database.books import get_book_by_id, update_book
 from internal.database.users import update_user, get_user_by_id
 from internal.types.types import SUCCESS, FAIL
