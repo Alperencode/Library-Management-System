@@ -73,6 +73,9 @@
                   <li>
                     <RouterLink to="/admin/banned-users">Banned Users</RouterLink>
                   </li>
+                  <li>
+                    <RouterLink to="/admin/add-book">Add New Book</RouterLink>
+                  </li>
                 </ul>
               </li>
 
