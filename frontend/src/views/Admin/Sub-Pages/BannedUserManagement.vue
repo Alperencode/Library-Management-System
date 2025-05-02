@@ -68,13 +68,11 @@ const onSearchEnter = () => {
 }
 
 const unbanUser = async (userId) => {
-  try {
     const { data } = await api.post(`/admin/unban/${userId}`)
     if (data.code === 'Success') {
       toast.success(data.message)
       fetchBannedUsers()
     }
-  } catch (_) { }
 }
 
 onMounted(fetchBannedUsers)

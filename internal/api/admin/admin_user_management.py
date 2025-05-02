@@ -8,6 +8,7 @@ from internal.types.responses import AdminDashboardResponse, PublicUserResponse,
 from internal.types.types import SUCCESS, FAIL, NEED_ACTION
 from internal.database.users import get_all_users, get_user_by_id
 from internal.models.user import User, PublicUser, UserPreview, PaginatedUserPreviewListResponse
+from internal.utils.email import generate_penalty_email_html, send_email_to_user
 from internal.database.users import get_penalty_users_count, ban_user, unban_user
 from internal.database.books import (
     get_borrowed_books_count, delete_book_by_id,
@@ -87,6 +88,7 @@ async def list_users(
             username=user.username,
             email=user.email,
             borrow_count=len(user.borrowed_books or []),
+            penalty_fee=sum(p.amount for p in user.penalties or []),
             has_penalty=bool(user.penalties and len(user.penalties) > 0),
             banned=user.banned
         )
@@ -226,3 +228,32 @@ async def unban_user_endpoint(user_id: str, admin=Depends(get_current_admin)):
         code=SUCCESS,
         message="User unbanned successfully and book references cleared"
     )
+
+
+@router.post("/notify/{user_id}", response_model=SuccessResponse)
+async def notify_penalty_user(user_id: str, admin=Depends(get_current_admin)):
+    user = await get_user_by_id(user_id)
+    if not user:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="User not found"))
+        )
+
+    if not user.penalties or len(user.penalties) == 0:
+        return JSONResponse(
+            status_code=400,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="User has no penalties"))
+        )
+
+    html = await generate_penalty_email_html(user, user.penalties)
+    subject = "Library Penalty Fee Reminder"
+
+    success = await send_email_to_user(user, html, subject)
+
+    if not success:
+        return JSONResponse(
+            status_code=500,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="Failed to send penalty email"))
+        )
+
+    return SuccessResponse(code=SUCCESS, message="Penalty reminder email sent to user.")

@@ -13,7 +13,7 @@ from internal.types.responses import (
     BorrowedBookListResponse,
 )
 from internal.types.types import SUCCESS, FAIL
-from internal.utils.utils import send_email_to_subscribers
+from internal.utils.email import send_email_to_subscribers
 from rapidfuzz import fuzz
 
 
@@ -117,7 +117,10 @@ async def update_borrowed_book(
     except ValueError:
         return JSONResponse(
             status_code=400,
-            content=jsonable_encoder(FailResponse(code=FAIL, message="Invalid return_date format. Expected YYYY-MM-DD."))
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="Invalid return_date format. Expected YYYY-MM-DD.",
+            ))
         )
     updated = await update_book(book)
 

@@ -12,7 +12,6 @@
             <th>Username</th>
             <th>E-mail</th>
             <th>Borrow Count</th>
-            <th>Penalty Day Count</th>
             <th>Penalty Fee</th>
             <th>Notify User</th>
             <th>Actions</th>
@@ -27,7 +26,6 @@
             </td>
             <td>{{ user.email }}</td>
             <td>{{ user.borrow_count }}</td>
-            <td>{{ user.penalty_day_count || 0 }}</td>
             <td>₺{{ user.penalty_fee?.toFixed(2) || '0.00' }}</td>
             <td>
               <button class="notify-btn" @click="notifyUser(user.id)">
@@ -72,6 +70,9 @@ const page = ref(1)
 const limit = 10
 const lastPage = ref(1)
 
+const selectedUserId = ref(null)
+const showModal = ref(false)
+
 const fetchUsers = async () => {
   try {
     const response = await api.get('/admin/users', {
@@ -83,11 +84,14 @@ const fetchUsers = async () => {
     })
     users.value = response.data.users
     lastPage.value = response.data.last_page || 1
-  } catch (err) {
-    toast.error("Failed to fetch users.")
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to fetch users."
+    toast.error(msg)
     users.value = []
   }
 }
+
+onMounted(fetchUsers)
 
 const onSearchEnter = () => {
   page.value = 1
@@ -100,12 +104,26 @@ const changePage = (newPage) => {
 }
 
 const notifyUser = async (userId) => {
+  const user = users.value.find(u => u.id === userId)
+  if (!user) {
+    toast.error("User not found in the list.")
+    return
+  }
+
+  if (!user.penalty_fee || user.penalty_fee === 0) {
+    toast.warning("User has no penalty fee to notify.")
+    return
+  }
+
   try {
     const { data } = await api.post(`/admin/notify/${userId}`)
     if (data.code === "Success") {
       toast.success(data.message)
     }
-  } catch (_) { }
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to notify user."
+    toast.error(msg)
+  }
 }
 
 const banUser = async (userId) => {
@@ -118,18 +136,10 @@ const banUser = async (userId) => {
       selectedUserId.value = userId
       showModal.value = true
     }
-  } catch (_) { }
-}
-
-const hardBanUser = async () => {
-  try {
-    const { data } = await api.post(`/admin/hard-ban/${selectedUserId.value}`)
-    if (data.code === "Success") {
-      toast.success(data.message)
-      showModal.value = false
-      fetchUsers()
-    }
-  } catch (_) { }
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to ban user."
+    toast.error(msg)
+  }
 }
 
 const unbanUser = async (userId) => {
@@ -139,10 +149,11 @@ const unbanUser = async (userId) => {
       toast.success(data.message)
       fetchUsers()
     }
-  } catch (_) { }
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to unban user."
+    toast.error(msg)
+  }
 }
-
-onMounted(fetchUsers)
 </script>
 
 <style scoped>
