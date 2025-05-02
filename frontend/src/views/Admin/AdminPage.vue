@@ -23,8 +23,10 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const { setUser, setAdmin } = useAuth()
 
 const adminMenuItems = [
   { label: "Dashboard", path: "/admin/dashboard" },
@@ -40,7 +42,8 @@ const adminMenuItems = [
 const logout = async () => {
   try {
     await api.post('/logout')
-    localStorage.removeItem('admin')
+    setUser(null)
+    setAdmin(null)
     router.push('/login')
   } catch (error) {
     console.error('Logout failed:', error)
