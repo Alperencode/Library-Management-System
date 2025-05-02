@@ -176,15 +176,13 @@ async def admin_return_book(
         )
 
     # Book updates
-    book.available_copies += 1
-    if book.available_copies >= book.total_copies:
-        book.borrowed = False
+    book.borrowed = False
     book.currently_borrowed_by = None
     book.last_borrowed_by = user.id
     book.return_date = None
 
     # Notify subscribers
-    if book.available_copies > 0 and book.notify_me_list:
+    if book.notify_me_list:
         for user_id in book.notify_me_list:
             sub_user = await get_user_by_id(user_id)
             if sub_user:

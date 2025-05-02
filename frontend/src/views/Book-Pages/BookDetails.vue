@@ -9,12 +9,7 @@
             <button v-if="showReturnButton" @click="goToScanBook" class="btn">Return</button>
             <button v-if="showExtendButton" @click="extendReturn" class="btn">Extend</button>
 
-            <button
-              v-else-if="showNotifyButton"
-              @click="notifyMe"
-              class="btn"
-              :disabled="isAlreadyInNotifyList"
-            >
+            <button v-else-if="showNotifyButton" @click="notifyMe" class="btn" :disabled="isAlreadyInNotifyList">
               {{ isAlreadyInNotifyList ? 'Already in Notify List' : 'Notify Me' }}
             </button>
 
@@ -22,11 +17,11 @@
           </div>
         </div>
         <div class="right-box">
-          <p><strong>Author:</strong> {{ book.authors?.join(', ') }}</p>
-          <p><strong>Publisher:</strong> {{ book.publisher }}</p>
-          <p><strong>Category: </strong>
+          <p><strong>Author: </strong> {{ book.authors?.join(', ') }}</p>
+          <p><strong>Publisher: </strong> {{ book.publisher }}</p>
+          <p><strong>Categories: </strong>
             <span v-if="book.categories?.length">
-              {{ book.categories[0]?.category }} / {{ book.categories[0]?.subcategory }}
+              {{book.categories.map(c => c.subcategory ? `${c.category} / ${c.subcategory}` : c.category).join(', ')}}
             </span>
             <span v-else>
               Not specified
@@ -92,23 +87,16 @@ const showNotifyButton = computed(() => isBorrowedByAnother.value)
 const showBorrowButton = computed(() => book.value && !book.value.borrowed)
 
 onMounted(async () => {
-  try {
     const res = await api.get(`/books/${route.params.id}`)
     book.value = res.data.book
-  } catch (err) {
-    // toast.error(err.response?.data?.message || 'Failed to fetch book details')
-  }
 
   if (user.value) {
-    try {
       const notifyRes = await api.get(`/notify-me`)
       notifyList.value = (notifyRes.data.books || []).map(book => ({
         ...book,
         _id: book._id || book.id
       }))
-    } catch (err) {
-      // toast.error(err.response?.data?.message || 'Failed to fetch notify list')
-    }
+
   }
 })
 
@@ -367,14 +355,17 @@ main {
   margin: auto;
   text-align: center;
 }
+
 .book-cover {
   width: 200px;
   height: auto;
   margin-bottom: 1rem;
 }
+
 .book-buttons {
   margin-top: 1.5rem;
 }
+
 .btn {
   margin: 0.5rem;
   padding: 0.75rem 1.5rem;
@@ -384,6 +375,7 @@ main {
   border-radius: 4px;
   cursor: pointer;
 }
+
 .btn:hover {
   background-color: #e48c12;
 }

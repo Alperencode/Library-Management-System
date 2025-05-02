@@ -30,8 +30,6 @@ class Book(BaseModel):
     return_date: Optional[datetime] = None
     added_at: datetime = Field(default_factory=datetime.now)
     borrowed_at: datetime = Field(default_factory=datetime.now)
-    available_copies: int = 1
-    total_copies: int = 1
     currently_borrowed_by: Optional[str] = None
     last_borrowed_by: Optional[str] = None
     notify_me_list: List[str] = []
@@ -72,3 +70,15 @@ class BorrowedBookPreview(BaseModel):
     borrowed_at: datetime
     return_date: datetime
     currently_borrowed_by: Optional[str]
+
+
+class BookCreate(BaseModel):
+    title: str
+    authors: List[str]
+    categories: List[BookCategory]
+    language: Optional[str] = None
+    page_count: Optional[int] = None
+    isbn: str
+    publisher: Optional[str] = None
+    cover_image: Optional[str] = None
+    description: Optional[str] = None

@@ -180,20 +180,18 @@ async def borrow_book(
 
     book = scanned_book
 
-    if book.available_copies < 1:
+    if book.currently_borrowed_by is not None:
         return JSONResponse(
             status_code=409,
             content=jsonable_encoder(
-                FailResponse(code=FAIL, message="No copies available")
+                FailResponse(code=FAIL, message="Book is already borrowed")
             )
         )
 
     book.borrow_count += 1
     book.return_date = datetime.combine((datetime.now() + timedelta(weeks=1)).date(), time(23, 59))
     book.currently_borrowed_by = user.id
-    book.available_copies -= 1
-    if book.available_copies < 1:
-        book.borrowed = True
+    book.borrowed = True
     book.borrowed_at = datetime.now()
 
     updated = await update_book(book)
@@ -309,14 +307,12 @@ async def return_book(
                     )
                 )
 
-    book.available_copies += 1
-    if book.available_copies >= book.total_copies:
-        book.borrowed = False
+    book.borrowed = False
     book.currently_borrowed_by = None
     book.last_borrowed_by = user.id
     book.return_date = None
 
-    if book.available_copies > 0 and book.notify_me_list:
+    if book.notify_me_list:
         for user_id in book.notify_me_list:
             subject = f"Book '{book.title}' is now available"
             sub_user = await get_user_by_id(user_id)

@@ -97,7 +97,6 @@ def generate_html_email(book) -> str:
               <td>
                 <p><strong>Title:</strong> {book.title}</p>
                 <p><strong>Author(s):</strong> {authors}</p>
-                <p><strong>Available Copies:</strong> {book.available_copies}</p>
                 <p>{description[:200]}...</p>
                 <a href="{borrow_link}" style="display: inline-block; margin-top: 10px; padding: 10px 15px; background-color: #40916c; color: white; text-decoration: none; border-radius: 5px;">Borrow Now</a>
               </td>
