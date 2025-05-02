@@ -43,7 +43,7 @@
             </td>
             <td>
               <button class="edit-btn">Edit</button>
-              <button class="delete-btn">Delete</button>
+              <button class="delete-btn" @click="confirmDelete(book)">Delete</button>
             </td>
           </tr>
         </tbody>
@@ -59,6 +59,17 @@
       </button>
       <button :disabled="page === lastPage" @click="changePage(page + 1)">›</button>
     </div>
+
+    <div v-if="showModal" class="modal-overlay">
+      <div class="confirm-modal">
+        <h3>Confirm Book Deletion</h3>
+        <p>This will remove the book from all users and the entire system. Are you sure?</p>
+        <div class="modal-actions">
+          <button class="confirm-btn" @click="deleteBook(bookToDelete.id)">Yes, Delete</button>
+          <button class="cancel-btn" @click="showModal = false">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -66,6 +77,7 @@
 import { ref, onMounted, watch, reactive } from 'vue'
 import api from '@/api/axios'
 import defaultCover from '@/assets/images/default-cover.png'
+import { useToast } from 'vue-toastification'
 
 const books = ref([])
 const searchQuery = ref('')
@@ -73,6 +85,10 @@ const page = ref(1)
 const limit = 10
 const lastPage = ref(1)
 const usernames = reactive({})
+const toast = useToast()
+
+const showModal = ref(false)
+const bookToDelete = ref(null)
 
 watch(
   () => books.value,
@@ -101,7 +117,6 @@ const fetchBooks = async () => {
         q: searchQuery.value || undefined
       }
     })
-
     books.value = response.data.books
     lastPage.value = response.data.last_page || 1
   } catch (err) {
@@ -117,6 +132,23 @@ const changePage = (newPage) => {
 const onSearchEnter = () => {
   page.value = 1
   fetchBooks()
+}
+
+const confirmDelete = (book) => {
+  bookToDelete.value = book
+  showModal.value = true
+}
+
+const deleteBook = async (bookId) => {
+  try {
+    await api.delete(`/admin/book/${bookId}`)
+    toast.success('Book deleted successfully.')
+    showModal.value = false
+    fetchBooks()
+  } catch (err) {
+    toast.error('Failed to delete book.')
+    console.error(err)
+  }
 }
 
 onMounted(fetchBooks)
@@ -251,5 +283,58 @@ onMounted(fetchBooks)
 
 .user-link:hover {
   text-decoration: underline;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.confirm-modal {
+  background: #fff;
+  padding: 24px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-modal h3 {
+  margin: 0 0 15px;
+  font-size: 20px;
+}
+
+.confirm-modal p {
+  margin: 0 0 20px;
+  color: #555;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.confirm-btn {
+  padding: 8px 16px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  padding: 8px 16px;
+  background: #bdc3c7;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 </style>

@@ -70,7 +70,7 @@ async def list_books(
         )
 
     all_books = await get_all_books()
-    threshold = 60
+    threshold = 85
     filtered_books = []
 
     q_lower = q.lower() if q else None
@@ -78,25 +78,33 @@ async def list_books(
     for book in all_books:
         # Fuzzy matching
         if q_lower:
-            title_match = fuzz.partial_ratio(q_lower, book.title.lower())
+            if (
+                q_lower in book.title.lower()
+                or any(q_lower in author.lower() for author in book.authors)
+                or any(q_lower in (cat.category or "").lower() or q_lower in (cat.subcategory or "").lower() for cat in book.categories or [])
+                or (book.publisher and q_lower in book.publisher.lower())
+            ):
+                pass
+            else:
+                title_match = fuzz.partial_ratio(q_lower, book.title.lower())
 
-            author_match = (
-                max(fuzz.partial_ratio(q_lower, author.lower()) for author in book.authors)
-                if book.authors else 0
-            )
+                author_match = (
+                    max(fuzz.partial_ratio(q_lower, author.lower()) for author in book.authors)
+                    if book.authors else 0
+                )
 
-            cat_scores = []
-            for cat in book.categories or []:
-                if cat.category:
-                    cat_scores.append(fuzz.partial_ratio(q_lower, cat.category.lower()))
-                if cat.subcategory:
-                    cat_scores.append(fuzz.partial_ratio(q_lower, cat.subcategory.lower()))
-            category_match = max(cat_scores) if cat_scores else 0
+                cat_scores = []
+                for cat in book.categories or []:
+                    if cat.category:
+                        cat_scores.append(fuzz.partial_ratio(q_lower, cat.category.lower()))
+                    if cat.subcategory:
+                        cat_scores.append(fuzz.partial_ratio(q_lower, cat.subcategory.lower()))
+                category_match = max(cat_scores) if cat_scores else 0
 
-            publisher_match = fuzz.partial_ratio(q_lower, book.publisher.lower()) if book.publisher else 0
+                publisher_match = fuzz.partial_ratio(q_lower, book.publisher.lower()) if book.publisher else 0
 
-            if not any(score >= threshold for score in [title_match, author_match, category_match, publisher_match]):
-                continue
+                if max([title_match, author_match, category_match, publisher_match]) < threshold:
+                    continue
 
         # Filters
         if available_only and book.borrowed:

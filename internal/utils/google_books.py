@@ -87,8 +87,6 @@ def fetch_google_book(volume_id: str) -> Optional[Book]:
         return_date=None,
         added_at=datetime.now(),
         updated_at=datetime.now(),
-        available_copies=1,
-        total_copies=1,
         last_borrowed_by=None
     )
 
