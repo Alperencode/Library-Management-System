@@ -49,6 +49,7 @@ async def list_users(
     page: int = Query(1, ge=1),
     limit: int = Query(25, ge=1, le=100),
     q: Optional[str] = Query(None, min_length=1),
+    only_with_penalties: bool = Query(False),
     admin=Depends(get_current_admin)
 ):
     all_users: List[User] = await get_all_users()
@@ -73,6 +74,9 @@ async def list_users(
                         filtered_users.append(user)
     else:
         filtered_users = all_users
+
+    if only_with_penalties:
+        filtered_users = [user for user in filtered_users if user.penalties and len(user.penalties) > 0]
 
     total_users = len(filtered_users)
     last_page = (total_users + limit - 1) // limit

@@ -5,6 +5,15 @@
     <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
       placeholder="Search by username or email..." />
 
+
+    <div class="toggle-wrapper">
+      <label class="toggle-switch">
+        <input type="checkbox" v-model="onlyWithPenalties" @change="onSearchEnter" />
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Show only users with penalties</span>
+    </div>
+
     <div v-if="users.length > 0" class="user-table-wrapper">
       <table class="user-table">
         <thead>
@@ -69,6 +78,8 @@ const searchQuery = ref('')
 const page = ref(1)
 const limit = 10
 const lastPage = ref(1)
+const onlyWithPenalties = ref(false)
+
 
 const selectedUserId = ref(null)
 const showModal = ref(false)
@@ -79,7 +90,8 @@ const fetchUsers = async () => {
       params: {
         page: page.value,
         limit,
-        q: searchQuery.value || undefined
+        q: searchQuery.value || undefined,
+        only_with_penalties: onlyWithPenalties.value || undefined
       }
     })
     users.value = response.data.users
@@ -247,5 +259,62 @@ const unbanUser = async (userId) => {
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: #40916c;
+}
+
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-label {
+  font-size: 14px;
+  color: #333;
 }
 </style>
