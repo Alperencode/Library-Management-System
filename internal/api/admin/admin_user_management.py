@@ -4,49 +4,16 @@ from fastapi.encoders import jsonable_encoder
 from typing import Optional, List
 from rapidfuzz import fuzz
 from internal.utils.utils import get_current_admin
-from internal.types.responses import AdminDashboardResponse, PublicUserResponse, FailResponse, SuccessResponse
+from internal.types.responses import PublicUserResponse, FailResponse, SuccessResponse
 from internal.types.types import SUCCESS, FAIL, NEED_ACTION
 from internal.database.users import get_all_users, get_user_by_id
 from internal.models.user import User, PublicUser, UserPreview, PaginatedUserPreviewListResponse
 from internal.utils.email import generate_penalty_email_html, send_email_to_user
-from internal.database.users import get_penalty_users_count, ban_user, unban_user
-from internal.database.books import (
-    get_borrowed_books_count, delete_book_by_id,
-    get_penalty_books_count, remove_book_from_notify_lists,
-    get_books_count, clear_books_from_user
-)
+from internal.database.users import ban_user, unban_user
+from internal.database.books import delete_book_by_id, remove_book_from_notify_lists, clear_books_from_user
 
 
 router = APIRouter(prefix="/admin")
-
-
-@router.get("/dashboard", response_model=AdminDashboardResponse)
-async def get_admin_dashboard(admin=Depends(get_current_admin)):
-    borrowed_books_count = await get_borrowed_books_count()
-    penalty_books_count = await get_penalty_books_count()
-    penalty_users_count = await get_penalty_users_count()
-    total_books_count = await get_books_count()
-
-    available_books_count = total_books_count - borrowed_books_count
-
-    all_users = await get_all_users()
-    total_users_count = len(all_users)
-
-    total_penalty_fee = sum(
-        p.amount for user in all_users for p in (user.penalties or [])
-    )
-
-    return AdminDashboardResponse(
-        code=SUCCESS,
-        message="Dashboard statistics fetched successfully",
-        borrowed_books_count=borrowed_books_count,
-        penalty_books_count=penalty_books_count,
-        penalty_users_count=penalty_users_count,
-        total_books_count=total_books_count,
-        available_books_count=available_books_count,
-        total_users_count=total_users_count,
-        total_penalty_fee=total_penalty_fee
-    )
 
 
 @router.get("/users", response_model=PaginatedUserPreviewListResponse)

@@ -11,6 +11,7 @@ from internal.types.responses import (
     SuccessResponse,
     FailResponse,
     BorrowedBookListResponse,
+    BookResponse
 )
 from internal.types.types import SUCCESS, FAIL
 from internal.utils.email import send_email_to_subscribers
@@ -18,6 +19,22 @@ from rapidfuzz import fuzz
 
 
 router = APIRouter(prefix="/admin")
+
+
+@router.get("/book/{book_id}", response_model=BookResponse)
+async def get_book_details(book_id: str, admin=Depends(get_current_admin)):
+    book = await get_book_by_id(book_id)
+    if not book:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="Book not found"))
+        )
+
+    return BookResponse(
+        code=SUCCESS,
+        message="Book details retrieved successfully",
+        book=book
+    )
 
 
 @router.get("/borrowed-books", response_model=BorrowedBookListResponse)
