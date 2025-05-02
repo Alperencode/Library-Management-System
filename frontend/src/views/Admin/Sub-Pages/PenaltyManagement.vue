@@ -27,7 +27,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.id">
+          <tr v-for="(user, index) in users" :key="user.id" class="fade-in-row" :style="{ animationDelay: `${index * 80}ms` }">
             <td>
               <router-link :to="`/admin/users/${user.id}`" class="user-link">
                 {{ user.username }}
@@ -317,4 +317,20 @@ const unbanUser = async (userId) => {
   font-size: 14px;
   color: #333;
 }
+
+.fade-in-row {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 </style>

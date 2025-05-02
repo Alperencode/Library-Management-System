@@ -22,12 +22,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="(book, index) in borrowedBooks"
-            :key="book.id"
-            class="fade-in-row"
-            :style="{ animationDelay: `${index * 80}ms` }"
-          >
+          <tr v-for="(book, index) in borrowedBooks" :key="book.id" class="fade-in-row" :style="{ animationDelay: `${index * 80}ms` }">
             <td>
               <img :src="book.cover_image || defaultCover" alt="Cover" class="book-cover" />
             </td>

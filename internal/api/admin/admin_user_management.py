@@ -32,6 +32,10 @@ async def get_admin_dashboard(admin=Depends(get_current_admin)):
     all_users = await get_all_users()
     total_users_count = len(all_users)
 
+    total_penalty_fee = sum(
+        p.amount for user in all_users for p in (user.penalties or [])
+    )
+
     return AdminDashboardResponse(
         code=SUCCESS,
         message="Dashboard statistics fetched successfully",
@@ -40,7 +44,8 @@ async def get_admin_dashboard(admin=Depends(get_current_admin)):
         penalty_users_count=penalty_users_count,
         total_books_count=total_books_count,
         available_books_count=available_books_count,
-        total_users_count=total_users_count
+        total_users_count=total_users_count,
+        total_penalty_fee=total_penalty_fee
     )
 
 
@@ -50,6 +55,7 @@ async def list_users(
     limit: int = Query(25, ge=1, le=100),
     q: Optional[str] = Query(None, min_length=1),
     only_with_penalties: bool = Query(False),
+    only_banned: bool = Query(False),
     admin=Depends(get_current_admin)
 ):
     all_users: List[User] = await get_all_users()
@@ -77,6 +83,9 @@ async def list_users(
 
     if only_with_penalties:
         filtered_users = [user for user in filtered_users if user.penalties and len(user.penalties) > 0]
+
+    if only_banned:
+        filtered_users = [user for user in filtered_users if user.banned]
 
     total_users = len(filtered_users)
     last_page = (total_users + limit - 1) // limit

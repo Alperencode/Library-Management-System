@@ -90,6 +90,7 @@ class AdminDashboardResponse(SuccessResponse):
     total_books_count: int
     available_books_count: int
     total_users_count: int
+    total_penalty_fee: int
 
 
 class BooksOverviewResponse(SuccessResponse):

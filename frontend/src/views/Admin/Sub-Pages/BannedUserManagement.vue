@@ -16,7 +16,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in bannedUsers" :key="user.id">
+          <tr v-for="(user, index) in bannedUsers" :key="user.id" class="fade-in-row" :style="{ animationDelay: `${index * 80}ms` }">
             <td>
               <router-link :to="`/admin/users/${user.id}`" class="user-link">
                 {{ user.username }}
@@ -53,11 +53,12 @@ const fetchBannedUsers = async () => {
     const response = await api.get('/admin/users', {
       params: {
         page: 1,
-        limit: 100,
-        q: searchQuery.value || undefined
+        limit: 10,
+        q: searchQuery.value || undefined,
+        only_banned: true
       }
     })
-    bannedUsers.value = response.data.users.filter(user => user.banned)
+    bannedUsers.value = response.data.users
   } catch (err) {
     bannedUsers.value = []
   }
@@ -125,5 +126,20 @@ onMounted(fetchBannedUsers)
   text-align: center;
   margin-top: 40px;
   font-style: italic;
+}
+
+.fade-in-row {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
