@@ -57,9 +57,10 @@
                         <tr v-for="(book, index) in borrowedBooksDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
                             <td>
-                                <router-link :to="`/admin/book-view/${book.id}`" class="book-link">
+                                <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
                                     {{ book.title || book.name }}
                                 </router-link>
+
                             </td>
                         </tr>
                     </tbody>
@@ -83,7 +84,7 @@
                         <tr v-for="(book, index) in overdueBooksDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
                             <td>
-                                <router-link :to="`/admin/book-view/${book.id}`" class="book-link">
+                                <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
                                     {{ book.title || book.name }}
                                 </router-link>
                             </td>
@@ -109,7 +110,7 @@
                         <tr v-for="(book, index) in requestedBooksDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
                             <td>
-                                <router-link :to="`/admin/requested-book/${book.id}`" class="book-link">
+                                <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
                                     {{ book.title || book.name }}
                                 </router-link>
                             </td>
@@ -134,7 +135,7 @@
                     <tbody>
                         <tr v-for="(book, index) in notifyMeListDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
-                            <router-link :to="`/admin/book-view/${book.id}`" class="book-link">
+                            <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
                                 {{ book.title || book.name }}
                             </router-link>
                         </tr>
@@ -159,7 +160,7 @@
                     <tbody>
                         <tr v-for="(penalty, index) in penaltiesDetails" :key="penalty.book.id">
                             <td>{{ index + 1 }}</td>
-                            <router-link :to="`/admin/book-view/${penalty.book.id}`" class="book-link">
+                            <router-link :to="`/admin/books/${penalty.book.id}`" class="book-link book-title">
                                 {{ penalty.book.title || penalty.book.name }}
                             </router-link>
                             <td>₺{{ penalty.amount }}</td>
@@ -223,11 +224,17 @@ const fetchBookDetails = async (bookIds, type = 'normal') => {
             return api.get(`/books/${id}`);
         });
         const results = await Promise.all(promises);
-        return results.map(res => {
+        return results.map((res, index) => {
             if (type === 'requested') {
-                return res.data.request;
+                return {
+                    ...res.data.request,
+                    id: bookIds[index]
+                };
             }
-            return res.data.book;
+            return {
+                ...res.data.book,
+                id: bookIds[index]
+            };
         });
     } catch (error) {
         console.error('Failed to fetch book details:', error);

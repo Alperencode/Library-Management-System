@@ -24,7 +24,9 @@
             <td>
               <img :src="book.cover_image || defaultCover" alt="Cover" class="book-cover" />
             </td>
-            <td>{{ book.title }}</td>
+            <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
+              {{ book.title || book.name }}
+            </router-link>
             <td class="ellipsis">{{ book.authors?.join(', ') || 'Unknown' }}</td>
             <td class="ellipsis">{{ book.publisher || 'Unknown' }}</td>
             <td>

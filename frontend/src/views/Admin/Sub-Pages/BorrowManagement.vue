@@ -2,12 +2,8 @@
   <div class="admin-borrow-container">
     <h2>Borrowed Books</h2>
 
-    <input
-      v-model="searchQuery"
-      @keyup.enter="onSearchEnter"
-      class="search-input"
-      placeholder="Search by username, title, author, publisher, or ISBN..."
-    />
+    <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
+      placeholder="Search by username, title, author, publisher, or ISBN..." />
 
     <div v-if="borrowedBooks.length > 0" class="book-table-wrapper">
       <table class="book-table">
@@ -22,11 +18,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(book, index) in borrowedBooks" :key="book.id" class="fade-in-row" :style="{ animationDelay: `${index * 80}ms` }">
+          <tr v-for="(book, index) in borrowedBooks" :key="book.id" class="fade-in-row"
+            :style="{ animationDelay: `${index * 80}ms` }">
             <td>
               <img :src="book.cover_image || defaultCover" alt="Cover" class="book-cover" />
             </td>
-            <td>{{ book.title }}</td>
+            <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
+              {{ book.title || book.name }}
+            </router-link>
             <td>
               <span v-if="usernames[book.currently_borrowed_by]">
                 <a :href="`/admin/users/${book.currently_borrowed_by}`" class="user-link">
@@ -52,33 +51,23 @@
       </table>
 
       <div v-if="showExtendModal" class="modal-overlay">
-          <div class="confirm-modal">
-            <h3>Extend Return Date</h3>
-            <p>How many days would you like to extend?</p>
-            <input
-              v-model.number="extraDays"
-              type="number"
-              min="1"
-              class="days-input"
-            />
-            <div class="modal-actions">
-              <button class="confirm-btn" @click="confirmExtend">Confirm</button>
-              <button class="cancel-btn" @click="showExtendModal = false">Cancel</button>
-            </div>
+        <div class="confirm-modal">
+          <h3>Extend Return Date</h3>
+          <p>How many days would you like to extend?</p>
+          <input v-model.number="extraDays" type="number" min="1" class="days-input" />
+          <div class="modal-actions">
+            <button class="confirm-btn" @click="confirmExtend">Confirm</button>
+            <button class="cancel-btn" @click="showExtendModal = false">Cancel</button>
           </div>
         </div>
+      </div>
     </div>
 
     <div v-else class="no-books">No borrowed books found.</div>
 
     <div class="pagination" v-if="lastPage > 1">
       <button :disabled="page === 1" @click="changePage(page - 1)">‹</button>
-      <button
-        v-for="p in lastPage"
-        :key="p"
-        @click="changePage(p)"
-        :class="{ active: p === page }"
-      >
+      <button v-for="p in lastPage" :key="p" @click="changePage(p)" :class="{ active: p === page }">
         {{ p }}
       </button>
       <button :disabled="page === lastPage" @click="changePage(page + 1)">›</button>
@@ -259,6 +248,7 @@ onMounted(fetchBorrowedBooks)
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
