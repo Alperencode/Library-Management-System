@@ -110,7 +110,7 @@
                         <tr v-for="(book, index) in requestedBooksDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
                             <td>
-                                <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
+                                <router-link :to="`/admin/requested-books/${book.id}`" class="book-link book-title">
                                     {{ book.title || book.name }}
                                 </router-link>
                             </td>
