@@ -128,7 +128,7 @@ async def generate_penalty_email_html(user, penalties: List[BookPenalty]) -> str
     <html>
       <body style="font-family: Arial, sans-serif; color: #333;">
         <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
-          <h2 style="color: #c0392b;">Penalty Fee Reminder</h2>
+          <h2 style="color: #c0392b;">Penalty Book Reminder</h2>
           <p>Dear {user.username},</p>
           <p>You currently have penalty fees for the following book(s):</p>
           <table style="border-collapse: collapse; width: 100%; margin-top: 16px;">
