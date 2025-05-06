@@ -49,6 +49,8 @@ import NotFound from "@/views/NotFound.vue";
 
 import UserDetail from "@/views/Admin/Sub-Pages/UserDetail.vue";
 
+import RequestDetails from '@/views/Admin/Sub-Pages/RequestDetails.vue';
+
 const routes = [
   // Homeview
   { path: "/", component: HomeView },
@@ -97,6 +99,7 @@ const routes = [
       { path: "banned-users", component: BannedUserManagement },
       { path: "add-book", component: AdminAddBook },
       { path: "users/:id", component: UserDetail },
+      { path: '/admin/requests/:id', component: RequestDetails },
     ],
   },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
