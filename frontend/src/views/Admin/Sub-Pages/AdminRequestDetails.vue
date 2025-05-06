@@ -25,6 +25,7 @@
                             <option disabled value="">Change Status</option>
                             <option value="Request Sent">Request Sent</option>
                             <option value="On Hold">On Hold</option>
+                            <option value="Approved">Approved</option>
                         </select>
                         <button class="change-status-btn" :disabled="!selectedStatus"
                             @click="updateStatus(selectedStatus)">
@@ -41,7 +42,11 @@
             <h3>Requesters</h3>
             <ul>
                 <li v-for="r in requesters" :key="r.id">
-                    <span class="user-icon">👤</span> {{ r.username }} ({{ r.email }})
+                    <span class="user-icon">👤</span>
+                    <router-link :to="`/admin/users/${r.id}`" class="user-link">
+                        {{ r.username }}
+                    </router-link>
+                    ({{ r.email }})
                 </li>
             </ul>
         </div>
@@ -114,10 +119,11 @@ async function declineRequest() {
 
 function statusColor(status) {
     switch (status) {
-        case 'ADDED': return 'green'
-        case 'DENIED': return 'red'
+        case 'Added': return 'green'
+        case 'Denied': return 'red'
         case 'Request Sent': return 'gray'
         case 'On Hold': return 'orange'
+        case 'Approved': return 'blue'
         default: return 'blue'
     }
 }
@@ -199,6 +205,11 @@ function formatDate(isoString) {
 .status.orange {
     background: #fff0db;
     color: #e67e22;
+}
+
+.status.blue {
+    background: #e6f0ff;
+    color: #1e90ff;
 }
 
 .actions {
@@ -301,5 +312,14 @@ function formatDate(isoString) {
     padding: 60px 0;
     font-size: 18px;
     color: #aaa;
+}
+
+.user-link {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.user-link:hover {
+  text-decoration: underline;
 }
 </style>

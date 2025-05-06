@@ -40,14 +40,12 @@ import AdminPenaltyManagement from "@/views/Admin/Sub-Pages/AdminPenaltyManageme
 import AdminBannedUserManagement from "@/views/Admin/Sub-Pages/AdminBannedUserManagement.vue";
 import AdminAddBook from "@/views/Admin/Sub-Pages/AdminAddBook.vue";
 import AdminDashboard from "@/views/Admin/Sub-Pages/AdminDashboard.vue";
-
+import AdminRequestDetails from '@/views/Admin/Sub-Pages/AdminRequestDetails.vue';
 
 import AdminUserDetail from "@/views/Admin/Sub-Pages/AdminUserDetail.vue";
 import AdminBookDetails from "@/views/Admin/Sub-Pages/AdminBookDetails.vue";
 import NotFound from "@/views/NotFound.vue";
 
-
-import RequestDetails from '@/views/Admin/Sub-Pages/RequestDetails.vue';
 
 const routes = [
   // Homeview
@@ -98,7 +96,7 @@ const routes = [
       { path: "add-book", component: AdminAddBook },
       { path: "users/:id", component: AdminUserDetail },
       { path: "books/:id", component: AdminBookDetails},
-      { path: '/admin/requests/:id', component: RequestDetails },
+      { path: 'requests/:id', component: AdminRequestDetails },
     ],
   },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
