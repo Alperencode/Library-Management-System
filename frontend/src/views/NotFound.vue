@@ -4,13 +4,24 @@
     <p style="color: white">
       The page you are looking for does not exist or may have been removed.
     </p>
-    <router-link to="/" class="go-home">Go to Home Page</router-link>
+    <div v-if="admin">
+    <router-link to="/admin" class="go-home"> Return to Admin Page</router-link>
+    </div>
+    <div v-if="!admin">
+    <router-link to="/" class="go-home"> Return to Home Page</router-link>
+    </div>
   </div>
 </template>
 
 <script>
+import { useAuth } from '@/composables/useAuth'
+
 export default {
-  name: "NotFound",
+  setup() {
+    const { user, admin } = useAuth()
+
+    return { user, admin }
+  },
 };
 </script>
 
@@ -20,11 +31,10 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden;
 }
 
 .page-content {
-  height: 86.5vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;

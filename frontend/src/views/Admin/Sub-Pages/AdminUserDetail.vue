@@ -135,9 +135,11 @@
                     <tbody>
                         <tr v-for="(book, index) in notifyMeListDetails" :key="book.id">
                             <td>{{ index + 1 }}</td>
-                            <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
-                                {{ book.title || book.name }}
-                            </router-link>
+                            <td>
+                                <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
+                                    {{ book.title || book.name }}
+                                </router-link>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -160,9 +162,11 @@
                     <tbody>
                         <tr v-for="(penalty, index) in penaltiesDetails" :key="penalty.book.id">
                             <td>{{ index + 1 }}</td>
-                            <router-link :to="`/admin/books/${penalty.book.id}`" class="book-link book-title">
-                                {{ penalty.book.title || penalty.book.name }}
-                            </router-link>
+                            <td>
+                                <router-link :to="`/admin/books/${penalty.book.id}`" class="book-link book-title">
+                                    {{ penalty.book.title || penalty.book.name }}
+                                </router-link>
+                            </td>
                             <td>₺{{ penalty.amount }}</td>
                         </tr>
                     </tbody>

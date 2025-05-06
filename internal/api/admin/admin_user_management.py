@@ -226,7 +226,7 @@ async def notify_penalty_user(user_id: str, admin=Depends(get_current_admin)):
         )
 
     html = await generate_penalty_email_html(user, user.penalties)
-    subject = "Library Penalty Fee Reminder"
+    subject = "Library Penalty Book Reminder"
 
     success = await send_email_to_user(user, html, subject)
 

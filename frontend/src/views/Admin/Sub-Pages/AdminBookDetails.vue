@@ -6,8 +6,8 @@
           <img :src="book.cover_image || defaultCover" alt="Cover Image" class="book-image" />
           <div class="book-title">{{ book.title }}</div>
           <div class="button-row">
-            <button class="btn blue" @click="editBook">Edit</button>
-            <button class="btn red" @click="openDeleteModal(book)">Delete</button>
+            <button class="btn btn-blue" @click="editBook">Edit</button>
+            <button class="btn btn-red" @click="openDeleteModal(book)">Delete</button>
           </div>
           <div class="info-box status-box" :class="book.borrowed ? 'bg-red' : 'bg-green'">
             <strong>Status:</strong> {{ book.borrowed ? 'Taken' : 'Available' }}
@@ -59,8 +59,13 @@
             <span v-else>-</span>
           </p>
 
-          <div class="info-box info-small-box" :class="book.has_penalty ? 'bg-red' : 'bg-green'">
-            <strong>Penalty:</strong> {{ book.has_penalty ? 'Yes' : 'No' }}
+          <div class="penalty-row" v-if="book.has_penalty">
+            <div class="info-box info-small-box bg-red">
+              <strong>Penalty:</strong> Yes
+            </div>
+            <button class="notify-btn" @click="notifyPenaltyUsers">
+              Notify User
+            </button>
           </div>
         </div>
       </div>
@@ -104,10 +109,6 @@ const lastBorrowerUsername = ref('')
 const currentBorrowerUsername = ref('')
 const notifyUsers = ref([])
 
-function editBook() {
-  router.push(`/admin/edit-book/${book.value.id}`)
-}
-
 function openDeleteModal(book) {
   bookToDelete.value = book
   showModal.value = true
@@ -126,9 +127,32 @@ async function deleteBook(id) {
   }
 }
 
+function editBook() {
+  if (book.value?.id) {
+    router.push(`/admin/edit-book/${book.value.id}`)
+  } else {
+    toast.warning("Book ID is not available.")
+  }
+}
+
+async function notifyPenaltyUsers() {
+  try {
+    const { data } = await api.post(`/admin/notify/${book.value.currently_borrowed_by}`)
+    if (data.code === "Success") {
+      toast.success(data.message)
+    }
+  } catch (error) {
+    const msg = error?.response?.data?.message || "Failed to notify user."
+    toast.error(msg)
+  }
+}
+
 onMounted(async () => {
   const res = await api.get(`/books/${route.params.id}`)
-  book.value = res.data.book
+  book.value = {
+    id: res.data.book._id,
+    ...res.data.book
+  }
 
   if (book.value.last_borrowed_by) {
     try {
@@ -169,7 +193,7 @@ onMounted(async () => {
 .content-wrapper {
   color: white;
   min-height: 100vh;
-  padding-top: 150px;
+  padding-top: 40px;
   padding-bottom: 100px;
 }
 
@@ -443,6 +467,68 @@ main {
 }
 
 .bg-red {
-  background-color: #dc3545;
+  background-color: #df2336;
+}
+
+.penalty-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 0.5rem;
+}
+
+.notify-btn {
+  padding: 8px 16px;
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.notify-btn:hover {
+  background-color: #d68910;
+}
+
+.btn-blue {
+  background-color: #2980b9;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-blue:hover {
+  background-color: #216a94;
+}
+
+.btn-red {
+  background-color: #c0392b;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-red:hover {
+  background-color: #962d22;
 }
 </style>
