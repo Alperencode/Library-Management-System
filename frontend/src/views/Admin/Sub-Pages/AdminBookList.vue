@@ -9,13 +9,13 @@
       <table class="book-table">
         <thead>
           <tr>
-            <th>Cover</th>
-            <th style="width: 180px;">Title</th>
-            <th style="width: 160px;">Author</th>
-            <th>Publisher</th>
-            <th>Status</th>
-            <th>Borrowed By</th>
-            <th>Actions</th>
+            <th style="width: 40px;">Cover</th>
+            <th style="width: 160px;">Title</th>
+            <th style="width: 60px;">Author</th>
+            <th style="width: 60px;">Publisher</th>
+            <th style="width: 40px;">Status</th>
+            <th style="width: 60px;">Borrowed By</th>
+            <th style="width: 50px;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -24,7 +24,11 @@
             <td>
               <img :src="book.cover_image || defaultCover" alt="Cover" class="book-cover" />
             </td>
-            <td>{{ book.title }}</td>
+            <td class="book-title-cell">
+              <router-link :to="`/admin/books/${book.id}`" class="book-link book-title">
+                {{ book.title || book.name }}
+              </router-link>
+            </td>
             <td class="ellipsis">{{ book.authors?.join(', ') || 'Unknown' }}</td>
             <td class="ellipsis">{{ book.publisher || 'Unknown' }}</td>
             <td>
@@ -42,7 +46,9 @@
               <span v-else>-</span>
             </td>
             <td>
-              <button class="edit-btn">Edit</button>
+              <router-link :to="`/admin/edit-book/${book.id}`" class="edit-btn">
+                Edit
+              </router-link>
               <button class="delete-btn" @click="confirmDelete(book)">Delete</button>
             </td>
           </tr>
@@ -209,13 +215,31 @@ onMounted(fetchBooks)
 }
 
 .edit-btn,
-.delete-btn {
-  padding: 4px 8px;
-  margin-right: 4px;
+.delete-btn,
+.edit-btn:visited {
+  display: inline-block;
+  padding: 8px 16px;
+  margin-right: 6px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+}
+
+.edit-btn {
+  background-color: #2980b9;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #216aa0;
+}
+
+.delete-btn:hover {
+  background-color: #a83226;
 }
 
 .edit-btn {
@@ -336,5 +360,28 @@ onMounted(fetchBooks)
   border: none;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.book-title-cell {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-link.book-title {
+  font-weight: 600;
+  color: #2980b9;
+  text-decoration: none;
+}
+
+.book-link.book-title:hover {
+  text-decoration: underline;
+}
+
+.book-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 </style>

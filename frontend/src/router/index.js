@@ -28,26 +28,24 @@ import RequestBook from "@/views/Book-Pages/RequestBook.vue";
 import ScanBook from "@/views/Scan-Pages/ScanBook.vue";
 import RfidScan from "@/views/Scan-Pages/RfidScan.vue";
 import BarcodeScan from "@/views/Scan-Pages/BarcodeScan.vue";
-
-// Admin-Page
-import AdminPage from "@/views/Admin/AdminPage.vue";
-import BookList from "@/views/Admin/Sub-Pages/BookList.vue";
-import UserList from "@/views/Admin/Sub-Pages/UserList.vue";
-import RequestList from "@/views/Admin/Sub-Pages/RequestList.vue";
-import BorrowManagement from "@/views/Admin/Sub-Pages/BorrowManagement.vue";
-import PenaltyManagement from "@/views/Admin/Sub-Pages/PenaltyManagement.vue";
-import BannedUserManagement from "@/views/Admin/Sub-Pages/BannedUserManagement.vue";
-import AdminAddBook from "@/views/Admin/Sub-Pages/AdminAddBook.vue";
-
-//  Admin Dashboard Sub-Pages
-import AdminDashboard from "@/views/Admin/Sub-Pages/AdminDashboard.vue";
-
 import BookScanResult from "@/views/Scan-Pages/BookScanResult.vue";
 
-// Not-Found
+// Admin-Pages
+import AdminSidebar from "@/views/Admin/AdminSidebar.vue";
+import AdminBookList from "@/views/Admin/Sub-Pages/AdminBookList.vue";
+import AdminUserList from "@/views/Admin/Sub-Pages/AdminUserList.vue";
+import AdminRequestList from "@/views/Admin/Sub-Pages/AdminRequestList.vue";
+import AdminBorrowManagement from "@/views/Admin/Sub-Pages/AdminBorrowManagement.vue";
+import AdminPenaltyManagement from "@/views/Admin/Sub-Pages/AdminPenaltyManagement.vue";
+import AdminBannedUserManagement from "@/views/Admin/Sub-Pages/AdminBannedUserManagement.vue";
+import AdminAddBook from "@/views/Admin/Sub-Pages/AdminAddBook.vue";
+import AdminDashboard from "@/views/Admin/Sub-Pages/AdminDashboard.vue";
+
+
+import AdminUserDetail from "@/views/Admin/Sub-Pages/AdminUserDetail.vue";
+import AdminBookDetails from "@/views/Admin/Sub-Pages/AdminBookDetails.vue";
 import NotFound from "@/views/NotFound.vue";
 
-import UserDetail from "@/views/Admin/Sub-Pages/UserDetail.vue";
 
 const routes = [
   // Homeview
@@ -85,18 +83,19 @@ const routes = [
   // Admin-Page
   {
     path: "/admin",
-    component: AdminPage,
+    component: AdminSidebar,
     children: [
       { path: "", redirect: "/admin/dashboard" },
-      { path: "books", component: BookList },
-      { path: "users", component: UserList },
+      { path: "books", component: AdminBookList },
+      { path: "users", component: AdminUserList },
       { path: "dashboard", component: AdminDashboard },
-      { path: "requests", component: RequestList },
-      { path: "borrow", component: BorrowManagement },
-      { path: "penalty", component: PenaltyManagement },
-      { path: "banned-users", component: BannedUserManagement },
+      { path: "requests", component: AdminRequestList },
+      { path: "borrow", component: AdminBorrowManagement },
+      { path: "penalty", component: AdminPenaltyManagement },
+      { path: "banned-users", component: AdminBannedUserManagement },
       { path: "add-book", component: AdminAddBook },
-      { path: "users/:id", component: UserDetail },
+      { path: "users/:id", component: AdminUserDetail },
+      { path: "books/:id", component: AdminBookDetails},
     ],
   },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
