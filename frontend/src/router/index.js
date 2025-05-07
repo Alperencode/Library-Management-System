@@ -47,6 +47,7 @@ import AdminBookDetails from "@/views/Admin/Sub-Pages/AdminBookDetails.vue";
 import NotFound from "@/views/NotFound.vue";
 import AdminEditBook from "@/views/Admin/Sub-Pages/AdminEditBook.vue";
 import AdminRequestAdded from "@/views/Admin/Sub-Pages/AdminRequestAdded.vue";
+import AdminRequestDenied from '@/views/Admin/Sub-Pages/AdminRequestDenied.vue'
 
 const routes = [
   // Homeview
@@ -100,6 +101,7 @@ const routes = [
       { path: 'requests/:id', component: AdminRequestDetails },
       { path: "/admin/edit-book/:id", component: AdminEditBook },
       { path: "requests/added", component: AdminRequestAdded },
+      { path: 'requests/denied', component: AdminRequestDenied },
     ],
   },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },

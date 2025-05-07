@@ -16,6 +16,12 @@
                     Added Requests
                   </router-link>
                 </li>
+                <li>
+                  <router-link to="/admin/requests/denied" class="nav-link" active-class="active-link"
+                    exact-active-class="active-link">
+                    Denied Requests
+                  </router-link>
+                </li>
               </ul>
             </transition>
           </template>
