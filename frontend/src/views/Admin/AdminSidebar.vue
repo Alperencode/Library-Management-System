@@ -4,9 +4,26 @@
       <router-link to="/admin/dashboard" class="admin-panel-link">Admin Panel</router-link>
       <ul class="nav flex-column">
         <li v-for="(item, index) in adminMenuItems" :key="index" class="nav-item mb-2">
-          <router-link :to="item.path" class="nav-link" active-class="active-link" exact-active-class="active-link">
-            {{ item.label }}
-          </router-link>
+          <template v-if="item.label === 'Request List'">
+            <div class="nav-link" @click="goToRequestsAndToggle(index)">
+              {{ item.label }}
+            </div>
+            <transition name="submenu-slide">
+              <ul v-if="activeSubmenu === index" class="submenu">
+                <li>
+                  <router-link to="/admin/requests/added" class="nav-link" active-class="active-link"
+                    exact-active-class="active-link">
+                    Added Requests
+                  </router-link>
+                </li>
+              </ul>
+            </transition>
+          </template>
+          <template v-else>
+            <router-link :to="item.path" class="nav-link" active-class="active-link" exact-active-class="active-link">
+              {{ item.label }}
+            </router-link>
+          </template>
         </li>
       </ul>
       <div class="logout-container">
@@ -21,23 +38,30 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
 const { setUser, setAdmin } = useAuth()
+const activeSubmenu = ref(null)
+
+const goToRequestsAndToggle = (index) => {
+  router.push('/admin/requests')
+  activeSubmenu.value = activeSubmenu.value === index ? null : index
+}
 
 const adminMenuItems = [
   { label: "Dashboard", path: "/admin/dashboard" },
   { label: "Book List", path: "/admin/books" },
   { label: "User List", path: "/admin/users" },
-  { label: "Request List", path: "/admin/requests" },
+  { label: "Request List", path: "/admin/requests", expandable: true },
   { label: "Borrow Management", path: "/admin/borrow" },
   { label: "Penalty Management", path: "/admin/penalty" },
   { label: "Banned User Management", path: "/admin/banned-users" },
   { label: "Add New Book", path: "/admin/add-book" },
-];
+]
 
 const logout = async () => {
   try {
@@ -140,5 +164,35 @@ const logout = async () => {
 .logout-link:hover {
   background-color: var(--sidebar-hover);
   color: var(--admin-orange);
+}
+
+.submenu {
+  margin-left: 16px;
+  margin-top: 4px;
+}
+
+.submenu .nav-link {
+  font-size: 14px;
+  padding: 6px 12px;
+}
+
+.submenu-slide-enter-active,
+.submenu-slide-leave-active {
+  transition: all 0.3s ease;
+}
+
+.submenu-slide-enter-from,
+.submenu-slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-5px);
+  overflow: hidden;
+}
+
+.submenu-slide-enter-to,
+.submenu-slide-leave-from {
+  opacity: 1;
+  max-height: 200px;
+  transform: translateY(0);
 }
 </style>
