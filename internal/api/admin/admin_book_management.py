@@ -6,7 +6,7 @@ from internal.database.users import get_all_users, update_user
 from internal.utils.utils import get_current_admin
 from internal.types.types import SUCCESS, FAIL
 from internal.database.books import create_book, update_book
-from internal.models.book import Book, BookCreate, BookEdit
+from internal.models.book import Book, BookCreate, BookEdit, BookCategory
 from internal.types.responses import SuccessResponse, FailResponse, BookResponse
 
 router = APIRouter(prefix="/admin")
@@ -83,6 +83,8 @@ async def patch_book(book_id: str, book_data: BookEdit, admin=Depends(get_curren
             )
 
     for key, value in updates.items():
+        if key == "categories":
+            value = [BookCategory(**v) if isinstance(v, dict) else v for v in value]
         setattr(book, key, value)
 
     saved = await update_book(book)

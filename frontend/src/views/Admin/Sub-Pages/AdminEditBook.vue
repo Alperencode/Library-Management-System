@@ -175,7 +175,14 @@ const submitForm = async () => {
 
     try {
         const { id } = route.params
-        const { data } = await api.patch(`/admin/book/${id}`, form.value)
+        const payload = {
+            ...form.value,
+            categories: form.value.categories.map(c => ({
+                category: c.category,
+                subcategory: c.subcategory || null
+            }))
+        }
+        const { data } = await api.patch(`/admin/book/${id}`, payload)
         if (data.code === 'Success') {
             toast.success(data.message)
             router.push('/admin/books')
