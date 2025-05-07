@@ -5,8 +5,8 @@ from internal.database.books import get_book_by_isbn, get_book_by_id, delete_boo
 from internal.database.users import get_all_users, update_user
 from internal.utils.utils import get_current_admin
 from internal.types.types import SUCCESS, FAIL
-from internal.database.books import create_book
-from internal.models.book import Book, BookCreate
+from internal.database.books import create_book, update_book
+from internal.models.book import Book, BookCreate, BookEdit
 from internal.types.responses import SuccessResponse, FailResponse, BookResponse
 
 router = APIRouter(prefix="/admin")
@@ -60,6 +60,39 @@ async def add_book(book_data: BookCreate, admin=Depends(get_current_admin)):
         )
 
     return SuccessResponse(code=SUCCESS, message=f"Book '{book.title}' added successfully")
+
+
+@router.patch("/book/{book_id}", response_model=SuccessResponse)
+async def patch_book(book_id: str, book_data: BookEdit, admin=Depends(get_current_admin)):
+    book = await get_book_by_id(book_id)
+    if not book:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="Book not found"))
+        )
+
+    updates = book_data.model_dump(exclude_unset=True)
+
+    # Check ISBN duplication if provided
+    if "isbn" in updates and updates["isbn"] != book.isbn:
+        existing = await get_book_by_isbn(updates["isbn"])
+        if existing:
+            return JSONResponse(
+                status_code=400,
+                content=jsonable_encoder(FailResponse(code=FAIL, message="ISBN already exists"))
+            )
+
+    for key, value in updates.items():
+        setattr(book, key, value)
+
+    saved = await update_book(book)
+    if not saved:
+        return JSONResponse(
+            status_code=500,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="Failed to update book"))
+        )
+
+    return SuccessResponse(code=SUCCESS, message=f"Book '{book.title}' updated successfully")
 
 
 @router.delete("/book/{book_id}", response_model=SuccessResponse)
