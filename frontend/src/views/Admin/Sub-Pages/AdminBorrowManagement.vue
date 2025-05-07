@@ -77,13 +77,11 @@
 
 <script setup>
 import { ref, onMounted, reactive, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import { useToast } from 'vue-toastification'
 import defaultCover from '@/assets/images/default-cover.png'
 
 const toast = useToast()
-const router = useRouter()
 const borrowedBooks = ref([])
 const usernames = reactive({})
 const searchQuery = ref('')
@@ -173,10 +171,6 @@ const adminReturnBook = async (bookId) => {
   } catch (error) {
     toast.error('Failed to return book')
   }
-}
-
-const goToEditPage = (bookId) => {
-  router.push(`/admin/borrow/${bookId}`)
 }
 
 const onSearchEnter = () => {
