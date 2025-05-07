@@ -43,7 +43,7 @@
             </td>
             <td>
               <button class="extend-btn" @click="openExtendModal(book.id)">Extend</button>
-              <button class="edit-btn" @click="goToEditPage(book.id)">Edit</button>
+              <router-link :to="`/admin/edit-book/${book.id}`" class="edit-btn">Edit</router-link>
               <button class="delete-btn" @click="adminReturnBook(book.id)">Return</button>
             </td>
           </tr>
