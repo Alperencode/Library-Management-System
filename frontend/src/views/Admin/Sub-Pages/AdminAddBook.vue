@@ -74,15 +74,16 @@ import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import api from '@/api/axios'
 import ISO6391 from 'iso-639-1'
+import { useRouter } from 'vue-router'
 
 const languages = ref([])
+const toast = useToast()
+const router = useRouter()
 
 onMounted(() => {
   languages.value = ISO6391.getAllCodes()
     .map(code => ({ code, name: ISO6391.getNativeName(code) || ISO6391.getName(code) }))
 })
-
-const toast = useToast()
 
 const form = ref({
   title: '',
@@ -147,17 +148,7 @@ const submitForm = async () => {
     const { data } = await api.post('/admin/book', form.value)
     if (data.code === 'Success') {
       toast.success(data.message)
-      form.value = {
-        title: '',
-        authors: [],
-        categories: [],
-        language: '',
-        page_count: null,
-        isbn: '',
-        publisher: '',
-        cover_image: '',
-        description: ''
-      }
+      router.push('/admin/books')
     }
   } catch (err) {
     const msg = err?.response?.data?.message || 'Failed to add book.'
