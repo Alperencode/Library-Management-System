@@ -82,3 +82,15 @@ class BookCreate(BaseModel):
     publisher: Optional[str] = None
     cover_image: Optional[str] = None
     description: Optional[str] = None
+
+
+class BookEdit(BaseModel):
+    title: Optional[str] = None
+    authors: Optional[List[str]] = None
+    categories: Optional[List[BookCategory]] = None
+    language: Optional[str] = None
+    page_count: Optional[int] = None
+    isbn: Optional[str] = None
+    publisher: Optional[str] = None
+    cover_image: Optional[str] = None
+    description: Optional[str] = None
