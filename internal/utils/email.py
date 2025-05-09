@@ -151,3 +151,39 @@ async def generate_penalty_email_html(user, penalties: List[BookPenalty]) -> str
       </body>
     </html>
     """
+
+
+async def generate_penalty_email_html_for_book(user, penalty: BookPenalty) -> str:
+    book = await get_book_by_id(penalty.book_id)
+    book_title = book.title if book else "Unknown Title"
+
+    return f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #333;">
+        <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+          <h2 style="color: #2c3e50;">Return Request from Library Staff</h2>
+          <p>Dear {user.username},</p>
+          <p>We kindly request the return of the following book you currently have borrowed:</p>
+          <table style="border-collapse: collapse; width: 100%; margin-top: 16px;">
+            <thead>
+              <tr style="background-color: #f2f2f2;">
+                <th style="padding: 8px; border: 1px solid #ddd;">Book</th>
+                <th style="padding: 8px; border: 1px solid #ddd;">Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ddd;">{book_title}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">₺{penalty.amount:.2f}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top: 20px;">
+            Please return the book at your earliest convenience to avoid further penalties and to make it available for other patrons.
+            If you need assistance or have concerns about returning it, feel free to contact your library staff.
+          </p>
+          <p style="margin-top: 20px;">Thank you for your attention.</p>
+        </div>
+      </body>
+    </html>
+    """

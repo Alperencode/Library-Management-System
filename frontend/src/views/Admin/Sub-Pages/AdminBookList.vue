@@ -5,6 +5,20 @@
     <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
       placeholder="Search by title, author, publisher..." />
 
+    <div class="toggle-wrapper">
+      <label class="toggle-switch">
+        <input type="checkbox" v-model="borrowedOnly" @change="onSearchEnter" />
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Show only borrowed books</span>
+
+      <label class="toggle-switch">
+        <input type="checkbox" v-model="recentlyAdded" @change="onSearchEnter" />
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">Sort by recently added</span>
+    </div>
+
     <div v-if="books.length > 0" class="book-table-wrapper">
       <table class="book-table">
         <thead>
@@ -95,6 +109,8 @@ const toast = useToast()
 
 const showModal = ref(false)
 const bookToDelete = ref(null)
+const borrowedOnly = ref(false)
+const recentlyAdded = ref(false)
 
 watch(
   () => books.value,
@@ -120,7 +136,9 @@ const fetchBooks = async () => {
       params: {
         page: page.value,
         limit,
-        q: searchQuery.value || undefined
+        q: searchQuery.value || undefined,
+        borrowed_only: borrowedOnly.value || undefined,
+        recently_added: recentlyAdded.value || undefined
       }
     })
     books.value = response.data.books
@@ -383,5 +401,64 @@ onMounted(fetchBooks)
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+}
+
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: #40916c;
+}
+
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-label {
+  font-size: 14px;
+  color: #333;
+  margin-right: 12px;
 }
 </style>

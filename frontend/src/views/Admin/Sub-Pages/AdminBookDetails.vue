@@ -6,14 +6,19 @@
           <img :src="book.cover_image || defaultCover" alt="Cover Image" class="book-image" />
           <div class="book-title">{{ book.title }}</div>
           <div class="button-row">
-            <button class="btn btn-blue" @click="editBook">Edit</button>
-            <button class="btn btn-red" @click="openDeleteModal(book)">Delete</button>
+            <button class="btn edit-btn" @click="editBook">Edit</button>
+            <button class="btn delete-btn" @click="openDeleteModal(book)">Delete</button>
           </div>
           <div class="info-box status-box" :class="book.borrowed ? 'bg-red' : 'bg-green'">
             <strong>Status:</strong> {{ book.borrowed ? 'Taken' : 'Available' }}
           </div>
-          <div class="info-box info-small-box bg-redish">
+          <div class="info-box info-small-box bg-orangeish">
             <strong>Borrow Count:</strong> {{ book.borrow_count || 0 }}
+          </div>
+
+          <div v-if="book.borrowed" class="penalty-row borrowed-row">
+            <button class="btn extend-btn" @click="openExtendModal(book.id)">Extend</button>
+            <button class="btn delete-btn" @click="adminReturnBook(book.id)">Return</button>
           </div>
         </div>
 
@@ -59,13 +64,11 @@
             <span v-else>-</span>
           </p>
 
-          <div class="penalty-row" v-if="book.has_penalty">
+          <div class="penalty-row penalty-actions" v-if="book.has_penalty">
             <div class="info-box info-small-box bg-red">
               <strong>Penalty:</strong> Yes
             </div>
-            <button class="notify-btn" @click="notifyPenaltyUsers">
-              Notify User
-            </button>
+            <button class="btn warning" @click="notifyPenaltyUsers">Notify User</button>
           </div>
         </div>
       </div>
@@ -82,6 +85,18 @@
           <div class="modal-actions">
             <button class="confirm-btn" @click="deleteBook(bookToDelete.id)">Yes, Delete</button>
             <button class="cancel-btn" @click="showModal = false">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="showExtendModal" class="modal-overlay">
+        <div class="confirm-modal">
+          <h3>Extend Return Date</h3>
+          <p>How many days would you like to extend?</p>
+          <input v-model.number="extraDays" type="number" min="1" class="days-input" />
+          <div class="modal-actions">
+            <button class="confirm-btn" @click="confirmExtend">Confirm</button>
+            <button class="cancel-btn" @click="showExtendModal = false">Cancel</button>
           </div>
         </div>
       </div>
@@ -109,9 +124,42 @@ const lastBorrowerUsername = ref('')
 const currentBorrowerUsername = ref('')
 const notifyUsers = ref([])
 
+const showExtendModal = ref(false)
+const extraDays = ref(7)
+const selectedBookId = ref(null)
+
 function openDeleteModal(book) {
   bookToDelete.value = book
   showModal.value = true
+}
+
+const openExtendModal = (bookId) => {
+  selectedBookId.value = bookId
+  extraDays.value = 7
+  showExtendModal.value = true
+}
+
+const confirmExtend = async () => {
+  try {
+    await api.post(`/admin/borrowed-books/extend/${selectedBookId.value}`, { extra_days: extraDays.value })
+    toast.success(`Return date extended by ${extraDays.value} days`)
+    showExtendModal.value = false
+    const res = await api.get(`/books/${route.params.id}`)
+    book.value = { id: res.data.book._id, ...res.data.book }
+  } catch (error) {
+    toast.error('Failed to extend return date')
+  }
+}
+
+const adminReturnBook = async (bookId) => {
+  try {
+    await api.post(`/admin/borrowed-books/return/${bookId}`)
+    toast.success('Book returned successfully')
+    const res = await api.get(`/books/${route.params.id}`)
+    book.value = { id: res.data.book._id, ...res.data.book }
+  } catch (error) {
+    toast.error('Failed to return book')
+  }
 }
 
 async function deleteBook(id) {
@@ -137,7 +185,15 @@ function editBook() {
 
 async function notifyPenaltyUsers() {
   try {
-    const { data } = await api.post(`/admin/notify/${book.value.currently_borrowed_by}`)
+    const userId = book.value.currently_borrowed_by
+    const bookId = book.value.id
+
+    if (!userId || !bookId) {
+      toast.warning("Book or user ID is missing.")
+      return
+    }
+
+    const { data } = await api.post(`/admin/notify/${userId}/book/${bookId}`)
     if (data.code === "Success") {
       toast.success(data.message)
     }
@@ -217,21 +273,33 @@ main {
   }
 }
 
+.left-box,
+.right-box,
+.desc-box {
+  background-color: #dddddddc;
+  border-radius: 10px;
+}
+
 .left-box {
   flex: 1;
-  background-color: #dddddddc;
   padding: 1rem;
-  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.book-image {
-  width: 240px;
-  height: 360px;
-  object-fit: cover;
-  border-radius: 6px;
+.right-box {
+  flex: 2;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+}
+
+.desc-box {
+  margin-top: 2rem;
+  padding: 2rem;
 }
 
 .book-title {
@@ -241,15 +309,17 @@ main {
   margin-top: 1rem;
 }
 
-.right-box {
-  flex: 2;
-  background-color: #dddddddc;
-  border-radius: 10px;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  font-size: 1.1rem;
+.book-image {
+  width: 240px;
+  height: 360px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.book-cover {
+  width: 200px;
+  height: auto;
+  margin-bottom: 1rem;
 }
 
 .right-box p {
@@ -262,141 +332,145 @@ main {
   font-weight: 700;
 }
 
-.desc-box {
-  margin-top: 2rem;
-  background-color: #dddddddc;
-  padding: 2rem;
-  border-radius: 10px;
-}
-
-.desc-box h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 0.8rem;
-}
-
 .desc-box p {
   font-size: 1.05rem;
   line-height: 1.8;
   white-space: pre-line;
 }
 
-.text-red {
-  color: #f87171;
-}
-
-.text-green {
-  color: #4ade80;
-}
-
-.left-box,
-.right-box,
-.desc-box,
 .left-box *,
 .right-box *,
 .desc-box * {
-  color: #000000 !important;
-}
-
-.info-box {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.bg-green {
-  background-color: #16a34a;
-}
-
-.bg-red {
-  background-color: #dc2626;
-}
-
-.bg-redish {
-  background-color: #e35521;
-}
-
-.book-image {
-  width: 180px;
-  height: 270px;
-}
-
-.button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 0.5rem;
-  justify-content: center;
+  color: #000 !important;
 }
 
 .btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
+  margin: 0.5rem;
+  padding: 0.65rem 1.2rem;
   font-size: 1rem;
   font-weight: 500;
-  letter-spacing: 0.5px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
   color: white;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+.edit-btn {
+  background-color: #44adf7;
+  color: #2980b9;
+  border: 1px solid #1a8ad4ce;
+}
+
+.edit-btn:hover {
+  background-color: #2f78b8bc;
+}
+
+.extend-btn {
+  background-color: #f7ac44;
+  color: #f7ac44;
+  border: 1px solid #e98c09d7;
+}
+
+.extend-btn:hover {
+  background-color: #2f78b8bc;
+}
+
+
+.delete-btn {
+  background-color: #dc1c1cd0;
+  color: #c0392b;
+  border: 1px solid #c0392b;
+}
+
+.delete-btn:hover {
+  background-color: #b21f1fc4;
+}
+
+.primary {
+  background-color: #2980b9;
+}
+
+.danger {
+  background-color: #d24242;
+}
+
+.warning {
+  background-color: #f39c12;
+}
+
+.primary:hover {
+  background-color: #216a94;
+}
+
+.danger:hover {
+  background-color: #bb3c2e;
+}
+
+.warning:hover {
+  background-color: #d68910;
+}
+
+.info-box,
+.info-small-box {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: white;
 }
 
 .status-box {
   display: inline-block;
   padding: 0.4rem 0.8rem;
-  font-size: 1rem;
   border-radius: 6px;
+  min-width: 140px;
+  margin-top: 0.25rem;
+  width: fit-content;
+}
+
+/* Colors */
+.bg-green {
+  background-color: #e6f4ea;
+  color: #276749;
+  border-color: #c6e6c3;
+}
+
+.bg-red {
+  background-color: #ff2727a5;
+  color: #bb2323;
+  border-color: #d90016f9;
+}
+
+.bg-orangeish {
+  background-color: #f5c150;
+  color: #e2ad3b;
+  border-color: #c89526ce;
+}
+
+.button-row,
+.borrowed-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.penalty-row,
+.borrowed-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-top: 0.5rem;
-  width: fit-content;
-  min-width: 140px;
-  text-align: left;
-  margin-top: 0.25rem;
-}
-
-.info-small-box {
-  display: inline-block;
-  padding: 0.4rem 0.8rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  width: fit-content;
-  min-width: 140px;
-  text-align: left;
-  margin-top: 0.25rem;
-}
-
-.book-details {
-  padding: 1rem;
-  max-width: 600px;
-  margin: auto;
-  text-align: center;
-}
-
-.book-cover {
-  width: 200px;
-  height: auto;
-  margin-bottom: 1rem;
-}
-
-.book-buttons {
-  margin-top: 1.5rem;
-}
-
-.btn {
-  margin: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background-color: #f5a425;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  background-color: #e48c12;
 }
 
 .modal-overlay {
@@ -419,13 +493,11 @@ main {
 }
 
 .confirm-modal h3 {
-  margin: 0 0 15px;
-  color: #000;
   font-size: 20px;
+  color: #000;
 }
 
 .confirm-modal p {
-  margin: 0 0 20px;
   color: #555;
 }
 
@@ -435,22 +507,31 @@ main {
   gap: 10px;
 }
 
-.confirm-btn {
+.confirm-btn,
+.cancel-btn {
   padding: 8px 16px;
-  background: #c0392b;
-  color: #fff;
-  border: none;
   border-radius: 6px;
+  border: none;
   cursor: pointer;
 }
 
+.confirm-btn {
+  background: #c0392b;
+  color: #fff;
+}
+
 .cancel-btn {
-  padding: 8px 16px;
   background: #bdc3c7;
   color: #333;
-  border: none;
+}
+
+.days-input {
+  width: 100%;
+  padding: 10px;
+  margin: 12px 0;
   border-radius: 6px;
-  cursor: pointer;
+  border: 1px solid #ccc;
+  font-size: 16px;
 }
 
 .user-link {
@@ -462,73 +543,16 @@ main {
   text-decoration: underline !important;
 }
 
-.bg-green {
-  background-color: #28a745;
-}
-
-.bg-red {
-  background-color: #df2336;
-}
-
-.penalty-row {
+.penalty-row.penalty-actions {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-top: 0.5rem;
 }
 
-.notify-btn {
-  padding: 8px 16px;
-  background-color: #f39c12;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.notify-btn:hover {
-  background-color: #d68910;
-}
-
-.btn-blue {
-  background-color: #2980b9;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  display: inline-block;
-  text-align: center;
-  text-decoration: none;
-  transition: background-color 0.2s ease-in-out;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.btn-blue:hover {
-  background-color: #216a94;
-}
-
-.btn-red {
-  background-color: #c0392b;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  display: inline-block;
-  text-align: center;
-  text-decoration: none;
-  transition: background-color 0.2s ease-in-out;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.btn-red:hover {
-  background-color: #962d22;
+.info-box.info-small-box {
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
 </style>

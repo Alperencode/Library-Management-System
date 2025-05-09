@@ -8,7 +8,7 @@ from internal.types.responses import PublicUserResponse, FailResponse, SuccessRe
 from internal.types.types import SUCCESS, FAIL, NEED_ACTION
 from internal.database.users import get_all_users, get_user_by_id
 from internal.models.user import User, PublicUser, UserPreview, PaginatedUserPreviewListResponse
-from internal.utils.email import generate_penalty_email_html, send_email_to_user
+from internal.utils.email import generate_penalty_email_html, generate_penalty_email_html_for_book, send_email_to_user
 from internal.database.users import ban_user, unban_user
 from internal.database.books import delete_book_by_id, remove_book_from_notify_lists, clear_books_from_user
 
@@ -237,3 +237,34 @@ async def notify_penalty_user(user_id: str, admin=Depends(get_current_admin)):
         )
 
     return SuccessResponse(code=SUCCESS, message="Penalty reminder email sent to user.")
+
+
+@router.post("/notify/{user_id}/book/{book_id}", response_model=SuccessResponse)
+async def notify_penalty_user_by_book(user_id: str, book_id: str, admin=Depends(get_current_admin)):
+    user = await get_user_by_id(user_id)
+    if not user:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="User not found"))
+        )
+
+    matching_penalty = next((p for p in (user.penalties or []) if p.book_id == book_id), None)
+
+    if not matching_penalty:
+        return JSONResponse(
+            status_code=404,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="No penalty found for this book"))
+        )
+
+    html = await generate_penalty_email_html_for_book(user, matching_penalty)
+    subject = "Penalty Reminder for Specific Book"
+
+    success = await send_email_to_user(user, html, subject)
+
+    if not success:
+        return JSONResponse(
+            status_code=500,
+            content=jsonable_encoder(FailResponse(code=FAIL, message="Failed to send penalty email"))
+        )
+
+    return SuccessResponse(code=SUCCESS, message="Penalty reminder email sent for specified book.")
