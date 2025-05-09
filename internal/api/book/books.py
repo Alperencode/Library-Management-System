@@ -34,6 +34,7 @@ async def list_books(
     subcategory: Optional[str] = Query(None),
     language: Optional[str] = Query(None),
     available_only: bool = Query(False),
+    borrowed_only: bool = Query(False),
     most_borrowed: bool = Query(False),
     recently_added: bool = Query(False),
     max_page_count: Optional[int] = Query(None, ge=1)
@@ -87,20 +88,12 @@ async def list_books(
                 pass
             else:
                 title_match = fuzz.partial_ratio(q_lower, book.title.lower())
-
-                author_match = (
-                    max(fuzz.partial_ratio(q_lower, author.lower()) for author in book.authors)
-                    if book.authors else 0
+                author_match = max((fuzz.partial_ratio(q_lower, author.lower()) for author in book.authors), default=0)
+                category_match = max(
+                    (fuzz.partial_ratio(q_lower, cat.category.lower()) for cat in book.categories if cat.category) +
+                    (fuzz.partial_ratio(q_lower, cat.subcategory.lower()) for cat in book.categories if cat.subcategory),
+                    default=0
                 )
-
-                cat_scores = []
-                for cat in book.categories or []:
-                    if cat.category:
-                        cat_scores.append(fuzz.partial_ratio(q_lower, cat.category.lower()))
-                    if cat.subcategory:
-                        cat_scores.append(fuzz.partial_ratio(q_lower, cat.subcategory.lower()))
-                category_match = max(cat_scores) if cat_scores else 0
-
                 publisher_match = fuzz.partial_ratio(q_lower, book.publisher.lower()) if book.publisher else 0
 
                 if max([title_match, author_match, category_match, publisher_match]) < threshold:
@@ -108,6 +101,8 @@ async def list_books(
 
         # Filters
         if available_only and book.borrowed:
+            continue
+        if borrowed_only and not book.borrowed:
             continue
         if max_page_count and book.page_count and book.page_count > max_page_count:
             continue
@@ -146,6 +141,9 @@ async def list_books(
             cover_image=book.cover_image,
             borrowed=book.borrowed,
             isbn=book.isbn,
+            borrowed_at=book.borrowed_at,
+            return_date=book.return_date,
+            has_penalty=book.has_penalty,
             currently_borrowed_by=book.currently_borrowed_by
         )
         for book in paginated_books

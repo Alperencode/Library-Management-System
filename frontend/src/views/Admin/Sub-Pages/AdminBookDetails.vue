@@ -6,13 +6,13 @@
           <img :src="book.cover_image || defaultCover" alt="Cover Image" class="book-image" />
           <div class="book-title">{{ book.title }}</div>
           <div class="button-row">
-            <button class="btn btn-blue" @click="editBook">Edit</button>
-            <button class="btn btn-red" @click="openDeleteModal(book)">Delete</button>
+            <button class="btn edit-btn" @click="editBook">Edit</button>
+            <button class="btn delete-btn" @click="openDeleteModal(book)">Delete</button>
           </div>
           <div class="info-box status-box" :class="book.borrowed ? 'bg-red' : 'bg-green'">
             <strong>Status:</strong> {{ book.borrowed ? 'Taken' : 'Available' }}
           </div>
-          <div class="info-box info-small-box bg-redish">
+          <div class="info-box info-small-box bg-orangeish">
             <strong>Borrow Count:</strong> {{ book.borrow_count || 0 }}
           </div>
         </div>
@@ -63,9 +63,7 @@
             <div class="info-box info-small-box bg-red">
               <strong>Penalty:</strong> Yes
             </div>
-            <button class="notify-btn" @click="notifyPenaltyUsers">
-              Notify User
-            </button>
+            <button class="btn warning bg-orangeish" @click="notifyPenaltyUsers">Notify User</button>
           </div>
         </div>
       </div>
@@ -137,7 +135,15 @@ function editBook() {
 
 async function notifyPenaltyUsers() {
   try {
-    const { data } = await api.post(`/admin/notify/${book.value.currently_borrowed_by}`)
+    const userId = book.value.currently_borrowed_by
+    const bookId = book.value.id
+
+    if (!userId || !bookId) {
+      toast.warning("Book or user ID is missing.")
+      return
+    }
+
+    const { data } = await api.post(`/admin/notify/${userId}/book/${bookId}`)
     if (data.code === "Success") {
       toast.success(data.message)
     }
@@ -313,10 +319,6 @@ main {
 
 .bg-red {
   background-color: #dc2626;
-}
-
-.bg-redish {
-  background-color: #e35521;
 }
 
 .book-image {
@@ -530,5 +532,108 @@ main {
 
 .btn-red:hover {
   background-color: #962d22;
+}
+
+.btn {
+  padding: 0.65rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  display: inline-block;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Types */
+.primary {
+  background-color: #2980b9;
+  color: white;
+}
+
+.primary:hover {
+  background-color: #216a94;
+}
+
+.danger {
+  background-color: #d24242;
+  color: white;
+}
+
+.danger:hover {
+  background-color: #bb3c2e;
+}
+
+.warning {
+  background-color: #f39c12;
+  color: white;
+}
+
+.warning:hover {
+  background-color: #d68910;
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.info-box {
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ccc;
+  margin-top: 8px;
+}
+
+.bg-green {
+  background-color: #e6f4ea;
+  color: #276749;
+  border-color: #c6e6c3;
+}
+
+.bg-red {
+  background-color: #ec6d66;
+  color: #c53030;
+  border-color: #b92030be;
+}
+
+.bg-orangeish {
+  background-color: #f5c150;
+  color: #e2ad3b;
+  border-color: #c89526ce;
+}
+
+.edit-btn {
+  background-color: #44adf7;
+  color: #2980b9;
+  border: 1px solid #1a8ad4ce;
+}
+
+.edit-btn:hover {
+  background-color: #2f78b8bc;
+}
+
+.delete-btn {
+  background-color: #f82525bf;
+  color: #c0392b;
+  border: 1px solid #c0392b;
+}
+
+.delete-btn:hover {
+  background-color: #b21f1fc4;
 }
 </style>
