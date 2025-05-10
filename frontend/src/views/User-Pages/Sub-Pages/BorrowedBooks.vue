@@ -4,6 +4,10 @@
       <div class="container">
         <h2>Borrowed Books</h2>
         <p>Here you can see the books you have borrowed.</p>
+        <div class="search-bar-wrapper">
+          <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
+            placeholder="Search by title, author, publisher..." />
+        </div>
 
         <div v-if="borrowedBooks.length === 0" class="no-results">
           <p class="no-results-text">You have not borrowed any books yet.</p>
@@ -11,7 +15,7 @@
 
         <div v-else>
           <div class="row grid">
-            <div v-for="(book, index) in borrowedBooks" :key="index" class="meeting-item">
+            <div v-for="(book, index) in paginatedBooks" :key="index" class="meeting-item">
               <div class="meeting-box">
                 <div class="thumb">
                   <router-link :to="book.link">
@@ -45,6 +49,15 @@
               </div>
             </div>
           </div>
+
+          <div v-if="totalPages > 1" class="pagination">
+            <button @click="prevPage" :disabled="currentPage === 1">‹</button>
+            <button v-for="page in visiblePages" :key="page" :class="{ active: page === currentPage }"
+              @click="goToPage(page)">
+              {{ page }}
+            </button>
+            <button @click="nextPage" :disabled="currentPage === totalPages">›</button>
+          </div>
         </div>
       </div>
     </section>
@@ -52,26 +65,69 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { formatDate } from "@/utils/date";
-import { useRouter } from "vue-router";
 import { useToast } from 'vue-toastification'
 
-const router = useRouter();
-const toast = useToast()
-
-const returnBook = () => {
-  router.push("/scan-book");
-};
+const toast = useToast();
 
 const borrowedBooks = ref([]);
+const currentPage = ref(1);
+const itemsPerPage = 3;
+
+const paginatedBooks = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return borrowedBooks.value.slice(start, end);
+});
+
+const totalPages = computed(() =>
+  Math.ceil(borrowedBooks.value.length / itemsPerPage)
+);
+
+const visiblePages = computed(() => {
+  const pages = [];
+  const maxButtons = 5;
+  let startPage = Math.max(1, currentPage.value - 2);
+  let endPage = Math.min(totalPages.value, startPage + maxButtons - 1);
+
+  if (endPage - startPage < maxButtons - 1) {
+    startPage = Math.max(1, endPage - maxButtons + 1);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
+const goToPage = (page) => {
+  currentPage.value = page;
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const searchQuery = ref('')
+
+const onSearchEnter = () => {
+  currentPage.value = 1
+  fetchBorrowedBooks()
+}
 
 const fetchBorrowedBooks = async () => {
   try {
     const res = await api.get("/borrowed");
-    borrowedBooks.value = res.data.books.map((book) => ({
+
+    let books = res.data.books.map((book) => ({
       id: book.id,
       title: book.title || "No Title",
       image: book.cover_image || defaultCover,
@@ -82,6 +138,16 @@ const fetchBorrowedBooks = async () => {
       borrowed_at: formatDate(book.borrowed_at),
       return_date: formatDate(book.return_date),
     }));
+
+    if (searchQuery.value.trim()) {
+      const q = searchQuery.value.toLowerCase();
+      books = books.filter((book) =>
+        book.title.toLowerCase().includes(q) ||
+        book.publisher.toLowerCase().includes(q) ||
+        book.authors.some((author) => author.toLowerCase().includes(q))
+      );
+    }
+    borrowedBooks.value = books;
   } catch (error) {
     console.error("Error retrieving borrowed books:", error);
   }
@@ -142,8 +208,28 @@ onMounted(fetchBorrowedBooks);
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 110%;
+  max-width: none;
+  min-width: 1000px;
+  height: 800px;
+  min-height: 800px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.container h2,
+.container>p {
+  color: white;
 }
 
 .no-results {
@@ -165,34 +251,49 @@ onMounted(fetchBorrowedBooks);
 .grid {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 20px;
-  margin-top: 20px;
+  width: 100%;
+  min-height: 300px;
+  margin: 0 auto;
 }
 
 .meeting-item {
-  width: 100%;
+  flex: 0 0 calc(33.333% - 20px);
+  max-width: calc(33.333% - 20px);
+  min-width: 280px;
+  box-sizing: border-box;
 }
 
-@media (min-width: 768px) {
+@media (max-width: 768px) {
+  .container {
+    min-width: auto;
+    max-width: 90%;
+  }
+
   .meeting-item {
-    width: calc(33.333% - 20px);
+    flex: 0 0 100%;
+    max-width: 100%;
   }
 }
 
 .meeting-box {
-  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 520px;
+  width: 280px;
   padding: 10px;
   border-radius: 8px;
   background-color: white;
-  height: 100%;
-  min-height: 100px;
+  border: 1px solid #ccc;
 }
 
 .thumb {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 180px;
+  height: 200px;
   background-color: #ffffff;
   padding: 8px;
   overflow: hidden;
@@ -221,8 +322,15 @@ onMounted(fetchBorrowedBooks);
 }
 
 .book-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
   text-align: center;
   margin-bottom: 8px;
+  line-height: 1.3;
+  max-height: calc(1.3em * 3);
 }
 
 .text-ellipsis {
@@ -234,23 +342,51 @@ onMounted(fetchBorrowedBooks);
   max-width: 100%;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  min-width: 4px;
+  background-color: #f2f2f2;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 6px;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #ffb03b;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button.active {
+  background-color: #ffb03b;
+  color: #fff;
+}
+
+.search-bar-wrapper {
+  margin: 12px 0;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
   border-radius: 6px;
-  margin-left: 6px;
-  color: white;
-  min-width: 80px;
-  text-align: center;
-}
-
-.status-badge.taken {
-  background-color: #e74c3c;
-}
-
-.status-badge.available {
-  background-color: #27ae60;
+  border: 1px solid #ccc;
+  font-size: 14px;
 }
 </style>
