@@ -1,30 +1,44 @@
 <template>
-  <div class="account-management">
-    <h2>Account Management</h2>
-    <form @submit.prevent="updateAccount">
-      <div class="form-group">
-        <label for="username">New Username:</label>
-        <input type="text" id="username" v-model="username" placeholder="New Username" />
-      </div>
+  <div class="page-background">
+    <div class="account-management">
+      <h2>Account Management</h2>
+      <form @submit.prevent="updateAccount">
+        <div class="form-group">
+          <label for="username">New Username:</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user"></i>
+            <input type="text" id="username" v-model="username" placeholder="New Username" />
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label for="email">New Email:</label>
-        <input type="email" id="email" v-model="email" placeholder="New Email" />
-      </div>
+        <div class="form-group">
+          <label for="email">New Email:</label>
+          <div class="input-wrapper">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" v-model="email" placeholder="New Email" />
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label for="new-password">New Password:</label>
-        <input type="password" id="new-password" v-model="newPassword" placeholder="New Password" />
-      </div>
+        <div class="form-group">
+          <label for="new-password">New Password:</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="new-password" v-model="newPassword" placeholder="New Password" />
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label for="confirm-password">Confirm Password:</label>
-        <input type="password" id="confirm-password" v-model="confirmPassword" placeholder="Confirm Password" />
-      </div>
+        <div class="form-group">
+          <label for="confirm-password">Confirm Password:</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="confirm-password" v-model="confirmPassword" placeholder="Confirm Password" />
+          </div>
+        </div>
 
-      <button class="ghost-round full-width" type="submit">Update</button>
-      <p v-if="message" :class="alertClass">{{ message }}</p>
-    </form>
+        <button class="ghost-round full-width" type="submit">Update</button>
+        <p v-if="message" :class="alertClass">{{ message }}</p>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -99,66 +113,91 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
+
+.page-background {
+  min-height: 100vh;
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
 .account-management {
-  max-width: 400px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 700px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 h2 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  font-size: 26px;
+  color: #ffffff;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 22px;
 }
 
 label {
   display: block;
-  font-weight: bold;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-wrapper i {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #adb5bd;
 }
 
 input {
   width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 12px 14px 12px 36px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: #ffffff;
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  border-color: #ffa600cc;
+  outline: none;
 }
 
 button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
+  width: 50%;
+  padding: 12px;
+  background: #ffa500cc;
+  color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background 0.3s ease;
+  display: block;
+  margin: 0 auto;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background: #dd9000cc;
 }
 
-.success-message {
-  color: #4caf50;
-  font-weight: bold;
-  font-size: 16px;
-  text-align: center;
-  margin-top: 10px;
-}
-
-.error-message {
-  color: #ff4d4d;
-  font-weight: bold;
-  font-size: 16px;
-  text-align: center;
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 5px;
-}
 </style>
