@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, time
 from fastapi import APIRouter, Depends, Query, Response
-from typing import Optional
+from typing import Optional, List
+from rapidfuzz import fuzz
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.utils.utils import get_current_user, get_scanned_book
@@ -357,18 +358,23 @@ async def logout_user(response: Response):
     return SuccessResponse(code=SUCCESS, message="Successfully removed the scanned_book")
 
 
-def filter_books(books, q: Optional[str]):
+def filter_books(books: List, q: Optional[str]) -> List:
     if not q:
         return books
+
     q_lower = q.lower()
-    return [
-        book for book in books
-        if (
-            q_lower in book.title.lower()
-            or any(q_lower in author.lower() for author in book.authors)
-            or (book.publisher and q_lower in book.publisher.lower())
-        )
-    ]
+    threshold = 85
+    filtered = []
+
+    for book in books:
+        title_match = fuzz.partial_ratio(q_lower, book.title.lower()) if book.title else 0
+        author_match = max((fuzz.partial_ratio(q_lower, author.lower()) for author in book.authors), default=0)
+        publisher_match = fuzz.partial_ratio(q_lower, book.publisher.lower()) if book.publisher else 0
+
+        if max(title_match, author_match, publisher_match) >= threshold:
+            filtered.append(book)
+
+    return filtered
 
 
 def paginate_books(books, page: int, limit: int):
