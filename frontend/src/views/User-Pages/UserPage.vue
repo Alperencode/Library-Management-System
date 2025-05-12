@@ -56,7 +56,7 @@
                     {{ book.title }}
                   </router-link>
                 </span>
-                <span class="date"> Return Date was: {{ formatDateWithoutTime(book.return_date) }}</span>
+                <span class="date"> &nbsp;&nbsp; Return Date was: {{ formatDateWithoutTime(book.return_date) }}</span>
               </div>
             </li>
           </ul>
@@ -82,7 +82,6 @@ const borrowedBooks = ref([]);
 const overdueBooks = ref([]);
 const requestedBooks = ref([]);
 const notifyList = ref([]);
-const borrowedHistory = ref([]);
 
 const logout = async () => {
   await api.post("/logout");
@@ -95,24 +94,22 @@ const menuItems = [
   { label: 'Borrowed Books', path: '/user-page/borrowed' },
   { label: 'Requested Books', path: '/user-page/requested' },
   { label: 'Notify Me List', path: '/user-page/notify' },
-  { label: 'Borrow History', path: '/user-page/history' },
-  { label: 'Overdue Books', path: '/user-page/overdue' }
+  { label: 'Overdue Books', path: '/user-page/overdue' },
+  { label: 'Borrow History', path: '/user-page/history' }
 ];
 
 onMounted(async () => {
-  const [borrowed, overdue, requested, notify, history] = await Promise.all([
+  const [borrowed, overdue, requested, notify] = await Promise.all([
     api.get('/borrowed'),
     api.get('/borrowed/overdue-books'),
     api.get('/request-book'),
     api.get('/notify-me'),
-    api.get('/borrowed/history'),
   ]);
 
   borrowedBooks.value = borrowed.data.books;
   overdueBooks.value = overdue.data.books;
   requestedBooks.value = requested.data.books;
   notifyList.value = notify.data.books;
-  borrowedHistory.value = history.data.books;
 });
 
 const topOverdueBooks = computed(() => {
