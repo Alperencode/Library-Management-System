@@ -1,3 +1,7 @@
+from datetime import datetime
+from typing import Optional
+from fastapi import Query
+from rapidfuzz import fuzz
 from fastapi import APIRouter, Depends, Body
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -9,9 +13,8 @@ from internal.types.types import SUCCESS, FAIL
 from internal.types.responses import (
     SuccessResponse,
     FailResponse,
-    BookRequestListResponse
+    PaginatedBookRequestListResponse
 )
-from datetime import datetime
 router = APIRouter()
 
 
@@ -49,32 +52,68 @@ async def request_book(data: BookRequest = Body(...), user: User = Depends(get_c
     )
 
 
-@router.get("/request-book", response_model=BookRequestListResponse)
-async def get_requested_books(user: User = Depends(get_current_user)):
+@router.get("/request-book", response_model=PaginatedBookRequestListResponse)
+async def get_requested_books(
+    user: User = Depends(get_current_user),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=100),
+    q: Optional[str] = Query(None, min_length=1)
+):
     if not user.requested_books:
-        return BookRequestListResponse(
+        return PaginatedBookRequestListResponse(
             code=SUCCESS,
             message="No requested books found",
-            books=[]
+            books=[],
+            total=0,
+            page=1,
+            last_page=1,
+            has_next=False
         )
+
+    q_lower = q.lower() if q else None
+    threshold = 85
+    filtered = []
+
+    for req in user.requested_books:
+        if not q_lower:
+            filtered.append(req)
+            continue
+
+        title_score = fuzz.partial_ratio(q_lower, req.title.lower()) if req.title else 0
+        author_score = max((fuzz.partial_ratio(q_lower, a.lower()) for a in req.authors), default=0)
+        publisher_score = fuzz.partial_ratio(q_lower, req.publisher.lower()) if req.publisher else 0
+
+        if max(title_score, author_score, publisher_score) >= threshold:
+            filtered.append(req)
+
+    total = len(filtered)
+    last_page = (total + limit - 1) // limit
+    page = min(page, last_page) if last_page > 0 else 1
+    start = (page - 1) * limit
+    end = start + limit
+    paginated = filtered[start:end]
 
     book_requests = [
         BookRequest(
-            id=request.id,
-            title=request.title,
-            authors=request.authors,
-            isbn=request.isbn,
-            publisher=request.publisher,
-            cover_image=request.cover_image,
-            status=request.status,
-            requested_at=request.requested_at,
-        ) for request in user.requested_books
+            id=req.id,
+            title=req.title,
+            authors=req.authors,
+            isbn=req.isbn,
+            publisher=req.publisher,
+            cover_image=req.cover_image,
+            status=req.status,
+            requested_at=req.requested_at,
+        ) for req in paginated
     ]
 
-    return BookRequestListResponse(
+    return PaginatedBookRequestListResponse(
         code=SUCCESS,
         message="Requested books retrieved successfully",
-        books=book_requests
+        books=book_requests,
+        total=total,
+        page=page,
+        last_page=last_page,
+        has_next=end < total and page < last_page
     )
 
 
