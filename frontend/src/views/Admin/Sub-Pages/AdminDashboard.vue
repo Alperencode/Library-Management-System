@@ -11,31 +11,37 @@
     </div>
 
       <div class="stats-container">
-        <div class="stat-card fade-in-row" :style="{ animationDelay: '0ms' }">
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '0ms' }" @click="router.push('/admin/books')" style="cursor: pointer;">
           <h3>Total Books</h3>
           <p>{{ animatedStats.total_books_count }}</p>
         </div>
-        <div class="stat-card fade-in-row" :style="{ animationDelay: '80ms' }">
+
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '80ms' }" @click="router.push('/admin/books')" style="cursor: pointer;">
           <h3>Available Books</h3>
           <p>{{ animatedStats.available_books_count }}</p>
         </div>
-        <div class="stat-card fade-in-row" :style="{ animationDelay: '160ms' }">
+
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '160ms' }" @click="router.push('/admin/borrow')" style="cursor: pointer;">
           <h3>Borrowed Books</h3>
           <p>{{ animatedStats.borrowed_books_count }}</p>
         </div>
-        <div class="stat-card fade-in-row" :style="{ animationDelay: '240ms' }">
+
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '240ms' }" @click="router.push('/admin/penalty')" style="cursor: pointer;">
           <h3>Penalty Books</h3>
           <p>{{ animatedStats.penalty_books_count }}</p>
         </div>
-        <div class="stat-card fade-in-row" :style="{ animationDelay: '320ms' }">
+
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '320ms' }" @click="router.push('/admin/users')" style="cursor: pointer;">
           <h3>Total Users</h3>
           <p>{{ animatedStats.total_users_count }}</p>
         </div>
-        <div class="stat-card fade-in-row" :style="{ animationDelay: '400ms' }">
+
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '400ms' }" @click="router.push('/admin/penalty')" style="cursor: pointer;">
           <h3>Penalty Users</h3>
           <p>{{ animatedStats.penalty_users_count }}</p>
         </div>
-        <div class="stat-card fade-in-row" :style="{ animationDelay: '480ms' }">
+
+        <div class="stat-card fade-in-row" :style="{ animationDelay: '480ms' }" @click="router.push('/admin/penalty')" style="cursor: pointer;">
           <h3>Total Penalty Fee</h3>
           <p>₺{{ animatedStats.total_penalty_fee.toFixed(2) }}</p>
         </div>
