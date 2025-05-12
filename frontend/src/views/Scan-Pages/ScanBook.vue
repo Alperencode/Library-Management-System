@@ -111,7 +111,6 @@ onMounted(fetchBooks)
 
 .scan-page {
   min-height: 100vh;
-  background: url("@/assets/images/meetings-bg.jpg") no-repeat center center fixed;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -168,7 +167,6 @@ onMounted(fetchBooks)
 }
 
 .popular-courses {
-  background: url("@/assets/images/meetings-bg.jpg") no-repeat center center fixed;
   padding: 60px 0;
   width: 100%;
 }
