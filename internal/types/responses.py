@@ -83,6 +83,14 @@ class BookRequestListResponse(SuccessResponse):
     books: List[BookRequest]
 
 
+class PaginatedBookRequestListResponse(SuccessResponse):
+    books: List[BookRequest]
+    total: int
+    page: int
+    last_page: int
+    has_next: bool
+
+
 class AdminDashboardResponse(SuccessResponse):
     borrowed_books_count: int
     penalty_books_count: int
