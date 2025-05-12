@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, time
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Query, Response
+from typing import Optional
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.utils.utils import get_current_user, get_scanned_book
@@ -11,157 +12,52 @@ from internal.models.user import User
 from internal.models.book import BookPreview
 from internal.types.responses import (
     FailResponse,
-    BookPreviewListResponse,
-    SuccessResponse
+    SuccessResponse,
+    PaginatedBookPreviewListResponse
 )
 
 
 router = APIRouter()
 
 
-@router.get("/borrowed", response_model=BookPreviewListResponse)
-async def get_borrowed_books(user: User = Depends(get_current_user)):
-    if not user.borrowed_books:
-        return BookPreviewListResponse(
-            code=SUCCESS, message="No borrowed books found", books=[]
-        )
-
-    previews = []
-    for book_id in user.borrowed_books:
-        book = await get_book_by_id(book_id)
-        if not book:
-            continue
-
-        previews.append(
-            BookPreview(
-                id=book.id,
-                title=book.title,
-                authors=book.authors,
-                categories=book.categories,
-                publisher=book.publisher,
-                cover_image=book.cover_image,
-                borrowed=book.borrowed,
-                isbn=book.isbn,
-                borrowed_at=book.borrowed_at,
-                return_date=book.return_date,
-                currently_borrowed_by=book.currently_borrowed_by
-            )
-        )
-
-    return BookPreviewListResponse(
-        code=SUCCESS,
-        message="Borrowed books retrieved successfully",
-        books=previews
-    )
+@router.get("/borrowed", response_model=PaginatedBookPreviewListResponse)
+async def get_borrowed_books(
+    user: User = Depends(get_current_user),
+    q: Optional[str] = Query(None, min_length=1),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=100)
+):
+    return await get_previews(user.borrowed_books or [], q, page, limit)
 
 
-@router.get("/borrowed/history", response_model=BookPreviewListResponse)
-async def get_borrowed_history(user: User = Depends(get_current_user)):
-    if not user.borrowed_history:
-        return BookPreviewListResponse(
-            code=SUCCESS, message="No borrowed history found", books=[]
-        )
-
-    previews = []
-
-    for book_id in user.borrowed_history:
-        book = await get_book_by_id(book_id)
-        if not book:
-            continue
-
-        previews.append(
-            BookPreview(
-                id=book.id,
-                title=book.title,
-                authors=book.authors,
-                categories=book.categories,
-                publisher=book.publisher,
-                cover_image=book.cover_image,
-                borrowed=book.borrowed,
-                isbn=book.isbn,
-                borrowed_at=book.borrowed_at,
-                return_date=book.return_date,
-                currently_borrowed_by=book.currently_borrowed_by
-            )
-        )
-
-    return BookPreviewListResponse(
-        code=SUCCESS,
-        message="Borrowed history retrieved successfully",
-        books=previews
-    )
+@router.get("/borrowed/history", response_model=PaginatedBookPreviewListResponse)
+async def get_borrowed_history(
+    user: User = Depends(get_current_user),
+    q: Optional[str] = Query(None, min_length=1),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=100)
+):
+    return await get_previews(user.borrowed_history or [], q, page, limit)
 
 
-@router.get("/notify-me", response_model=BookPreviewListResponse)
-async def get_notify_me_list(user: User = Depends(get_current_user)):
-    if not user.notify_me_list:
-        return BookPreviewListResponse(
-            code=SUCCESS, message="No books found to notify", books=[]
-        )
-
-    previews = []
-    for book_id in user.notify_me_list:
-        book = await get_book_by_id(book_id)
-        if not book:
-            continue
-
-        previews.append(
-            BookPreview(
-                id=book.id,
-                title=book.title,
-                authors=book.authors,
-                categories=book.categories,
-                publisher=book.publisher,
-                cover_image=book.cover_image,
-                borrowed=book.borrowed,
-                isbn=book.isbn,
-                borrowed_at=book.borrowed_at,
-                return_date=book.return_date,
-                currently_borrowed_by=book.currently_borrowed_by
-            )
-        )
-
-    return BookPreviewListResponse(
-        code=SUCCESS,
-        message="Notify me list retrieved successfully",
-        books=previews
-    )
+@router.get("/notify-me", response_model=PaginatedBookPreviewListResponse)
+async def get_notify_me_list(
+    user: User = Depends(get_current_user),
+    q: Optional[str] = Query(None, min_length=1),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=100)
+):
+    return await get_previews(user.notify_me_list or [], q, page, limit)
 
 
-@router.get("/borrowed/overdue-books", response_model=BookPreviewListResponse)
-async def get_overdue_books(user: User = Depends(get_current_user)):
-    if not user.overdue_books:
-        return BookPreviewListResponse(
-            code=SUCCESS, message="No overdue books found", books=[]
-        )
-
-    previews = []
-    for book_id in user.overdue_books:
-        book = await get_book_by_id(book_id)
-        if not book:
-            continue
-
-        previews.append(
-            BookPreview(
-                id=book.id,
-                title=book.title,
-                authors=book.authors,
-                categories=book.categories,
-                publisher=book.publisher,
-                cover_image=book.cover_image,
-                borrowed=book.borrowed,
-                isbn=book.isbn,
-                borrowed_at=book.borrowed_at,
-                return_date=book.return_date,
-                currently_borrowed_by=book.currently_borrowed_by
-            )
-        )
-
-    return BookPreviewListResponse(
-        code=SUCCESS,
-        message="Overdue books retrieved successfully",
-        books=previews
-    )
+@router.get("/borrowed/overdue-books", response_model=PaginatedBookPreviewListResponse)
+async def get_overdue_books(
+    user: User = Depends(get_current_user),
+    q: Optional[str] = Query(None, min_length=1),
+    page: int = Query(1, ge=1),
+    limit: int = Query(25, ge=1, le=100)
+):
+    return await get_previews(user.overdue_books or [], q, page, limit)
 
 
 @router.post("/borrow/{book_id}", response_model=SuccessResponse)
@@ -459,3 +355,63 @@ async def remove_notify_me(book_id: str, user: User = Depends(get_current_user))
 async def logout_user(response: Response):
     response.delete_cookie("scanned_book")
     return SuccessResponse(code=SUCCESS, message="Successfully removed the scanned_book")
+
+
+def filter_books(books, q: Optional[str]):
+    if not q:
+        return books
+    q_lower = q.lower()
+    return [
+        book for book in books
+        if (
+            q_lower in book.title.lower()
+            or any(q_lower in author.lower() for author in book.authors)
+            or (book.publisher and q_lower in book.publisher.lower())
+        )
+    ]
+
+
+def paginate_books(books, page: int, limit: int):
+    total = len(books)
+    last_page = (total + limit - 1) // limit
+    page = min(page, last_page) if last_page > 0 else 1
+    start = (page - 1) * limit
+    end = start + limit
+    return books[start:end], total, last_page, page, end < total and page < last_page
+
+
+async def get_previews(book_ids, q: Optional[str], page: int, limit: int):
+    books = []
+    for book_id in book_ids:
+        book = await get_book_by_id(book_id)
+        if book:
+            books.append(book)
+
+    filtered = filter_books(books, q)
+    paginated, total, last_page, page, has_next = paginate_books(filtered, page, limit)
+
+    previews = [
+        BookPreview(
+            id=book.id,
+            title=book.title,
+            authors=book.authors,
+            categories=book.categories,
+            publisher=book.publisher,
+            cover_image=book.cover_image,
+            borrowed=book.borrowed,
+            isbn=book.isbn,
+            borrowed_at=book.borrowed_at,
+            return_date=book.return_date,
+            currently_borrowed_by=book.currently_borrowed_by
+        ) for book in paginated
+    ]
+
+    return PaginatedBookPreviewListResponse(
+        code=SUCCESS,
+        message="Books retrieved successfully",
+        books=previews,
+        total=total,
+        page=page,
+        last_page=last_page,
+        has_next=has_next
+    )
