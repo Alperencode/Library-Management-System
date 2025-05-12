@@ -4,6 +4,7 @@
       <div class="container">
         <h2>Borrowed Books</h2>
         <p>Here you can see the books you have borrowed.</p>
+
         <div class="search-bar-wrapper">
           <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
             placeholder="Search by title, author, publisher..." />
@@ -15,7 +16,7 @@
 
         <div v-else>
           <div class="row grid">
-            <div v-for="(book, index) in paginatedBooks" :key="index" class="meeting-item">
+            <div v-for="(book, index) in borrowedBooks" :key="index" class="meeting-item">
               <div class="meeting-box">
                 <div class="thumb">
                   <router-link :to="book.link">
@@ -65,27 +66,69 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { formatDate } from "@/utils/date";
-import { useToast } from 'vue-toastification'
+import { useToast } from 'vue-toastification';
 
 const toast = useToast();
 
 const borrowedBooks = ref([]);
 const currentPage = ref(1);
 const itemsPerPage = 3;
+const totalPages = ref(1);
+const searchQuery = ref('');
 
-const paginatedBooks = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return borrowedBooks.value.slice(start, end);
-});
+const fetchBorrowedBooks = async () => {
+  try {
+    const res = await api.get("/borrowed", {
+      params: {
+        page: currentPage.value,
+        limit: itemsPerPage,
+        q: searchQuery.value || undefined
+      }
+    });
 
-const totalPages = computed(() =>
-  Math.ceil(borrowedBooks.value.length / itemsPerPage)
-);
+    const { books, last_page } = res.data;
+    totalPages.value = last_page || 1;
+
+    borrowedBooks.value = books.map((book) => ({
+      id: book.id,
+      title: book.title || "No Title",
+      image: book.cover_image || defaultCover,
+      link: `/books/${book.id}`,
+      authors: book.authors || [],
+      has_extended: book.has_extended || false,
+      publisher: book.publisher || "Unknown",
+      borrowed_at: formatDate(book.borrowed_at),
+      return_date: formatDate(book.return_date),
+    }));
+  } catch (error) {
+    console.error("Error retrieving borrowed books:", error);
+  }
+};
+
+const onSearchEnter = () => {
+  currentPage.value = 1;
+  fetchBorrowedBooks();
+};
+
+const goToPage = (page) => {
+  currentPage.value = page;
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
 
 const visiblePages = computed(() => {
   const pages = [];
@@ -104,64 +147,19 @@ const visiblePages = computed(() => {
   return pages;
 });
 
-const goToPage = (page) => {
-  currentPage.value = page;
-};
-
-const prevPage = () => {
-  if (currentPage.value > 1) currentPage.value--;
-};
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
-};
-
-const searchQuery = ref('')
-
-const onSearchEnter = () => {
-  currentPage.value = 1
-  fetchBorrowedBooks()
-}
-
-const fetchBorrowedBooks = async () => {
-  try {
-    const res = await api.get("/borrowed");
-
-    let books = res.data.books.map((book) => ({
-      id: book.id,
-      title: book.title || "No Title",
-      image: book.cover_image || defaultCover,
-      link: `/books/${book.id}`,
-      authors: book.authors || [],
-      has_extended: book.has_extended || false,
-      publisher: book.publisher || "Unknown",
-      borrowed_at: formatDate(book.borrowed_at),
-      return_date: formatDate(book.return_date),
-    }));
-
-    if (searchQuery.value.trim()) {
-      const q = searchQuery.value.toLowerCase();
-      books = books.filter((book) =>
-        book.title.toLowerCase().includes(q) ||
-        book.publisher.toLowerCase().includes(q) ||
-        book.authors.some((author) => author.toLowerCase().includes(q))
-      );
-    }
-    borrowedBooks.value = books;
-  } catch (error) {
-    console.error("Error retrieving borrowed books:", error);
-  }
-};
-
 const extendReturn = async (bookId) => {
   try {
     const res = await api.post(`/extend-return/${bookId}`);
-    toast.success(res.data.message)
-    await fetchBorrowedBooks();
+    toast.success(res.data.message);
+    fetchBorrowedBooks();
   } catch (err) {
     console.error("Extend return error:", err);
   }
 };
+
+watch(currentPage, () => {
+  fetchBorrowedBooks();
+});
 
 onMounted(fetchBorrowedBooks);
 </script>
