@@ -3,6 +3,8 @@
     <section class="meetings-page" id="meetings">
       <div class="container">
         <div class="main-content">
+          <h2 class="request-title">Request a Book</h2>
+          <p class="request-subtitle">Looking for a book? Start typing to search by title, author, publisher, or ISBN.</p>
           <div class="search-bar">
             <input class="input-line full-width" type="text" :value="searchQuery" @input="updateSearchQuery"
               @keyup.enter="performSearch" placeholder="Search by Author, Title, Publisher, ISBN..." />
@@ -12,7 +14,20 @@
               No books found for "{{ searchQuery }}"
             </p>
           </div>
-          <div v-else>
+          <div v-if="previousRequests.length > 0 && !searchPerformed" class="previous-requests">
+            <div class="requests-header">
+              <h3 class="previous-title">Your Previous Requests</h3>
+              <span class="see-more" @click="goToRequested">See more →</span>
+            </div>
+            <ul>
+              <li v-for="(book, index) in previousRequests.slice(0, 8)" :key="index">
+                <span class="truncate-text">
+                  <strong>{{ book.title }}</strong> by {{ book.authors.join(', ') || 'Unknown' }}
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div v-if="books.length > 0">
             <div class="row grid">
               <div v-for="(book, index) in books" :key="index" class="meeting-item">
                 <div class="meeting-box">
@@ -39,6 +54,7 @@
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -50,6 +66,12 @@ import { ref, watch, onMounted } from "vue"
 import api from "@/api/axios"
 import defaultCover from "@/assets/images/default-cover.png"
 import { useToast } from 'vue-toastification'
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+const goToRequested = () => {
+  router.push("/user-page/requested");
+};
 
 const books = ref([])
 const searchQuery = ref("")
@@ -57,6 +79,7 @@ const searchPerformed = ref(false)
 const currentPage = ref(1)
 const limit = ref(24)
 const toast = useToast()
+const previousRequests = ref([])
 
 const fetchBooks = async () => {
   if (!searchQuery.value.trim()) {
@@ -92,7 +115,7 @@ const fetchBooks = async () => {
         isbn: book.isbn || null,
         authors: book.authors || [],
         publisher: book.publisher || "Unknown",
-        categories: categoriesString,
+        categories: categoriesString || "Not specified",
       }
     })
     searchPerformed.value = true
@@ -123,6 +146,7 @@ const fetchRequestedBooks = async () => {
     const res = await api.get("/request-book")
     const ids = res.data.books.map((book) => book.id)
     requestedBookIds.value = new Set(ids)
+    previousRequests.value = res.data.books
   } catch (err) {
     console.warn("Could not fetch requested books")
   }
@@ -212,26 +236,46 @@ const requestBook = async (book) => {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
+  justify-content: center;
 }
+
 
 .meeting-item {
-  width: 100%;
+  flex: 0 0 calc(25% - 20px);
+  max-width: calc(25% - 20px);
+  min-width: 220px;
+  box-sizing: border-box;
 }
 
-@media (min-width: 768px) {
+
+@media (max-width: 1024px) {
   .meeting-item {
-    width: calc(33.333% - 20px);
+    flex: 0 0 calc(50% - 20px);
+    max-width: calc(50% - 20px);
   }
 }
 
+@media (max-width: 600px) {
+  .meeting-item {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+
 .meeting-box {
-  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 500px;
+  width: 280px;
   padding: 10px;
   border-radius: 8px;
   background-color: white;
-  height: 100%;
-  min-height: 100px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
 }
+
 
 .thumb {
   display: flex;
@@ -283,7 +327,7 @@ const requestBook = async (book) => {
   padding: 8px;
   font-size: 14px;
   font-weight: bold;
-  background-color: #3498db;
+  background-color: #ffa500cc;
   color: white;
   border: none;
   border-radius: 6px;
@@ -293,11 +337,89 @@ const requestBook = async (book) => {
 }
 
 .request-button:hover {
-  background-color: #2980b9;
+  background-color: #dd9000cc;
 }
 
 .request-button:disabled {
   background-color: #bdc3c7;
   cursor: not-allowed;
 }
+
+.request-title {
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.request-subtitle {
+  font-size: 16px;
+  margin-bottom: 30px;
+  color: white;
+}
+.previous-requests {
+  margin-top: 40px;
+  color: white;
+}
+
+.previous-requests h3 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #ffb03b;
+}
+
+.previous-requests ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+}
+
+.previous-requests li {
+  list-style: none;
+  background: rgba(255,255,255,0.1);
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: #fff;
+  min-width: 220px;
+  max-width: 300px;
+  font-size: 14px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.truncate-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.requests-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.previous-title {
+  font-size: 20px;
+  color: #ffb03b;
+  margin: 0;
+}
+
+.see-more {
+  font-size: 14px;
+  color: #ffb03b;
+  cursor: pointer;
+  transition: text-decoration 0.2s ease;
+}
+
+.see-more:hover {
+  text-decoration: underline;
+}
+
 </style>
