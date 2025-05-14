@@ -99,17 +99,19 @@ const menuItems = [
 ];
 
 onMounted(async () => {
-  const [borrowed, overdue, requested, notify] = await Promise.all([
-    api.get('/borrowed'),
-    api.get('/borrowed/overdue-books'),
-    api.get('/request-book'),
-    api.get('/notify-me'),
-  ]);
+  if (router.currentRoute.value.path === '/user-page' || router.currentRoute.value.path === '/user-page/') {
+    const [borrowed, overdue, requested, notify] = await Promise.all([
+      api.get('/borrowed'),
+      api.get('/borrowed/overdue-books'),
+      api.get('/request-book'),
+      api.get('/notify-me'),
+    ]);
 
-  borrowedBooks.value = borrowed.data.books;
-  overdueBooks.value = overdue.data.books;
-  requestedBooks.value = requested.data.books;
-  notifyList.value = notify.data.books;
+    borrowedBooks.value = borrowed.data.books;
+    overdueBooks.value = overdue.data.books;
+    requestedBooks.value = requested.data.books;
+    notifyList.value = notify.data.books;
+  }
 });
 
 const topOverdueBooks = computed(() => {

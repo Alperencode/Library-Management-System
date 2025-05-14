@@ -32,6 +32,16 @@
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
+                  <p class="text-ellipsis">
+                    <strong>Categories: </strong>
+                    <span v-if="book.categories.length">
+                      {{book.categories.map(c => c.subcategory ? `${c.category} / ${c.subcategory}` :
+                        c.category).join(', ')}}
+                    </span>
+                    <span v-else>
+                      Not specified
+                    </span>
+                  </p>
                   <div class="borrowed-date-badge" :title="book.borrowed_at">
                     <strong>Borrowed At:</strong> {{ book.borrowed_at }}
                   </div>
@@ -86,6 +96,7 @@ const fetchBorrowHistory = async () => {
       image: book.cover_image || defaultCover,
       authors: book.authors || [],
       publisher: book.publisher || "Unknown",
+      categories: book.categories || [],
       borrowed_at: formatDateWithoutTime(book.borrowed_at),
       return_date: formatDateWithoutTime(book.return_date)
     }));
@@ -278,7 +289,8 @@ onMounted(fetchBorrowHistory);
 }
 
 .book-title:hover {
-  color: #ffb03b; /* Optional: highlight color on hover */
+  color: #ffb03b;
+  /* Optional: highlight color on hover */
 }
 
 .book-title h4 {

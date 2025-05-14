@@ -34,6 +34,16 @@
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
+                  <p class="text-ellipsis">
+                    <strong>Categories: </strong>
+                    <span v-if="book.categories.length">
+                      {{book.categories.map(c => c.subcategory ? `${c.category} / ${c.subcategory}` :
+                        c.category).join(', ') }}
+                    </span>
+                    <span v-else>
+                      Not specified
+                    </span>
+                  </p>
                   <p><strong>Return Date was:</strong> {{ book.return_date }}</p>
                   <p v-if="book.penalty > 0" style="color: #b91c1c; font-weight: 600;">
                     <strong>Penalty:</strong> {{ book.penalty }} ₺
@@ -104,6 +114,7 @@ const fetchOverdueBooks = async () => {
         link: `/books/${book.id}`,
         authors: book.authors || [],
         publisher: book.publisher || "Unknown",
+        categories: book.categories || [],
         return_date: formatDate(book.return_date),
         penalty: match ? match.amount : 0,
       };

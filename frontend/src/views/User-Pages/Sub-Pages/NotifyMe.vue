@@ -18,19 +18,11 @@
 
         <div v-else>
           <div class="row grid">
-            <div
-              v-for="(book, index) in notifyMeBooks"
-              :key="index"
-              class="meeting-item"
-            >
+            <div v-for="(book, index) in notifyMeBooks" :key="index" class="meeting-item">
               <div class="meeting-box">
                 <div class="thumb">
                   <router-link :to="book.link">
-                    <img
-                      :src="book.image"
-                      :alt="book.title"
-                      class="book-thumbnail"
-                    />
+                    <img :src="book.image" :alt="book.title" class="book-thumbnail" />
                   </router-link>
                 </div>
                 <div class="down-content">
@@ -44,10 +36,20 @@
                   <p class="text-ellipsis" :title="book.publisher">
                     <strong>Publisher:</strong> {{ book.publisher }}
                   </p>
-                  <button
-                    class="remove-btn"
-                    @click="removeFromNotifyList(book.id)"
-                  >
+                  <p class="text-ellipsis">
+                    <strong>Categories: </strong>
+                    <span v-if="book.categories.length">
+                      {{book.categories.map(c => c.subcategory ? `${c.category} / ${c.subcategory}` :
+                        c.category).join(', ') }}
+                    </span>
+                    <span v-else>
+                      Not specified
+                    </span>
+                  </p>
+                  <p v-if="book.returnDate" class="text-ellipsis">
+                    <strong>Return Date:</strong> {{ new Date(book.returnDate).toLocaleDateString() }}
+                  </p>
+                  <button class="remove-btn" @click="removeFromNotifyList(book.id)">
                     Remove
                   </button>
                 </div>
@@ -56,14 +58,14 @@
           </div>
         </div>
 
-          <div v-if="totalPages > 1" class="pagination">
-            <button @click="prevPage" :disabled="currentPage === 1">‹</button>
-            <button v-for="page in visiblePages" :key="page" :class="{ active: page === currentPage }"
-              @click="goToPage(page)">
-              {{ page }}
-            </button>
-            <button @click="nextPage" :disabled="currentPage === totalPages">›</button>
-          </div>
+        <div v-if="totalPages > 1" class="pagination">
+          <button @click="prevPage" :disabled="currentPage === 1">‹</button>
+          <button v-for="page in visiblePages" :key="page" :class="{ active: page === currentPage }"
+            @click="goToPage(page)">
+            {{ page }}
+          </button>
+          <button @click="nextPage" :disabled="currentPage === totalPages">›</button>
+        </div>
       </div>
     </section>
   </div>
@@ -93,7 +95,7 @@ const fetchNotifyMeList = async () => {
       }
     });
 
-totalPages.value = res.data.last_page || 1;
+    totalPages.value = res.data.last_page || 1;
 
     notifyMeBooks.value = res.data.books.map((book) => ({
       id: book.id,
@@ -102,7 +104,8 @@ totalPages.value = res.data.last_page || 1;
       link: `/books/${book.id}`,
       authors: book.authors || [],
       publisher: book.publisher || "Unknown",
-
+      categories: book.categories || [],
+      returnDate: book.return_date || null,
     }));
   } catch (error) {
     console.error("Error retrieving borrowed books:", error);
@@ -305,6 +308,7 @@ onMounted(fetchNotifyMeList);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .down-content h4 {
   margin-bottom: 8px;
   text-align: center;
