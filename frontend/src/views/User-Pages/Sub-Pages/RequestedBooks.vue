@@ -43,7 +43,8 @@
                   <p class="text-ellipsis">
                     <strong>Requested At:</strong> {{ book.requested_at }}
                   </p>
-                  <button class="remove-btn" @click="deleteRequest(book.id)">
+                  <button class="remove-btn" @click="deleteRequest(book.id)"
+                    :disabled="['Added', 'Denied'].includes(book.status)">
                     Delete Request
                   </button>
                 </div>
@@ -68,7 +69,7 @@
 import { ref, onMounted, watch, computed } from "vue";
 import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
-import { formatDate } from "@/utils/date";
+import { formatDateWithoutTime } from "@/utils/date";
 import { useToast } from "vue-toastification";
 
 const toast = useToast();
@@ -99,7 +100,7 @@ const fetchRequestedBooks = async () => {
       authors: book.authors || [],
       publisher: book.publisher || "Unknown",
       status: book.status || "Request Sent",
-      requested_at: formatDate(book.requested_at),
+      requested_at: formatDateWithoutTime(book.requested_at),
     }));
   } catch (error) {
     console.error("Error retrieving requested books:", error);
@@ -108,13 +109,19 @@ const fetchRequestedBooks = async () => {
 
 const deleteRequest = async (id) => {
   try {
-    const res = await api.delete(`/requests/${id}`)
-    toast.success(res.data.message)
-    requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id)
+    const res = await api.delete(`/requests/${id}`);
+    toast.success(res.data.message);
+
+    requestedBooks.value = requestedBooks.value.filter((b) => b.id !== id);
+    if (requestedBooks.value.length === 0 && currentPage.value > 1) {
+      currentPage.value--;
+    }
+
+    await fetchRequestedBooks();
   } catch (error) {
-    console.error("Failed to delete book request:", error)
+    console.error("Failed to delete book request:", error);
   }
-}
+};
 
 const onSearchEnter = () => {
   currentPage.value = 1;
@@ -412,5 +419,11 @@ onMounted(fetchRequestedBooks);
 
 .status-badge.request-sent {
   background-color: #7f8c8d;
+}
+
+.remove-btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>

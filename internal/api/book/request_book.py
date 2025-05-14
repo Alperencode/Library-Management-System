@@ -5,7 +5,7 @@ from rapidfuzz import fuzz
 from fastapi import APIRouter, Depends, Body
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from internal.models.request import BookRequest
+from internal.models.request import BookRequest, RequestStatus
 from internal.models.user import User
 from internal.utils.utils import get_current_user
 from internal.database.users import update_user, get_user_by_id
@@ -24,7 +24,7 @@ async def request_book(data: BookRequest = Body(...), user: User = Depends(get_c
     if not user.requested_books:
         user.requested_books = []
 
-    data.requested_at = datetime.now()
+    # Check for duplicates
     for existing in user.requested_books:
         if existing.id and existing.id == data.id:
             return JSONResponse(
@@ -35,6 +35,23 @@ async def request_book(data: BookRequest = Body(...), user: User = Depends(get_c
                 ))
             )
 
+    # Count only active requests
+    active_requests = [
+        r for r in user.requested_books
+        if r.status not in {RequestStatus.ADDED, RequestStatus.DENIED, RequestStatus.APPROVED}
+    ]
+    if len(active_requests) >= 10:
+        return JSONResponse(
+            status_code=400,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message="You can only have up to 10 active book requests at a time." +
+                " Please wait for current requests to be processed before adding more."
+            ))
+        )
+
+    # Proceed with request
+    data.requested_at = datetime.now()
     user.requested_books.append(data)
     updated = await update_user(user)
     if not updated:
@@ -42,7 +59,7 @@ async def request_book(data: BookRequest = Body(...), user: User = Depends(get_c
             status_code=500,
             content=jsonable_encoder(FailResponse(
                 code=FAIL,
-                message="Failed to update user data"
+                message="Failed to update your request. Please try again later."
             ))
         )
 
@@ -85,6 +102,9 @@ async def get_requested_books(
 
         if max(title_score, author_score, publisher_score) >= threshold:
             filtered.append(req)
+
+    deprioritized_statuses = {RequestStatus.ADDED, RequestStatus.DENIED}
+    filtered.sort(key=lambda req: req.status in deprioritized_statuses)
 
     total = len(filtered)
     last_page = (total + limit - 1) // limit
@@ -152,8 +172,8 @@ async def delete_requested_book(request_id: str, user: User = Depends(get_curren
             ))
         )
 
-    filtered = [req for req in user.requested_books if req.id != request_id]
-    if len(filtered) == len(user.requested_books):
+    matching = next((req for req in user.requested_books if req.id == request_id), None)
+    if not matching:
         return JSONResponse(
             status_code=404,
             content=jsonable_encoder(FailResponse(
@@ -162,7 +182,21 @@ async def delete_requested_book(request_id: str, user: User = Depends(get_curren
             ))
         )
 
-    user.requested_books = filtered
+    # Disallow deletion for statuses: 'Approved', 'Added', 'Denied'
+    if matching.status in {
+        RequestStatus.APPROVED,
+        RequestStatus.ADDED,
+        RequestStatus.DENIED
+    }:
+        return JSONResponse(
+            status_code=403,
+            content=jsonable_encoder(FailResponse(
+                code=FAIL,
+                message=f"Requests with status '{matching.status.value}' cannot be deleted."
+            ))
+        )
+
+    user.requested_books = [req for req in user.requested_books if req.id != request_id]
     updated = await update_user(user)
     if not updated:
         return JSONResponse(
