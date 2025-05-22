@@ -68,20 +68,23 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import api from '@/api/axios';
 import { useAuth } from '@/composables/useAuth';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import defaultCover from '@/assets/images/default-cover.png';
 import { formatDateWithoutTime } from '@/utils/date';
 
 const router = useRouter();
+const route = useRoute();
 const { user, setUser } = useAuth();
 
 const borrowedBooks = ref([]);
 const overdueBooks = ref([]);
 const requestedBooks = ref([]);
 const notifyList = ref([]);
+
+const dataLoaded = ref(false);
 
 const logout = async () => {
   await api.post("/logout");
@@ -98,8 +101,8 @@ const menuItems = [
   { label: 'Borrow History', path: '/user-page/history' }
 ];
 
-onMounted(async () => {
-  if (router.currentRoute.value.path === '/user-page' || router.currentRoute.value.path === '/user-page/') {
+const fetchDashboardData = async () => {
+  try {
     const [borrowed, overdue, requested, notify] = await Promise.all([
       api.get('/borrowed'),
       api.get('/borrowed/overdue-books'),
@@ -111,8 +114,26 @@ onMounted(async () => {
     overdueBooks.value = overdue.data.books;
     requestedBooks.value = requested.data.books;
     notifyList.value = notify.data.books;
+    dataLoaded.value = true;
+  } catch (err) {
+    console.error("Failed to fetch dashboard data:", err);
+  }
+};
+
+onMounted(() => {
+  if (route.path === '/user-page' || route.path === '/user-page/') {
+    fetchDashboardData();
   }
 });
+
+watch(
+  () => route.path,
+  (newPath) => {
+    if ((newPath === '/user-page' || newPath === '/user-page/') && !dataLoaded.value) {
+      fetchDashboardData();
+    }
+  }
+);
 
 const topOverdueBooks = computed(() => {
   return overdueBooks.value

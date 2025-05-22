@@ -40,7 +40,7 @@
                   <p class="text-ellipsis" :title="book.return_date">
                     <strong>Return Date:</strong> {{ book.return_date }}
                   </p>
-                  <button class="return-btn" @click="returnBook(book.id)">
+                  <button class="return-btn" @click="returnBook()">
                     Return
                   </button>
                   <button class="extend-btn" :disabled="book.has_extended" @click="extendReturn(book.id)">
@@ -71,7 +71,9 @@ import api from "@/api/axios";
 import defaultCover from "@/assets/images/default-cover.png";
 import { formatDate } from "@/utils/date";
 import { useToast } from 'vue-toastification';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const toast = useToast();
 
 const borrowedBooks = ref([]);
@@ -160,6 +162,10 @@ const extendReturn = async (bookId) => {
 watch(currentPage, () => {
   fetchBorrowedBooks();
 });
+
+const returnBook = () => {
+  router.push('/scan-book');
+};
 
 onMounted(fetchBorrowedBooks);
 </script>
