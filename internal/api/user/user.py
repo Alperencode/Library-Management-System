@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.utils.utils import hash_password, get_current_user
+from internal.database.admins import get_admin_by_email, get_admin_by_username
 from internal.database.users import get_user_by_id, update_user, get_user_by_username, get_user_by_email
 from internal.types.responses import FailResponse, PublicUserResponse
 from internal.types.types import SUCCESS, FAIL, UserUpdateRequest
@@ -43,7 +44,8 @@ async def update_user_info(update_data: UserUpdateRequest, user: User = Depends(
     isUpdated = False
     if update_data.username and update_data.username != user.username:
         existing_username_user = await get_user_by_username(update_data.username)
-        if existing_username_user:
+        existing_username_admin = await get_admin_by_username(update_data.username)
+        if (existing_username_user and existing_username_user.id != user.id) or existing_username_admin:
             return JSONResponse(status_code=409, content=jsonable_encoder(
                 FailResponse(
                     code=FAIL,
@@ -55,7 +57,8 @@ async def update_user_info(update_data: UserUpdateRequest, user: User = Depends(
 
     if update_data.email and update_data.email != user.email:
         existing_email_user = await get_user_by_email(update_data.email)
-        if existing_email_user:
+        existing_email_admin = await get_admin_by_email(update_data.email)
+        if (existing_email_user and existing_email_user.id != user.id) or existing_email_admin:
             return JSONResponse(status_code=409, content=jsonable_encoder(
                 FailResponse(
                     code=FAIL,
