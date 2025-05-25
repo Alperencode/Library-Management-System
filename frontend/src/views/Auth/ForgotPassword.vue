@@ -2,18 +2,10 @@
   <div class="login-page">
     <div class="login-wrapper">
       <div class="login-form-container">
-        <h2 class="title">Login</h2>
-        <div class="input-fields">
-          <input type="email" v-model="email" placeholder="Email" class="input-line full-width" />
-          <input type="password" v-model="password" placeholder="Password" class="input-line full-width" />
-        </div>
-        <div class="remember-me">
-          <input type="checkbox" id="rememberMe" v-model="rememberMe" />
-          <label for="rememberMe">Remember Me</label>
-        </div>
+        <h2 class="title">Forgot Password</h2>
+        <input type="email" v-model="email" placeholder="Enter your email" class="input-line full-width" />
         <div class="spacer"></div>
-        <button class="ghost-round full-width" @click="login">Login</button>
-        <p class="forgot-link" @click="goToForgotPassword">Forgot Password?</p>
+        <button class="ghost-round full-width" @click="sendResetEmail">Send Reset Link</button>
       </div>
     </div>
   </div>
@@ -21,57 +13,32 @@
 
 <script>
 import api from "@/api/axios";
-import { useRouter } from "vue-router";
 import { useToast } from "vue-toastification";
-import { useAuth } from "@/composables/useAuth";
+import { useRouter } from "vue-router";
 
 const toast = useToast();
 
 export default {
-  name: "AuthLogin",
-
+  name: "ForgotPasswordView",
   data() {
     return {
       email: "",
-      password: "",
-      rememberMe: false,
     };
   },
-
   setup() {
     const router = useRouter();
-    const { setUser, setAdmin } = useAuth();
-    return { router, setUser, setAdmin };
+    return { router };
   },
-
   methods: {
-    async login() {
+    async sendResetEmail() {
       try {
-        const response = await api.post("/login", {
-          email: this.email,
-          password: this.password,
-          remember_me: this.rememberMe,
-        });
-
-        toast.success(response.data.message);
-
-        if (response.data.user) {
-          this.setUser(response.data.user);
-          this.router.push("/");
-        }
-        else if (response.data.admin) {
-          this.setAdmin(response.data.admin);
-          this.router.push("/admin");
-        }
-        else {
-          toast.error("Login failed. Unexpected response.");
-        }
+        const response = await api.post("/forgot-password", { email: this.email });
+        toast.success(response.data.message || "Password reset email sent.");
+        this.router.push("/");
       } catch (error) {
-        toast.error("Login failed. Please check your credentials.");
+        const message = error?.response?.data?.message || "Failed to send reset email.";
+        toast.error(message);
       }
-    },
-    goToForgotPassword() {
-      this.router.push("/forgot-password");
     }
   }
 };
@@ -483,6 +450,7 @@ button:focus {
   cursor: pointer;
   text-decoration: underline;
 }
+
 .forgot-link:hover {
   color: #fff;
 }

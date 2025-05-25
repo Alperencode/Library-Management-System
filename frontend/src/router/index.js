@@ -9,6 +9,8 @@ import HomeView from "@/views/HomeView.vue";
 // Auth
 import Login from "@/views/Auth/Login.vue";
 import Register from "@/views/Auth/Register.vue";
+import ForgotPassword from "@/views/Auth/ForgotPassword.vue";
+import ResetPassword from "@/views/Auth/ResetPassword.vue";
 
 // User-Pages
 import UserPage from "@/views/User-Pages/UserPage.vue";
@@ -56,6 +58,18 @@ const routes = [
   // Auth
   { path: "/login", component: Login },
   { path: "/register", component: Register },
+  { path: "/forgot-password", component: ForgotPassword },
+  {
+    path: "/reset-password",
+    component: ResetPassword,
+    beforeEnter: (to, from, next) => {
+      if (!to.query.token) {
+        toast.error("Reset token is missing.");
+        return next("/login");
+      }
+      next();
+    }
+  },
 
   // User-Pages
   {
@@ -97,7 +111,7 @@ const routes = [
       { path: "banned-users", component: AdminBannedUserManagement },
       { path: "add-book", component: AdminAddBook },
       { path: "users/:id", component: AdminUserDetail },
-      { path: "books/:id", component: AdminBookDetails},
+      { path: "books/:id", component: AdminBookDetails },
       { path: 'requests/:id', component: AdminRequestDetails },
       { path: "/admin/edit-book/:id", component: AdminEditBook },
       { path: "requests/added", component: AdminRequestAdded },

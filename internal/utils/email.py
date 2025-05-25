@@ -1,11 +1,13 @@
 import smtplib
 from typing import List
+from urllib.parse import urlencode
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate, make_msgid, formataddr
 from config.config import LOCAL_IP, get_config
 from internal.models.user import BookPenalty
 from internal.database.books import get_book_by_id
+from internal.tokens.tokens import create_password_reset_token
 from .logger import logger
 
 
@@ -187,3 +189,52 @@ async def generate_penalty_email_html_for_book(user, penalty: BookPenalty) -> st
       </body>
     </html>
     """
+
+
+async def send_reset_password_email(user, token: str) -> bool:
+    try:
+        host = get_config("email_host")
+        port = get_config("email_port")
+        username = get_config("email_username")
+        password = get_config("email_password")
+        sender_name = "Library Notifications"
+        sender_email = username
+
+        reset_link = f"http://{LOCAL_IP}:8085/reset-password?{urlencode({'token': token})}"
+
+        html_body = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; color: #333;">
+            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+              <h2 style="color: #2d6a4f;">Password Reset Request</h2>
+              <p>Hi {user.username},</p>
+              <p>We received a request to reset your password.</p>
+              <p>You can reset it by clicking the link below:</p>
+              <a href="{reset_link}" style="display: inline-block; margin-top: 10px; padding: 10px 15px; background-color: #40916c; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
+              <p style="margin-top: 20px; font-size: 12px; color: #888;">If you didn't request this, you can safely ignore this email.</p>
+            </div>
+          </body>
+        </html>
+        """
+
+        with smtplib.SMTP(host, port) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(username, password)
+
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = "Reset Your Password"
+            msg["From"] = formataddr((sender_name, sender_email))
+            msg["To"] = user.email
+            msg["Date"] = formatdate(localtime=True)
+            msg["Message-ID"] = make_msgid()
+            msg["Reply-To"] = sender_email
+
+            msg.attach(MIMEText(html_body, "html", "utf-8"))
+            server.sendmail(sender_email, [user.email], msg.as_string())
+
+            return True
+
+    except Exception as e:
+        logger.error(f"Failed to send reset password email to {user.email}: {e}")
+        return False

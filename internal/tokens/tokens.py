@@ -63,6 +63,23 @@ def verify_scanned_book_token(token: str):
         return None, None
 
 
+def create_password_reset_token(user_id: str, expire_minutes: int = 30) -> str:
+    return create_jwt_token(
+        {"id": user_id, "purpose": "reset_password"},
+        timedelta(minutes=expire_minutes)
+    )
+
+
+def verify_password_reset_token(token: str) -> str | None:
+    try:
+        payload = jwt.decode(token, get_config("secret_key"), algorithms=[get_config("algorithm")])
+        if payload.get("purpose") != "reset_password":
+            return None
+        return payload.get("id")
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return None
+
+
 def _get_cookie_options():
     environment = get_config("environment")
     if environment == "dev":
