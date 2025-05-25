@@ -44,3 +44,12 @@ class UserUpdateRequest(BaseModel):
 class LanguageItem(BaseModel):
     Language: str
     Key: str
+
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(max_length=128)

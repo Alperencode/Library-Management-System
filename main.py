@@ -11,7 +11,7 @@ from internal.api.utils.exception_handlers import generic_exception_handler, val
 from internal.cron_jobs.penalty_handler import start_cron_jobs, check_penalties
 from internal.api.auth import login, token
 from internal.api.book import books, google_books, request_book, user_book_operations
-from internal.api.user import user
+from internal.api.user import user, reset_password
 from internal.api.utils import service_status
 from internal.api.admin import (
     admin_auth, admin_dashboard,
@@ -59,6 +59,7 @@ app.add_middleware(
 app.include_router(login.router, prefix=get_config("api_prefix"), tags=["Authenticate and Session Management"])
 app.include_router(token.router, prefix=get_config("api_prefix"), tags=["Token Management"])
 app.include_router(user.router, prefix=get_config("api_prefix"), tags=["User Management"])
+app.include_router(reset_password.router, prefix=get_config("api_prefix"), tags=["Reset Password"])
 app.include_router(service_status.router, prefix=get_config("api_prefix"), tags=["Service Status"])
 app.include_router(books.router, prefix=get_config("api_prefix"), tags=["Book Management"])
 app.include_router(google_books.router, prefix=get_config("api_prefix"), tags=["Google Books"])
