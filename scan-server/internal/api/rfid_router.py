@@ -2,28 +2,29 @@ import nfc
 import ndef
 import time as t
 from time import time
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Request
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.types.types import WriteRequest, FAIL, SUCCESS
 from internal.types.responses import FailResponse, ISBNResponse
 from internal.tokens.tokens import create_scanned_book_token
 from internal.gpio.buzz import buzz_and_blink, rgb_on
+from threading import Thread, Event
+import asyncio
+
 
 router = APIRouter()
 
 
 @router.get("/read", response_model=ISBNResponse)
-def read_rfid(response: Response):
-    # turn LED solid blue for the duration of the read
+async def read_rfid(response: Response, request: Request):
     rgb_on(b=True)
-
-    read_result = None
     timeout_seconds = 10
     start_time = time()
+    cancel_event = Event()
+    read_result = {}
 
     def on_connect(tag):
-        # stop the solid-blue
         rgb_on(False, False, False)
         t.sleep(0.2)
 
@@ -32,62 +33,55 @@ def read_rfid(response: Response):
                 if isinstance(record, ndef.TextRecord):
                     buzz_and_blink(g=True)
                     create_scanned_book_token(record.text, response)
-                    return ISBNResponse(
+                    read_result['value'] = ISBNResponse(
                         code=SUCCESS,
                         message="Successfully retrieved RFID data",
                         data=record.text
                     )
+                    return True
             buzz_and_blink(r=True, buzz_times=2, blink_times=2)
-            return JSONResponse(
-                status_code=400,
+        return True
+
+    def terminate():
+        return time() - start_time > timeout_seconds or cancel_event.is_set()
+
+    def read_from_rfid():
+        try:
+            with nfc.ContactlessFrontend('tty:AMA0') as clf:
+                clf.connect(rdwr={'on-connect': on_connect}, terminate=terminate)
+        except Exception as e:
+            read_result['value'] = JSONResponse(
+                status_code=500,
                 content=jsonable_encoder(
-                    FailResponse(code=FAIL, message="Unsupported RFID record type.")
+                    FailResponse(code=FAIL, message=f"RFID read error: {str(e)}")
                 )
             )
 
-        buzz_and_blink(r=True, buzz_times=2, blink_times=2)
-        return JSONResponse(
-            status_code=404,
-            content=jsonable_encoder(
-                FailResponse(code=FAIL, message="Invalid RFID tag")
+    thread = Thread(target=read_from_rfid)
+    thread.start()
+
+    # Monitor client disconnect
+    while thread.is_alive():
+        if await request.is_disconnected():
+            cancel_event.set()
+            thread.join()
+            rgb_on(False, False, False)
+            return JSONResponse(
+                status_code=499,
+                content=jsonable_encoder(FailResponse(code=FAIL, message="Client disconnected."))
             )
+        await asyncio.sleep(0.1)
+
+    thread.join()
+    rgb_on(False, False, False)
+    await asyncio.sleep(0.2)
+    buzz_and_blink(r=True, buzz_times=2, blink_times=2)
+    return read_result.get('value') or JSONResponse(
+        status_code=408,
+        content=jsonable_encoder(
+            FailResponse(code=FAIL, message="RFID read timeout or no tag.")
         )
-
-    def terminate():
-        return time() - start_time > timeout_seconds
-
-    try:
-        with nfc.ContactlessFrontend('tty:AMA0') as clf:
-            def connected(tag):
-                nonlocal read_result
-                read_result = on_connect(tag)
-                return True
-
-            clf.connect(rdwr={'on-connect': connected}, terminate=terminate)
-
-    except Exception as e:
-        rgb_on(False, False, False)
-        t.sleep(0.2)
-        buzz_and_blink(r=True, buzz_times=2, blink_times=2)
-        return JSONResponse(
-            status_code=500,
-            content=jsonable_encoder(
-                FailResponse(code=FAIL, message=f"RFID read error: {str(e)}")
-            )
-        )
-
-    if not read_result:
-        rgb_on(False, False, False)
-        t.sleep(0.2)
-        buzz_and_blink(r=True, buzz_times=2, blink_times=2)
-        return JSONResponse(
-            status_code=408,
-            content=jsonable_encoder(
-                FailResponse(code=FAIL, message="RFID read timeout: no tag detected.")
-            )
-        )
-
-    return read_result
+    )
 
 
 @router.post("/write", response_model=ISBNResponse)
