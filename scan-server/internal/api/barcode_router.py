@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Response
+from fastapi import APIRouter, BackgroundTasks, Response, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.types.responses import ISBNResponse, FailResponse
@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw
 import numpy as np
 import cv2
 import time
+import asyncio
 
 router = APIRouter()
 
@@ -26,9 +27,9 @@ display_until = 0
 camera_session_id = 0
 
 
-def stop_camera_after_delay(delay: float, session_id: float):
-    global shared_picam2, camera_active, display_title, display_until, camera_session_id
-    time.sleep(delay)
+async def stop_camera_after_delay(delay: float, session_id: float):
+    global shared_picam2, camera_active, display_title, display_until, camera_session_id, last_scanned_frame
+    await asyncio.sleep(delay)
     if session_id != camera_session_id:
         return
     if shared_picam2:
@@ -37,16 +38,17 @@ def stop_camera_after_delay(delay: float, session_id: float):
     camera_active = False
     display_title = ""
     display_until = 0
-    time.sleep(0.3)
+    last_scanned_frame = None
+    await asyncio.sleep(0.3)
 
 
 @router.get("/barcode/video")
-def barcode_video_feed():
+async def barcode_video_feed():
     global shared_picam2, camera_active, flip_camera, display_title, display_until, last_scanned_frame
 
     retry_start = time.time()
     while (not camera_active or shared_picam2 is None) and time.time() - retry_start < 1.5:
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
 
     if not camera_active or shared_picam2 is None:
         return JSONResponse(
@@ -61,18 +63,17 @@ def barcode_video_feed():
         global shared_picam2, camera_active, display_title, display_until, last_scanned_frame
 
         while True:
-            if (not camera_active or shared_picam2 is None) and (time.time() > display_until):
+            if not camera_active or shared_picam2 is None:
                 break
 
             if display_title and time.time() < display_until and last_scanned_frame is not None:
                 frame = last_scanned_frame.copy()
             else:
-                if shared_picam2 is None:
-                    break
-                try:
-                    frame = shared_picam2.capture_array("main")
-                except Exception:
-                    break
+                display_title = ""
+                display_until = 0
+                last_scanned_frame = None
+
+                frame = shared_picam2.capture_array("main")
 
             if flip_camera:
                 frame = cv2.rotate(frame, cv2.ROTATE_180)
@@ -108,12 +109,11 @@ def barcode_video_feed():
             _, buffer = cv2.imencode(".jpg", frame)
             frame_bytes = buffer.tobytes()
             yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame_bytes + b"\r\n"
-
     return StreamingResponse(generate_frames(), media_type="multipart/x-mixed-replace; boundary=frame")
 
 
 @router.get("/barcode/scan", response_model=ISBNResponse)
-def scan_barcode(background_tasks: BackgroundTasks, response: Response):
+async def scan_barcode(background_tasks: BackgroundTasks, response: Response, request: Request):
     global shared_picam2, camera_active, display_title, display_until, last_scanned_frame, camera_session_id
 
     timeout_seconds = 30
@@ -129,7 +129,7 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
             shared_picam2 = None
             camera_active = False
 
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
 
         # Start camera
         shared_picam2 = Picamera2()
@@ -139,7 +139,7 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
         )
         shared_picam2.configure(video_config)
         shared_picam2.start()
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
         metadata = shared_picam2.capture_metadata()
 
         shared_picam2.set_controls({
@@ -150,6 +150,7 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
         })
 
         camera_active = True
+        last_scanned_frame = None
         camera_session_id = time.time()
         current_session_id = camera_session_id
 
@@ -158,6 +159,16 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
 
         # Poll for barcodes until timeout
         while time.time() - start_time < timeout_seconds:
+            if await request.is_disconnected():
+                rgb_on(False, False, False)
+                background_tasks.add_task(stop_camera_after_delay, 0, current_session_id)
+                return JSONResponse(
+                    status_code=499,
+                    content=jsonable_encoder(
+                        FailResponse(code=FAIL, message="Client disconnected during scan.")
+                    )
+                )
+
             frame = shared_picam2.capture_array("main")
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -187,7 +198,7 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
 
                     # turn off blue before green blink/buzz
                     rgb_on(False, False, False)
-                    time.sleep(0.2)
+                    await asyncio.sleep(0.2)
                     buzz_and_blink(g=True)
 
                     background_tasks.add_task(stop_camera_after_delay, 2.5, current_session_id)
@@ -197,11 +208,11 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
                         data=isbn
                     )
 
-            time.sleep(0.2)
+            await asyncio.sleep(0.2)
 
         # timeout path: turn off blue before red blink/buzz
         rgb_on(False, False, False)
-        time.sleep(0.2)
+        await asyncio.sleep(0.2)
         buzz_and_blink(r=True, buzz_times=2, blink_times=2)
         background_tasks.add_task(stop_camera_after_delay, 0, current_session_id)
         return JSONResponse(
@@ -214,7 +225,7 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
     except Exception as e:
         # exception path: turn off blue before red blink/buzz
         rgb_on(False, False, False)
-        time.sleep(0.2)
+        await asyncio.sleep(0.2)
         buzz_and_blink(r=True, buzz_times=2, blink_times=2)
         background_tasks.add_task(stop_camera_after_delay, 0, camera_session_id)
         return JSONResponse(

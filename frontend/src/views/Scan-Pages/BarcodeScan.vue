@@ -2,7 +2,7 @@
   <div class="how-to-page">
     <div class="blur-header">
       <h2 class="how-to-title">How to Use Barcode Scan</h2>
-      <p class="how-to-description" >
+      <p class="how-to-description">
         Follow the instructions below to scan the book's barcode:
       </p>
     </div>
@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from "vue";
+import { ref, nextTick, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import api from "@/api/axios";
 import { useToast } from "vue-toastification";
@@ -42,10 +42,13 @@ const showVideo = ref(false);
 const videoUrl = ref("");
 const videoContainer = ref(null);
 const instructions = ref(null);
+const abortController = ref(null);
 
 const barcodeUrl = `${window.location.protocol}//${process.env.VUE_APP_API_HOST}:${process.env.VUE_APP_BARCODE_PORT}`;
 
 onMounted(() => {
+  showVideo.value = false;
+  videoUrl.value = "";
   nextTick(() => {
     setTimeout(() => {
       if (instructions.value) {
@@ -60,13 +63,20 @@ onMounted(() => {
   });
 });
 
+onBeforeUnmount(() => {
+  if (abortController.value) {
+    abortController.value.abort();
+  }
+});
+
 const startBarcodeScan = async () => {
   loading.value = true;
   toast.clear();
-
   showVideo.value = true;
-  videoUrl.value = `${barcodeUrl}/api/v1/barcode/video`;
+  videoUrl.value = `${barcodeUrl}/api/v1/barcode/video?t=${Date.now()}`;
 
+  abortController.value = new AbortController();
+  const signal = abortController.value.signal;
 
   await nextTick();
 
@@ -85,11 +95,7 @@ const startBarcodeScan = async () => {
     const response = await fetch(`${barcodeUrl}/api/v1/barcode/scan`, {
       method: "GET",
       credentials: "include",
-    });
-
-    await fetch(`${barcodeUrl}/api/v1/barcode/video`, {
-      method: "GET",
-      credentials: "include",
+      signal
     });
 
     const result = await response.json();
@@ -102,13 +108,16 @@ const startBarcodeScan = async () => {
       }, 2500);
     } else {
       toast.error(result.message || "Barcode scan failed.");
-      setTimeout(async () => {
+      setTimeout(() => {
         router.push("/scan-book");
       }, 2500);
     }
   } catch (err) {
-    toast.error("Barcode scanner is not responding or unreachable.");
-    console.error(err);
+    if (err.name === 'AbortError') {
+      toast.warning("Barcode scan request was aborted due to route change.");
+    } else {
+      toast.error("Barcode scanner is not responding or unreachable.");
+    }
   } finally {
     loading.value = false;
   }

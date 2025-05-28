@@ -18,18 +18,19 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from "vue";
+import { ref, nextTick, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import api from "@/api/axios";
-import { useToast } from 'vue-toastification'
+import { useToast } from 'vue-toastification';
 
 const router = useRouter();
 
 const rfidFailed = ref(false);
 const loading = ref(false);
-const toast = useToast()
+const toast = useToast();
 const scanButtonText = ref("Start RFID Scan");
 const instructions = ref(null);
+const abortController = ref(null);
 
 const rfidUrl = `${window.location.protocol}//${process.env.VUE_APP_API_HOST}:${process.env.VUE_APP_RFID_PORT}`;
 
@@ -48,15 +49,25 @@ onMounted(() => {
   });
 });
 
+onBeforeUnmount(() => {
+  if (abortController.value) {
+    abortController.value.abort();
+  }
+});
+
 const startRfidScan = async () => {
   loading.value = true;
   rfidFailed.value = false;
   scanButtonText.value = "Start RFID Scan";
 
+  abortController.value = new AbortController();
+  const signal = abortController.value.signal;
+
   try {
     const response = await fetch(`${rfidUrl}/api/v1/read`, {
       method: 'GET',
-      credentials: 'include'
+      credentials: 'include',
+      signal
     });
 
     const result = await response.json();
@@ -65,8 +76,8 @@ const startRfidScan = async () => {
       if (result.code === "Success") {
         if (result.message) toast.success(result.message);
         setTimeout(async () => {
-        await handleIsbn(result.data);
-      }, 1000);
+          await handleIsbn(result.data);
+        }, 1000);
       } else {
         toast.error(result.message || "RFID scan failed");
       }
@@ -75,8 +86,12 @@ const startRfidScan = async () => {
     }
 
   } catch (err) {
-    console.error("RFID Scan error:", err);
-    toast.error("RFID scanner is not responding or unreachable.");
+    if (err.name === 'AbortError') {
+      toast.warning("RFID scan request was aborted due to route change.");
+    } else {
+      console.error("RFID Scan error:", err);
+      toast.error("RFID scanner is not responding or unreachable.");
+    }
   } finally {
     loading.value = false;
   }
