@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from internal.types.responses import ISBNResponse, FailResponse
 from internal.types.types import SUCCESS, FAIL
-from internal.gpio.buzz import buzz_and_blink
+from internal.gpio.buzz import buzz_and_blink, rgb_on
 from internal.utils.utils import is_valid_isbn, get_font
 from internal.tokens.tokens import create_scanned_book_token
 
@@ -120,6 +120,7 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
     start_time = time.time()
 
     try:
+        # Reset any previous camera session
         if shared_picam2:
             try:
                 shared_picam2.close()
@@ -130,6 +131,7 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
 
         time.sleep(0.5)
 
+        # Start camera
         shared_picam2 = Picamera2()
         video_config = shared_picam2.create_video_configuration(
             main={"size": (640, 480)},
@@ -151,14 +153,20 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
         camera_session_id = time.time()
         current_session_id = camera_session_id
 
+        # turn the LED solid blue for the duration of the scan
+        rgb_on(b=True)
+
+        # Poll for barcodes until timeout
         while time.time() - start_time < timeout_seconds:
             frame = shared_picam2.capture_array("main")
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
             decoded_barcodes = decode(gray)
+
             for barcode in decoded_barcodes:
                 isbn = barcode.data.decode("utf-8").strip()
                 if is_valid_isbn(isbn):
+                    # label the frame for display
                     try:
                         book_meta = meta(isbn)
                         title = book_meta.get("Title") or isbn
@@ -168,12 +176,18 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
                     display_title = title
                     display_until = time.time() + 3
 
+                    # draw polygon on last frame
                     for b in decoded_barcodes:
                         pts = np.array([b.polygon], np.int32)
                         cv2.polylines(frame, [pts], isClosed=True, color=(0, 255, 0), thickness=2)
 
                     last_scanned_frame = frame.copy()
+
                     create_scanned_book_token(isbn, response)
+
+                    # turn off blue before green blink/buzz
+                    rgb_on(False, False, False)
+                    time.sleep(0.2)
                     buzz_and_blink(g=True)
 
                     background_tasks.add_task(stop_camera_after_delay, 2.5, current_session_id)
@@ -185,6 +199,9 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
 
             time.sleep(0.2)
 
+        # timeout path: turn off blue before red blink/buzz
+        rgb_on(False, False, False)
+        time.sleep(0.2)
         buzz_and_blink(r=True, buzz_times=2, blink_times=2)
         background_tasks.add_task(stop_camera_after_delay, 0, current_session_id)
         return JSONResponse(
@@ -195,6 +212,9 @@ def scan_barcode(background_tasks: BackgroundTasks, response: Response):
         )
 
     except Exception as e:
+        # exception path: turn off blue before red blink/buzz
+        rgb_on(False, False, False)
+        time.sleep(0.2)
         buzz_and_blink(r=True, buzz_times=2, blink_times=2)
         background_tasks.add_task(stop_camera_after_delay, 0, camera_session_id)
         return JSONResponse(

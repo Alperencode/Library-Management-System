@@ -78,34 +78,20 @@ const toast = useToast()
 
 const user = ref(null)
 const savedUser = localStorage.getItem("user")
-if (savedUser) {
-  user.value = JSON.parse(savedUser)
-}
+if (savedUser) user.value = JSON.parse(savedUser)
 
 const book = ref(null)
-const notifyList = ref([])
 const actionBlocked = ref(false)
 
 const isMine = computed(() => book.value?.currently_borrowed_by === user.value?.id)
-const isBorrowedByAnother = computed(() => {
-  return (
-    book.value &&
-    book.value.borrowed &&
-    book.value.currently_borrowed_by &&
-    book.value.currently_borrowed_by !== user.value?.id
-  )
-})
+const isBorrowedByAnother = computed(() =>
+  book.value?.borrowed && book.value.currently_borrowed_by && book.value.currently_borrowed_by !== user.value.id
+)
 
-const penaltyAmount = computed(() => {
-  const bookId = book.value?._id || book.value?.id
-  const penalties = user.value?.penalties || []
-  const match = penalties.find(p => p.book_id === bookId)
-  return match ? match.amount : 0
-})
-
-const isAlreadyInNotifyList = computed(() => {
-  return notifyList.value.some(item => item.id === book.value?.id || item._id === book.value?._id)
-})
+const isAlreadyInNotifyList = computed(() =>
+  Array.isArray(book.value?.notify_me_list) &&
+  book.value.notify_me_list.includes(user.value.id)
+)
 
 const showReturnButton = computed(() => isMine.value)
 const showExtendButton = computed(() => isMine.value)
@@ -116,32 +102,19 @@ onMounted(async () => {
   try {
     const res = await api.get(`/scan-book/${route.params.id}`)
     book.value = res.data.book
-  } catch (err) {
+  } catch {
     router.push("/")
-  }
-
-  try {
-    const notifyRes = await api.get(`/notify-me`)
-    notifyList.value = (notifyRes.data.books || []).map(book => ({
-      ...book,
-      _id: book._id || book.id
-    }))
-  } catch (err) {
-    console.error("Failed to fetch book details:", err)
   }
 })
 
 async function borrowBook() {
-  if (!book.value?._id) {
-    return
-  }
-
+  if (!book.value?._id) return
   try {
     const res = await api.post(`/borrow/${book.value._id}`)
-    toast.success(res.data.message || "Book borrowed successfully")
+    toast.success(res.data.message)
     setTimeout(() => router.push("/"), 1000)
   } catch (err) {
-    console.error("Borrow failed:", err)
+    console.error(err)
   }
 }
 
@@ -174,11 +147,11 @@ async function notifyMe() {
     toast.error('Book ID is not available')
     return
   }
-
   try {
     const res = await api.post(`/notify-me/${book.value._id}`)
     toast.success(res.data.message)
-    notifyList.value.push(book.value)
+    book.value.notify_me_list = book.value.notify_me_list || []
+    book.value.notify_me_list.push(user.value.id)
   } catch (err) {
     console.error("Notification failed:", err)
   }

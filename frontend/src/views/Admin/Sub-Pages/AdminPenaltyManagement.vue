@@ -1,18 +1,12 @@
 <template>
   <div class="admin-users-container">
     <h2 class="mb-4">User Penalty Management</h2>
+    <div class="total-penalty">
+      <strong>Total Penalty:</strong> ₺{{ totalPenaltyFee.toFixed(2) }}
+    </div>
 
     <input v-model="searchQuery" @keyup.enter="onSearchEnter" class="search-input"
       placeholder="Search by username or email..." />
-
-
-    <div class="toggle-wrapper">
-      <label class="toggle-switch">
-        <input type="checkbox" v-model="onlyWithPenalties" @change="onSearchEnter" />
-        <span class="slider"></span>
-      </label>
-      <span class="toggle-label">Show only users with penalties</span>
-    </div>
 
     <div v-if="users.length > 0" class="user-table-wrapper">
       <table class="user-table">
@@ -27,7 +21,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(user, index) in users" :key="user.id" class="fade-in-row" :style="{ animationDelay: `${index * 80}ms` }">
+          <tr v-for="(user, index) in users" :key="user.id" class="fade-in-row"
+            :style="{ animationDelay: `${index * 80}ms` }">
             <td>
               <router-link :to="`/admin/users/${user.id}`" class="user-link">
                 {{ user.username }}
@@ -78,7 +73,7 @@ const searchQuery = ref('')
 const page = ref(1)
 const limit = 10
 const lastPage = ref(1)
-const onlyWithPenalties = ref(false)
+const totalPenaltyFee = ref(0)
 
 
 const selectedUserId = ref(null)
@@ -91,7 +86,7 @@ const fetchUsers = async () => {
         page: page.value,
         limit,
         q: searchQuery.value || undefined,
-        only_with_penalties: onlyWithPenalties.value || undefined
+        only_with_penalties: true
       }
     })
     users.value = response.data.users
@@ -103,7 +98,19 @@ const fetchUsers = async () => {
   }
 }
 
-onMounted(fetchUsers)
+const fetchDashboardStats = async () => {
+  try {
+    const { data } = await api.get("/admin/dashboard")
+    totalPenaltyFee.value = data.total_penalty_fee || 0
+  } catch (err) {
+    toast.error("Failed to fetch dashboard statistics")
+  }
+}
+
+onMounted(() => {
+  fetchUsers()
+  fetchDashboardStats()
+})
 
 const onSearchEnter = () => {
   page.value = 1
@@ -305,11 +312,11 @@ const unbanUser = async (userId) => {
   transition: 0.3s;
 }
 
-.toggle-switch input:checked + .slider {
+.toggle-switch input:checked+.slider {
   background-color: #40916c;
 }
 
-.toggle-switch input:checked + .slider:before {
+.toggle-switch input:checked+.slider:before {
   transform: translateX(20px);
 }
 
@@ -322,15 +329,22 @@ const unbanUser = async (userId) => {
   animation: fadeUp 0.5s ease-out both;
 }
 
+.total-penalty {
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: #b91c1c;
+  font-weight: bold;
+}
+
 @keyframes fadeUp {
   0% {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
 </style>

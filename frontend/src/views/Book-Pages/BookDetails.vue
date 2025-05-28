@@ -62,7 +62,6 @@ const router = useRouter()
 const toast = useToast()
 
 const book = ref(null)
-const notifyList = ref([])
 import { useAuth } from "@/composables/useAuth";
 
 const { user } = useAuth();
@@ -78,7 +77,8 @@ const isBorrowedByAnother = computed(() => {
 })
 
 const isAlreadyInNotifyList = computed(() => {
-  return notifyList.value.some(item => item.id === book.value?.id || item._id === book.value?._id)
+  return Array.isArray(book.value?.notify_me_list) &&
+         book.value.notify_me_list.includes(user.value?.id)
 })
 
 const showReturnButton = computed(() => isMine.value)
@@ -87,17 +87,8 @@ const showNotifyButton = computed(() => isBorrowedByAnother.value)
 const showBorrowButton = computed(() => book.value && !book.value.borrowed)
 
 onMounted(async () => {
-    const res = await api.get(`/books/${route.params.id}`)
-    book.value = res.data.book
-
-  if (user.value) {
-      const notifyRes = await api.get(`/notify-me`)
-      notifyList.value = (notifyRes.data.books || []).map(book => ({
-        ...book,
-        _id: book._id || book.id
-      }))
-
-  }
+  const res = await api.get(`/books/${route.params.id}`)
+  book.value = res.data.book
 })
 
 function goToScanBook() {
@@ -122,7 +113,12 @@ async function notifyMe() {
   try {
     const res = await api.post(`/notify-me/${book.value._id}`)
     toast.success(res.data.message)
-    notifyList.value.push(book.value)
+
+    if (!book.value.notify_me_list) {
+      book.value.notify_me_list = []
+    }
+
+    book.value.notify_me_list.push(user.value.id)
   } catch (err) {
     console.error("Notify error:", err)
   }
