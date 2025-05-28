@@ -10,6 +10,7 @@ from internal.types.responses import FailResponse, ISBNResponse
 from internal.tokens.tokens import create_scanned_book_token
 from internal.gpio.buzz import buzz_and_blink, rgb_on
 from threading import Thread, Event
+import asyncio
 
 
 router = APIRouter()
@@ -39,7 +40,7 @@ async def read_rfid(response: Response, request: Request):
                     )
                     return True
             buzz_and_blink(r=True, buzz_times=2, blink_times=2)
-        return True  # Still disconnect reader
+        return True
 
     def terminate():
         return time() - start_time > timeout_seconds or cancel_event.is_set()
@@ -69,7 +70,7 @@ async def read_rfid(response: Response, request: Request):
                 status_code=499,
                 content=jsonable_encoder(FailResponse(code=FAIL, message="Client disconnected."))
             )
-        t.sleep(0.1)
+        await asyncio.sleep(0.1)
 
     thread.join()
     rgb_on(False, False, False)
