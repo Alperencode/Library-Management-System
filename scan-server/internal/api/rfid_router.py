@@ -1,5 +1,6 @@
 import nfc
 import ndef
+import time as t
 from time import time
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
@@ -7,18 +8,25 @@ from fastapi.encoders import jsonable_encoder
 from internal.types.types import WriteRequest, FAIL, SUCCESS
 from internal.types.responses import FailResponse, ISBNResponse
 from internal.tokens.tokens import create_scanned_book_token
-from internal.gpio.buzz import buzz_and_blink
+from internal.gpio.buzz import buzz_and_blink, rgb_on
 
 router = APIRouter()
 
 
 @router.get("/read", response_model=ISBNResponse)
 def read_rfid(response: Response):
+    # turn LED solid blue for the duration of the read
+    rgb_on(b=True)
+
     read_result = None
     timeout_seconds = 10
     start_time = time()
 
     def on_connect(tag):
+        # stop the solid-blue
+        rgb_on(False, False, False)
+        t.sleep(0.2)
+
         if tag.ndef and tag.ndef.length > 0:
             for record in tag.ndef.records:
                 if isinstance(record, ndef.TextRecord):
@@ -36,6 +44,7 @@ def read_rfid(response: Response):
                     FailResponse(code=FAIL, message="Unsupported RFID record type.")
                 )
             )
+
         buzz_and_blink(r=True, buzz_times=2, blink_times=2)
         return JSONResponse(
             status_code=404,
@@ -57,6 +66,8 @@ def read_rfid(response: Response):
             clf.connect(rdwr={'on-connect': connected}, terminate=terminate)
 
     except Exception as e:
+        rgb_on(False, False, False)
+        t.sleep(0.2)
         buzz_and_blink(r=True, buzz_times=2, blink_times=2)
         return JSONResponse(
             status_code=500,
@@ -66,6 +77,8 @@ def read_rfid(response: Response):
         )
 
     if not read_result:
+        rgb_on(False, False, False)
+        t.sleep(0.2)
         buzz_and_blink(r=True, buzz_times=2, blink_times=2)
         return JSONResponse(
             status_code=408,

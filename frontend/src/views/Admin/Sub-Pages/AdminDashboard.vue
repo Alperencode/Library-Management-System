@@ -87,22 +87,6 @@
       <p>{{ ((stats.borrowed_books_count / stats.total_books_count) * 100).toFixed(1) }}% of books are borrowed</p>
     </div>
 
-    <div class="recent-users">
-      <h3 class="section-title">Banned Users</h3>
-      <div v-if="bannedUsers && bannedUsers.length === 0" class="no-users">
-        No banned users found.
-      </div>
-      <div v-else class="user-list">
-        <div v-for="(user, index) in bannedUsers" :key="user.id" class="user-card fade-in-row" :style="{ animationDelay: `${index * 80}ms` }">
-          <div class="user-info">
-            <div class="user-name">{{ user.username }}</div>
-            <div class="user-email">({{ user.email }})</div>
-          </div>
-          <div class="view-details" @click="goToUserDetail(user.id)">User Details</div>
-        </div>
-      </div>
-    </div>
-
     <div v-if="showAdminModal" class="modal-overlay">
       <div class="modal-content">
         <button class="close-button" @click="closeAdminModal">×</button>
@@ -151,7 +135,6 @@ const animatedStats = ref({
   total_penalty_fee: 0
 });
 
-const bannedUsers = ref([]);
 const pieChartRef = ref(null);
 const barChartRef = ref(null);
 const booksChartRef = ref(null);
@@ -185,10 +168,6 @@ const openAdminModal = () => {
 const closeAdminModal = () => {
   showAdminModal.value = false;
   newAdmin.value = { username: '', email: '', password: '' };
-};
-
-const goToUserDetail = (userId) => {
-  router.push(`/admin/users/${userId}`);
 };
 
 const submitNewAdmin = async () => {
@@ -240,15 +219,6 @@ const fetchDashboardData = async () => {
     createCharts();
   } catch (error) {
     console.error('Failed to fetch dashboard stats:', error);
-  }
-};
-
-const fetchBannedUsers = async () => {
-  try {
-    const response = await api.get('/admin/users?page=1&limit=10');
-    bannedUsers.value = (response.data.users || []).filter(user => user.banned);
-  } catch (error) {
-    console.error('Failed to fetch banned users:', error);
   }
 };
 
@@ -407,7 +377,6 @@ const goToAddBook = () => {
 
 onMounted(() => {
   fetchDashboardData();
-  fetchBannedUsers();
   fetchAdminInfo();
 });
 </script>

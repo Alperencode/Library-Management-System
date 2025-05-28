@@ -89,11 +89,14 @@ async def list_books(
             else:
                 title_match = fuzz.partial_ratio(q_lower, book.title.lower())
                 author_match = max((fuzz.partial_ratio(q_lower, author.lower()) for author in book.authors), default=0)
-                category_match = max(
-                    (fuzz.partial_ratio(q_lower, cat.category.lower()) for cat in book.categories if cat.category) +
-                    (fuzz.partial_ratio(q_lower, cat.subcategory.lower()) for cat in book.categories if cat.subcategory),
-                    default=0
-                )
+                category_scores = [
+                    fuzz.partial_ratio(q_lower, cat.category.lower())
+                    for cat in book.categories if cat.category
+                ] + [
+                    fuzz.partial_ratio(q_lower, cat.subcategory.lower())
+                    for cat in book.categories if cat.subcategory
+                ]
+                category_match = max(category_scores, default=0)
                 publisher_match = fuzz.partial_ratio(q_lower, book.publisher.lower()) if book.publisher else 0
 
                 if max([title_match, author_match, category_match, publisher_match]) < threshold:
@@ -229,13 +232,14 @@ async def search_books(q: str = Query(...)):
             if book.authors else 0
         )
 
-        cat_scores = []
-        for cat in book.categories or []:
-            if cat.category:
-                cat_scores.append(fuzz.partial_ratio(q.lower(), cat.category.lower()))
-            if cat.subcategory:
-                cat_scores.append(fuzz.partial_ratio(q.lower(), cat.subcategory.lower()))
-        category_match = max(cat_scores) if cat_scores else 0
+        category_scores = [
+            fuzz.partial_ratio(q.lower(), cat.category.lower())
+            for cat in book.categories if cat.category
+        ] + [
+            fuzz.partial_ratio(q.lower(), cat.subcategory.lower())
+            for cat in book.categories if cat.subcategory
+        ]
+        category_match = max(category_scores, default=0)
 
         publisher_match = fuzz.partial_ratio(q.lower(), book.publisher.lower()) if book.publisher else 0
 

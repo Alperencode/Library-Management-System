@@ -14,11 +14,12 @@
     </div>
   </div>
 </template>
-  
+
 <script>
 import api from "@/api/axios";
 import { useRouter } from "vue-router";
 import { useToast } from "vue-toastification";
+import { useAuth } from "@/composables/useAuth";
 
 const toast = useToast();
 
@@ -35,7 +36,8 @@ export default {
 
   setup() {
     const router = useRouter();
-    return { router };
+    const { setUser } = useAuth();
+    return { router, setUser };
   },
 
   methods: {
@@ -49,28 +51,23 @@ export default {
 
         toast.success(response.data.message);
 
-        await this.fetchUser();
-        window.dispatchEvent(new Event("storage"));
-
-        this.router.push("/");
+        if (response.data.user) {
+          this.setUser(response.data.user);
+          this.router.push("/");
+        } else {
+          toast.error("Registration failed. Unexpected response.");
+        }
       } catch (error) {
-        console.log("Registration failed");
+        const msg = error?.response?.data?.message || "Registration failed. Please try again.";
+        toast.error(msg);
       }
-    },
-
-    async fetchUser() {
-      const response = await api.get("/me");
-      if (response.data.user) {
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-      }
-    },
+    }
   },
 };
 </script>
 
 
 <style scoped>
-
 .register-page {
   display: flex;
   flex-direction: column;
@@ -141,6 +138,7 @@ export default {
 .spacer {
   height: 20px;
 }
+
 .success-text {
   color: #4caf50;
   font-weight: bold;
@@ -162,7 +160,8 @@ export default {
 .spacer {
   height: 20px;
 }
-  .auth-container {
+
+.auth-container {
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -174,21 +173,22 @@ export default {
   left: 0;
   z-index: 9999;
 }
+
 body {
-    font-family: 'Lato', sans-serif;
-    background: url('@/assets/images/meetings-bg.jpg') no-repeat center center fixed;
-    background-size: cover;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  font-family: 'Lato', sans-serif;
+  background: url('@/assets/images/meetings-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .login-wrap {
-    background: rgba(255, 255, 255, 0.9);
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
@@ -203,28 +203,28 @@ label {
 }
 
 .form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
 }
 
 .field-icon {
-    float: right;
-    margin-right: 10px;
-    margin-top: -30px;
-    position: relative;
-    cursor: pointer;
+  float: right;
+  margin-right: 10px;
+  margin-top: -30px;
+  position: relative;
+  cursor: pointer;
 }
 
 .btn-primary {
-    background-color: #007bff;
-    border: none;
-    padding: 10px;
-    font-size: 18px;
-    width: 100%;
-    border-radius: 5px;
+  background-color: #007bff;
+  border: none;
+  padding: 10px;
+  font-size: 18px;
+  width: 100%;
+  border-radius: 5px;
 }
 
 input[type="checkbox"] {
@@ -275,7 +275,7 @@ button:focus {
   color: rgba(255, 255, 255, 0.65);
 }
 
-::-webkit-input-placeholder .input-line:focus +::input-placeholder {
+::-webkit-input-placeholder .input-line:focus+::input-placeholder {
   color: #fff;
 }
 
@@ -395,7 +395,7 @@ button:focus {
 }
 
 .overlay {
-  
+
   opacity: 0.85;
   height: 300px;
   position: absolute;
@@ -422,9 +422,10 @@ button:focus {
     width: 100%;
     height: 100%;
   }
+
   .overlay {
     width: 100%;
     height: 100%;
   }
 }
-  </style>
+</style>
