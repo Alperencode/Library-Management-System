@@ -301,7 +301,7 @@ async def extend_return(book_id: str, user: User = Depends(get_current_user)):
             )
         )
 
-    book.return_date = (book.return_date + timedelta(days=5)).replace(hour=23, minute=59, second=0)
+    book.return_date = (book.return_date + timedelta(days=7)).replace(hour=23, minute=59, second=0)
     book.has_extended = True
     updated_book = await update_book(book)
 
