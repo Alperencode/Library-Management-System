@@ -75,8 +75,12 @@ async def read_rfid(response: Response, request: Request):
     thread.join()
     rgb_on(False, False, False)
     await asyncio.sleep(0.2)
+    if read_result.get('value'):
+        return read_result.get('value')
+
+    
     buzz_and_blink(r=True, buzz_times=2, blink_times=2)
-    return read_result.get('value') or JSONResponse(
+    return JSONResponse(
         status_code=408,
         content=jsonable_encoder(
             FailResponse(code=FAIL, message="RFID read timeout or no tag.")
