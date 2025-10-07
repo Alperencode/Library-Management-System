@@ -2,16 +2,35 @@
 
 A modern, API-driven Library Management System developed using FastAPI (Python), MongoDB, and Vue.js. This system allows users to manage borrowing and returning of books, request new titles for the library, and receive email notifications when requested or borrowed books become available.
 
+## Scan Videos
+
+<div align="center">
+
+<p align=center> <img src="images/RFID-Scan.gif" width=650> </p>
+<p align=center> <img src="images/Barcode-Scan.gif" width=650> </p>
+
+</div>
+
+## Related Images
+
+<img src="images/Project-1.jpg" width="600">
+<img src="images/Project-2.jpg" width="600">
+<img src="images/Project-3.jpg" width="600">
+<img src="images/Waiting-For-Scan-State.jpg" width="600">
+<img src="images/Success-State.jpg" width="600">
+<img src="images/Error-State.jpg" width="600">
+
 ## Features
 
 - **Book Identification:** Scan book RFID or barcode to retrieve information via ISBN.
+- **Book Catalog:** Users can search through the book catalog and use filters.
 - **Borrow & Return:** Users can borrow and return books.
 - **Book Requests:** Users can request books using google-books API not currently in the library catalog.
 - **Email Notifications:** Automated notifications for book availability and updates on book requests.
 - **Authentication:** Secure user login and access management using JWT.
 - **Admin Panel:** Separate authentication and access control for administrators.
 - **Public Browsing:** Unauthenticated users can browse available books and categories.
-- **Notification Subscription:** Users can opt-in for email alerts when a specific book becomes available.
+- **Notification Subscription:** Users can subsribe for email alerts when a specific book becomes available.
 
 ## Tech Stack
 
